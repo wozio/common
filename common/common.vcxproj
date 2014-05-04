@@ -68,9 +68,12 @@
     </Lib>
     <PreBuildEvent>
       <Command>cd ..\yami4\src\core
-nmake -f Makefile.VS
+
+nmake /f Makefile.VS
+
 cd ..\cpp
-nmake -f Makefile.VS</Command>
+
+nmake /f Makefile.VS</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -81,6 +84,7 @@ nmake -f Makefile.VS</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions);_WIN32_WINNT=0x0501</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

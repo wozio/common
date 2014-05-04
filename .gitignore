@@ -1,0 +1,5 @@
+*.obj
+Debug
+lib
+yami4-core
+yami4-cpp
