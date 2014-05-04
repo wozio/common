@@ -66,6 +66,12 @@
       <AdditionalDependencies>yamicpp.lib;yamicore.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\yami4\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>cd ..\yami4\src\core
+nmake -f Makefile.VS
+cd ..\cpp
+nmake -f Makefile.VS</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -87,6 +93,12 @@
       <AdditionalLibraryDirectories>..\yami4\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <Lib />
+    <PreBuildEvent>
+      <Command>cd ..\yami4\src\core
+nmake -f Makefile.VS
+cd ..\cpp
+nmake -f Makefile.VS</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\app.h" />
