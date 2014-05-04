@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="94">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>src/app.cpp</itemPath>
+      <itemPath>src/app.h</itemPath>
+      <itemPath>src/discovery.cpp</itemPath>
+      <itemPath>src/discovery.h</itemPath>
+      <itemPath>src/ios_wrapper.cpp</itemPath>
+      <itemPath>src/ios_wrapper.h</itemPath>
+      <itemPath>src/logger.cpp</itemPath>
+      <itemPath>src/logger.h</itemPath>
+      <itemPath>src/mcs.cpp</itemPath>
+      <itemPath>src/mcs.h</itemPath>
+      <itemPath>src/service.cpp</itemPath>
+      <itemPath>src/service.h</itemPath>
+      <itemPath>src/timer.cpp</itemPath>
+      <itemPath>src/timer.h</itemPath>
+      <itemPath>src/yamicontainer.cpp</itemPath>
+      <itemPath>src/yamicontainer.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <preprocessorList>
+            <Elem>DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </cTool>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../yami4/include</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <asmTool>
+          <warningLevel>2</warningLevel>
+        </asmTool>
+        <archiverTool>
+          <output>../${CND_CONF}/libcommon.a</output>
+        </archiverTool>
+        <requiredProjects>
+          <makeArtifact PL="../yami4/src/core"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/core"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+          <makeArtifact PL="../yami4/src/cpp"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/cpp"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+        </requiredProjects>
+      </compileType>
+      <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/app.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/discovery.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/discovery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/mcs.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/mcs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/service.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/service.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <warningLevel>2</warningLevel>
+        </cTool>
+        <ccTool>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../yami4/include</pElem>
+          </incDir>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <archiverTool>
+          <output>../${CND_CONF}/libcommon.a</output>
+        </archiverTool>
+        <requiredProjects>
+          <makeArtifact PL="../yami4/src/core"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/core"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+          <makeArtifact PL="../yami4/src/cpp"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/cpp"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+        </requiredProjects>
+      </compileType>
+      <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/app.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/discovery.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/discovery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/mcs.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/mcs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/service.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/service.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Debug_laptop" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <preprocessorList>
+            <Elem>DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </cTool>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../yami4/include</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <asmTool>
+          <warningLevel>2</warningLevel>
+        </asmTool>
+        <archiverTool>
+          <output>../${CND_CONF}/libcommon.a</output>
+        </archiverTool>
+        <requiredProjects>
+          <makeArtifact PL="../yami4/src/core"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/core"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+          <makeArtifact PL="../yami4/src/cpp"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/cpp"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+        </requiredProjects>
+      </compileType>
+      <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/app.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/discovery.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/discovery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/mcs.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/mcs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/service.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/service.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Debug_praca" type="3">
+      <toolsSet>
+        <compilerSet>GNU_4.7.3|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <preprocessorList>
+            <Elem>DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </cTool>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../yami4/include</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <asmTool>
+          <warningLevel>2</warningLevel>
+        </asmTool>
+        <archiverTool>
+          <output>../${CND_CONF}/libcommon.a</output>
+        </archiverTool>
+        <requiredProjects>
+          <makeArtifact PL="../yami4/src/core"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/core"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+          <makeArtifact PL="../yami4/src/cpp"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/cpp"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+        </requiredProjects>
+      </compileType>
+      <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/app.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/discovery.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/discovery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/mcs.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/mcs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/service.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/service.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Debug_tv" type="3">
+      <toolsSet>
+        <compilerSet>GNU_4.7.3|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <preprocessorList>
+            <Elem>DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </cTool>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../yami4/include</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <asmTool>
+          <warningLevel>2</warningLevel>
+        </asmTool>
+        <archiverTool>
+          <output>../${CND_CONF}/libcommon.a</output>
+        </archiverTool>
+        <requiredProjects>
+          <makeArtifact PL="../yami4/src/core"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/core"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+          <makeArtifact PL="../yami4/src/cpp"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="true"
+                        WD="../yami4/src/cpp"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+        </requiredProjects>
+      </compileType>
+      <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/app.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/discovery.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/discovery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ios_wrapper.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/mcs.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/mcs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/service.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/service.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/yamicontainer.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
