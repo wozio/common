@@ -1,0 +1,38 @@
+body
+{
+    font-family: sans-serif;
+    font-size: small;
+}
+h4
+{
+  padding: 5px 10px 5px 10px;
+  background-color: #f4fafa;
+}
+span.ada-comment
+{
+    color:green;
+}
+span.ada-keyword
+{
+    color:#9400d3;
+}
+span.ada-number
+{
+    color:#a52a2a;
+}
+span.ada-string
+{
+    color:#a52a2a;
+}
+span.ada-character
+{
+    color:#a52a2a;
+}
+span.ada-identifier
+{
+    color:blue;
+}
+span.ada-special
+{
+    color:black;
+}

@@ -1,0 +1,9 @@
+with "../../../../../ada/yami.gpr";
+
+project Print is
+   for Main use ("client", "client_synchronous", "server");
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat05");
+   end Compiler;
+end Print;

@@ -1,0 +1,9 @@
+with "../../yami.gpr";
+
+project Subscription is
+   for Main use ("publisher", "subscriber");
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat05");
+   end Compiler;
+end Subscription;

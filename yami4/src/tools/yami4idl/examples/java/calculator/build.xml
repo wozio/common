@@ -1,0 +1,10 @@
+<project default="compile">
+
+  <property name="lib.dir"     value="../../../../../../lib"/>
+  <property name="jar.file"    value="${lib.dir}/yami4.jar"/>
+
+  <target name="compile">
+    <javac srcdir="." classpath="${jar.file}:."/>
+  </target>
+
+</project>

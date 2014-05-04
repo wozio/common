@@ -1,0 +1,20 @@
+package Subscription is
+
+   type Payload is
+      Value : Integer;
+   end Payload;
+   
+   type Subscription_Info is
+      Destination_Object : String;
+   end Subscription_Info;
+   
+   interface Publisher is
+      oneway message Subscribe (S : in Subscription_Info);
+   end Publisher;
+   
+   interface Subscriber is
+      oneway message Subscription_Update (P : in Payload);
+   end Subscriber;
+
+end Subscription;
+

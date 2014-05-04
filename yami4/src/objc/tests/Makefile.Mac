@@ -1,0 +1,33 @@
+COMPILER = gcc
+OPTIONS = -g
+
+INCLUDES = -I../../../include
+
+LIBS = -L../../../lib -lyamiobjc -lyamicpp -lyamicore -lstdc++ -framework Foundation
+
+all : build test
+
+EXECS = parameters-test agent-test subscription-test
+
+build : $(EXECS)
+
+test :
+	./parameters-test
+	./agent-test
+	./subscription-test
+
+parameters-test : parameters-test.m
+	$(COMPILER) parameters-test.m -o parameters-test \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+agent-test : agent-test.m
+	$(COMPILER) agent-test.m -o agent-test \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+subscription-test : subscription-test.m
+	$(COMPILER) subscription-test.m -o subscription-test \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+
+clean :
+	rm -f $(EXECS)

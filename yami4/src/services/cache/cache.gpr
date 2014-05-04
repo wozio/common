@@ -1,0 +1,10 @@
+with "../../ada-ravenscar/yami.gpr";
+
+project Cache is	
+   for Main use ("yami4cache");
+   for Source_Dirs use (".", "../common");
+  
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O2", "-gnat05", "-gnata");
+   end Compiler;
+end Cache;

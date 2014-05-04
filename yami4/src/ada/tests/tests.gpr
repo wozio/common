@@ -1,0 +1,9 @@
+with "../yami.gpr";
+
+project Tests is
+   for Main use ("parameters_test", "core_agent_test", "agent_test", "subscription_test");
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat05", "-gnata");
+   end Compiler;
+end Tests;

@@ -1,0 +1,15 @@
+with "std_cpp.gpr";
+with "Ws2_32.gpr";
+with "yami_core.gpr";
+
+project YAMI is
+   for Source_Dirs use (".");
+   for Object_Dir use "obj";
+   for Library_Name use "yamiada-ravenscar";
+   for Library_Dir use "../../lib/ravenscar";
+   for Library_Kind use "static";
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O2", "-gnat05", "-gnata");
+   end Compiler;
+end YAMI;

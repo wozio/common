@@ -1,0 +1,16 @@
+project Ws2_32 is
+
+   type OS_Type is ("POSIX", "Linux", "Windows", "Windows_NT");
+   OS : OS_Type := external ("OS", "POSIX");
+   
+   for Externally_Built use "true";
+   for Source_Dirs use ();
+   
+   case OS is
+      when "Windows" | "Windows_NT" =>
+         for Library_Dir use ".";
+         for Library_Name use "Ws2_32";
+         for Library_Kind use "static";
+      when others =>
+   end case;
+end Ws2_32;

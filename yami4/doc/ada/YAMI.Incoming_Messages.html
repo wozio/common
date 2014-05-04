@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Incoming_Messages</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#subprograms">subprograms</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Incoming_Message</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Incoming_Message</span> <span class="ada-keyword">is</span> <span class="ada-keyword">tagged</span> <span class="ada-keyword">limited</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Incoming_Message_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Type encapsulating all information about the incoming message.
+</p>
+<h4 class="unit-name">Message_Handler</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Message_Handler</span> <span class="ada-keyword">is</span> <span class="ada-keyword">limited</span> <span class="ada-keyword">interface</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Message_Handler_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Message_Handler</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Callback interface for processing incoming messages.
+</p>
+<hr />
+<h2><a name="subprograms">Subprograms</a></h2>
+<h4 class="unit-name">Source</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Source</span> <span class="ada-special">(</span><span class="ada-identifier">Msg</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Gets the message source name.
+</p>
+<h4 class="unit-name">Object_Name</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Object_Name</span> <span class="ada-special">(</span><span class="ada-identifier">Msg</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Gets the destination object name.
+</p>
+<h4 class="unit-name">Message_Name</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Message_Name</span> <span class="ada-special">(</span><span class="ada-identifier">Msg</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Gets the message name.
+</p>
+<h4 class="unit-name">Process_Content</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Process_Content</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Msg</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Process</span> <span class="ada-special">:</span> <span class="ada-keyword">not</span> <span class="ada-keyword">null</span> <span class="ada-keyword">access</span> <span class="ada-keyword">procedure</span>
+      <span class="ada-special">(</span><span class="ada-identifier">Content</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters.Parameters_Collection</span><span class="ada-special">));</span>
+</pre>
+<p>
+
+Queries the body content.
+</p>
+<h4 class="unit-name">Process_Raw_Content</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Process_Raw_Content</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Msg</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Process</span> <span class="ada-special">:</span> <span class="ada-keyword">not</span> <span class="ada-keyword">null</span> <span class="ada-keyword">access</span> <span class="ada-keyword">procedure</span>
+      <span class="ada-special">(</span><span class="ada-identifier">Raw_Content</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span><span class="ada-special">));</span>
+</pre>
+<p>
+
+Queries the raw (binary) body content.
+</p><p>
+
+This operation can be executed only if the agent is configured
+for raw content delivery.
+</p>
+<h4 class="unit-name">Move</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Move</span> <span class="ada-special">(</span><span class="ada-identifier">What</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">Where</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Stores the content of Incoming_Message in other object.
+</p><p>
+
+Note: the destination object should be empty
+and the source object becomes empty after this operation.
+</p>
+<h4 class="unit-name">Reply</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Reply</span> <span class="ada-special">(</span><span class="ada-identifier">Msg</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">;</span>
+                    <span class="ada-identifier">Priority</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Natural</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">);</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Reply</span> <span class="ada-special">(</span><span class="ada-identifier">Msg</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">;</span>
+                    <span class="ada-identifier">Reply_Content</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serializable</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+                    <span class="ada-identifier">Priority</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Natural</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Sends back the reply.
+</p>
+<h4 class="unit-name">Reject</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Reject</span> <span class="ada-special">(</span><span class="ada-identifier">Msg</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">;</span>
+                     <span class="ada-identifier">Reason</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span> <span class="ada-special">:=</span> <span class="ada-string">""</span><span class="ada-special">;</span>
+                     <span class="ada-identifier">Priority</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Natural</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Sends back the rejection notification.
+</p>
+<h4 class="unit-name">New_Message</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">New_Message</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Core_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Core.Agents.Agent_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Connection_Event_Handler</span> <span class="ada-special">:</span>
+        <span class="ada-keyword">in</span> <span class="ada-identifier">Details.Core_Connection_Handlers.Handler_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Message_Id</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters.YAMI_Long_Long_Integer</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Source</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Object_Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Message_Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Content</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters.Parameters_Collection_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Raw_Content</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Incoming_Message_Access</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+used internally</p>
+<h4 class="unit-name">Call</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Call</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Message_Handler</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">Message</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Incoming_Message</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Processes the new incoming message.
+</p>
+<hr />
+</body>
+</html>

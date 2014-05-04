@@ -1,0 +1,34 @@
+package My_Package is
+
+   type My_Nested is
+      N : Integer;
+   end My_Nested;
+
+   type My_Type is
+      A : Boolean;
+      B : Integer;
+      C : Long_Long;
+      D : Float;
+      E : String;
+      F : Binary;
+      G : Boolean_Array;
+      H : Integer_Array;
+      I : Long_Long_Array;
+      J : Float_Array;
+      K : String_Array;
+      L : Binary_Array;
+      M : My_Nested;
+   end My_Type;
+
+   type My_Result_Type is
+   end My_Result_Type;
+
+   interface My_Interface is
+      oneway message Message_1 (X : in My_Type);
+      message Message_2 (X : in My_Type; Y : out My_Result_Type);
+      message Message_3 (Y : out My_Result_Type);
+      oneway message Message_4;
+      message Message_5;
+   end My_Interface;
+
+end My_Package;

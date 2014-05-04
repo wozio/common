@@ -1,0 +1,29 @@
+COMPILER = gcc
+OPTIONS = -g
+
+INCLUDES = -I../../../../include
+
+LIBS = -L../../../../lib -lyamiobjc -lyamicpp -lyamicore -lstdc++ -framework Foundation
+
+
+all : client server client_ns server_ns
+
+client : client.m
+	$(COMPILER) client.m -o client \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+client_ns : client_ns.m
+	$(COMPILER) client_ns.m -o client_ns \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+server : server.m
+	$(COMPILER) server.m -o server \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+server_ns : server_ns.m
+	$(COMPILER) server_ns.m -o server_ns \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+
+clean :
+	rm -f client server client_ns server_ns

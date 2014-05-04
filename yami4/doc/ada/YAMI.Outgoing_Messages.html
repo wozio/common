@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Outgoing_Messages</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#protected">protected</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Message_State</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Message_State</span> <span class="ada-keyword">is</span>
+     <span class="ada-special">(</span>
+      <span class="ada-comment">--  Message was posted for transmission</span>
+      <span class="ada-identifier">Posted</span><span class="ada-special">,</span>
+
+      <span class="ada-comment">--  Message was fully transmitted</span>
+      <span class="ada-identifier">Transmitted</span><span class="ada-special">,</span>
+
+      <span class="ada-comment">--  Message was abandoned due to error or channel closing</span>
+      <span class="ada-identifier">Abandoned</span><span class="ada-special">,</span>
+
+      <span class="ada-comment">--  The reply was received</span>
+      <span class="ada-identifier">Replied</span><span class="ada-special">,</span>
+
+      <span class="ada-comment">--  Message was rejected</span>
+      <span class="ada-identifier">Rejected</span>
+     <span class="ada-special">);</span>
+</pre>
+<p>
+
+Definition of all possible message states,
+as used by the Outgoing_Message protected type.
+</p>
+<h4 class="unit-name">Finalization_Guard</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Finalization_Guard</span> <span class="ada-keyword">is</span> <span class="ada-keyword">limited</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+used to clean up internal resources</p>
+<h4 class="unit-name">Outgoing_Message_Access</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Outgoing_Message_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Outgoing_Message</span><span class="ada-special">;</span>
+</pre>
+
+<hr />
+<h2><a name="protected">Protected Units and Types</a></h2>
+<h4 class="unit-name">Outgoing_Message</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">protected</span> <span class="ada-keyword">type</span> <span class="ada-identifier">Outgoing_Message</span> <span class="ada-keyword">is</span>
+
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  Gets the current state of the message.</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-keyword">function</span> <span class="ada-identifier">State</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Message_State</span><span class="ada-special">;</span>
+
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  Returns the current state of the message</span>
+      <span class="ada-comment">--  and its transmission progress metrics.</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Get_State</span>
+        <span class="ada-special">(</span><span class="ada-identifier">S</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Message_State</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Sent_Bytes</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Total_Byte_Count</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">);</span>
+
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  Waits for the transmission of this message.</span>
+      <span class="ada-comment">--  Note: The wait is terminated either when the transmission</span>
+      <span class="ada-comment">--  is successful or when the message is cancelled due to error</span>
+      <span class="ada-comment">--  or channel closing request.</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-keyword">entry</span> <span class="ada-identifier">Wait_For_Transmission</span><span class="ada-special">;</span>
+
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  Waits for the completion of this message.</span>
+      <span class="ada-comment">--  Note: The wait is terminated either when the message</span>
+      <span class="ada-comment">--  is completed - which means that there was a reply or rejection</span>
+      <span class="ada-comment">--  received for it - or when the message is cancelled due to error</span>
+      <span class="ada-comment">--  or channel closing request.</span>
+      <span class="ada-comment">--  When the message is completed,</span>
+      <span class="ada-comment">--  it will not receive any more notifications.</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-keyword">entry</span> <span class="ada-identifier">Wait_For_Completion</span><span class="ada-special">;</span>
+
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  Queries the reply body content.</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Process_Reply_Content</span>
+        <span class="ada-special">(</span><span class="ada-identifier">Process</span> <span class="ada-special">:</span> <span class="ada-keyword">not</span> <span class="ada-keyword">null</span> <span class="ada-keyword">access</span> <span class="ada-keyword">procedure</span>
+         <span class="ada-special">(</span><span class="ada-identifier">Content</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters.Parameters_Collection</span><span class="ada-special">));</span>
+
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  Queries the raw (binary) reply body content.</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  This operation can be executed only if the agent is configured</span>
+      <span class="ada-comment">--  for raw content delivery.</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Process_Raw_Reply_Content</span>
+        <span class="ada-special">(</span><span class="ada-identifier">Process</span> <span class="ada-special">:</span> <span class="ada-keyword">not</span> <span class="ada-keyword">null</span> <span class="ada-keyword">access</span> <span class="ada-keyword">procedure</span>
+         <span class="ada-special">(</span><span class="ada-identifier">Raw_Content</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span><span class="ada-special">));</span>
+
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  Returns the rejection reason (or exception message).</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-keyword">function</span> <span class="ada-identifier">Exception_Message</span> <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+
+      <span class="ada-comment">--</span>
+      <span class="ada-comment">--  Detaches this handler from any future notifications</span>
+      <span class="ada-comment">--  and releases internal resources related to the given message.</span>
+      <span class="ada-comment">--  This procedure need not be called when the message is completed.</span>
+      <span class="ada-comment">--</span>
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Close</span><span class="ada-special">;</span>
+
+      <span class="ada-comment">--  internally used interface</span>
+
+      <span class="ada-comment">--  TODO: remove OM_A when compiler bug is fixed</span>
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Init</span>
+        <span class="ada-special">(</span><span class="ada-identifier">OM_A</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Address</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Message_Id</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters.YAMI_Long_Long_Integer</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Manager</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Details.Outgoing_Message_Managers.Manager_Access</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Proxy</span> <span class="ada-special">:</span>
+         <span class="ada-keyword">in</span> <span class="ada-identifier">Details.Outgoing_Message_Notifications.Message_Proxy_Access</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Deliver_As_Raw</span> <span class="ada-special">:</span> <span class="ada-identifier">Boolean</span><span class="ada-special">);</span>
+
+      <span class="ada-comment">--  TODO: workaround, remove when compiler bug is fixed</span>
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Get_Notification_Handler</span>
+        <span class="ada-special">(</span><span class="ada-identifier">NF</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span>
+         <span class="ada-identifier">Details.Outgoing_Message_Notifications.Notification_Handler_Access</span><span class="ada-special">);</span>
+
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Progress</span>
+        <span class="ada-special">(</span><span class="ada-identifier">Message_Id</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters.YAMI_Long_Long_Integer</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Sent_Bytes</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Total_Byte_Count</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">);</span>
+
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Replied</span>
+        <span class="ada-special">(</span><span class="ada-identifier">Message_Id</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters.YAMI_Long_Long_Integer</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Content_Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Core.Serialization_Buffers_Descriptor</span><span class="ada-special">);</span>
+
+      <span class="ada-keyword">procedure</span> <span class="ada-identifier">Rejected</span>
+        <span class="ada-special">(</span><span class="ada-identifier">Message_Id</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters.YAMI_Long_Long_Integer</span><span class="ada-special">;</span>
+         <span class="ada-identifier">Reason</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+
+      <span class="ada-comment">--  at most only one of these has valid (non-null) content</span>
+      <span class="ada-identifier">Reply_Content</span> <span class="ada-special">:</span> <span class="ada-identifier">Parameters.Parameters_Collection_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Raw_Reply_Content</span> <span class="ada-special">:</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span> <span class="ada-special">(</span><span class="ada-number">1</span> <span class="ada-special">..</span> <span class="ada-number">1</span><span class="ada-special">);</span>
+
+      <span class="ada-identifier">Rejection_Reason</span> <span class="ada-special">:</span> <span class="ada-identifier">Ada.Strings.Unbounded.Unbounded_String</span><span class="ada-special">;</span>
+
+      <span class="ada-comment">--  TODO: this mixin is a workaround for the compiler bug</span>
+      <span class="ada-comment">--  Outgoing_Message should derive from the Notification_Handler</span>
+      <span class="ada-comment">--  interface directly</span>
+      <span class="ada-identifier">Notif_Handler</span> <span class="ada-special">:</span>
+        <span class="ada-keyword">aliased</span> <span class="ada-identifier">Details.Outgoing_Message_Notifications.Notification_Handler</span><span class="ada-special">;</span>
+
+      <span class="ada-identifier">Guard</span> <span class="ada-special">:</span> <span class="ada-identifier">Finalization_Guard</span><span class="ada-special">;</span>
+   <span class="ada-keyword">end</span> <span class="ada-identifier">Outgoing_Message</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Type of the callback object used to deliver notifications
+related to outgoing messages.
+The notifications allow to pass the information about
+transmission progress, replies and rejections.
+</p>
+<hr />
+</body>
+</html>

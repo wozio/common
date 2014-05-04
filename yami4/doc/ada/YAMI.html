@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#exceptions">exceptions</a>] [<a href="#fields">fields</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="exceptions">Exceptions</a></h2>
+<h4 class="unit-name">Logic_Error</h4>
+<pre class="ada-code">
+   <span class="ada-identifier">Logic_Error</span> <span class="ada-special">:</span> <span class="ada-keyword">exception</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+General exception for reporting logic errors.
+</p><p>
+
+Logic errors represent misuses of the API
+like invalid arguments, out of range indexes or type mismatches.
+</p>
+<h4 class="unit-name">Runtime_Error</h4>
+<pre class="ada-code">
+   <span class="ada-identifier">Runtime_Error</span> <span class="ada-special">:</span> <span class="ada-keyword">exception</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+General exception for reporting run-time errors.
+</p><p>
+
+Runtime errors represent problems that might not result
+from incorrect library usage, but can be related to
+resource constraints or communication problems.
+</p>
+<hr />
+<h2><a name="fields">Variables, Constants and Fields</a></h2>
+<h4 class="unit-name">Version_Name</h4>
+<pre class="ada-code">
+   <span class="ada-identifier">Version_Name</span> <span class="ada-special">:</span> <span class="ada-keyword">constant</span> <span class="ada-identifier">String</span> <span class="ada-special">:=</span> <span class="ada-string">"1.9.0"</span><span class="ada-special">;</span>
+   <span class="ada-identifier">Version_Number</span> <span class="ada-special">:</span> <span class="ada-keyword">constant</span> <span class="ada-special">:=</span> <span class="ada-number">10900</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Library version information.
+</p>
+<hr />
+</body>
+</html>

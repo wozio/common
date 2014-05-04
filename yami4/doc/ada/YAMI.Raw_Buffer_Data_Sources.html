@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Raw_Buffer_Data_Sources</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#subprograms">subprograms</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Raw_Buffer_Data_Source</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Raw_Buffer_Data_Source</span> <span class="ada-special">(&lt;&gt;)</span> <span class="ada-keyword">is</span> <span class="ada-keyword">limited</span>
+     <span class="ada-keyword">new</span> <span class="ada-identifier">Serializables.Serializable</span> <span class="ada-keyword">with</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Serializable wrapper for the raw binary data.
+</p><p>
+
+Serializable wrapper for the raw binary data allows to use
+already serialized content for message sending.
+The two major use cases for this type are efficient message forwarding
+(when the message is received and its content is used
+for another message) and support for custom data models
+and serializers.
+</p>
+<hr />
+<h2><a name="subprograms">Subprograms</a></h2>
+<h4 class="unit-name">Make_Raw_Buffer_Data_Source</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Make_Raw_Buffer_Data_Source</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Raw_Buffer_Data_Source</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Constructs the buffer wrapper for the given set of buffers.
+The data buffer must have the same form as if given for
+the deserialization of Parameters_Collection.
+</p>
+<h4 class="unit-name">Make_Raw_Buffer_Data_Source</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Make_Raw_Buffer_Data_Source</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Core.Serialization_Buffers_Descriptor</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Raw_Buffer_Data_Source</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Constructs the buffer wrapper for the given set of buffers,
+as described by the low-level descriptor.
+</p>
+<h4 class="unit-name">Serialize_Buffer_Size</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">overriding</span>
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Serialize_Buffer_Size</span> <span class="ada-special">(</span><span class="ada-identifier">Raw</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Raw_Buffer_Data_Source</span><span class="ada-special">)</span>
+                                  <span class="ada-keyword">return</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Computes the total size of serialization buffer(s) for the current
+content of this object.
+</p>
+<h4 class="unit-name">Serialize</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">overriding</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Serialize</span> <span class="ada-special">(</span><span class="ada-identifier">Raw</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Raw_Buffer_Data_Source</span><span class="ada-special">;</span>
+                        <span class="ada-identifier">Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Serializes the current content of this object into the given
+buffer(s).
+</p><p>
+
+The serialization buffer does not have to be contiguous and any number
+of buffer segments is allowed, provided that the size of each buffer
+segment is a multiple of 4 (32 bits).<br />
+The function scatters the serialized data into subsequent buffers
+as they become filled.<br />
+</p>
+<h4 class="unit-name">Core_Object</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">overriding</span>
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Core_Object</span> <span class="ada-special">(</span><span class="ada-identifier">Raw</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Raw_Buffer_Data_Source</span><span class="ada-special">)</span>
+                        <span class="ada-keyword">return</span> <span class="ada-identifier">Details.Void_Ptr</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Used only by the binding layer.
+</p>
+<hr />
+</body>
+</html>

@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A18F5F60-79EA-4C98-82BE-89106F8536C3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Inspirel.YAMI</RootNamespace>
+    <AssemblyName>Inspirel.YAMI.Test</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\nunit\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\src\Agent.cs">
+      <Link>Agent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\BadProtocolException.cs">
+      <Link>BadProtocolException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\BadStateException.cs">
+      <Link>BadStateException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\BadTypeException.cs">
+      <Link>BadTypeException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\ConnectionEventHandler.cs">
+      <Link>ConnectionEventHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\Channel.cs">
+      <Link>details\Channel.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\ChannelReader.cs">
+      <Link>details\ChannelReader.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\ChannelWriter.cs">
+      <Link>details\ChannelWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\ConnectionEventCallback.cs">
+      <Link>details\ConnectionEventCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\DispatchManager.cs">
+      <Link>DispatchManager.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\Frame.cs">
+      <Link>details\Frame.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\IncomingFrame.cs">
+      <Link>details\IncomingFrame.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\IncomingMessageCallback.cs">
+      <Link>details\IncomingMessageCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\IncomingMessageDispatchCallback.cs">
+      <Link>details\IncomingMessageDispatchCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\IncomingMessageFrames.cs">
+      <Link>details\IncomingMessageFrames.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\IOWorker.cs">
+      <Link>details\IOWorker.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\Listener.cs">
+      <Link>details\Listener.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\LogCallback.cs">
+      <Link>details\LogCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\MessageProgressCallback.cs">
+      <Link>details\MessageProgressCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\NetworkUtils.cs">
+      <Link>details\NetworkUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\Options.cs">
+      <Link>details\Options.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\OutgoingFrame.cs">
+      <Link>details\OutgoingFrame.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\OutgoingMessageManager.cs">
+      <Link>details\OutgoingMessageManager.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\Selector.cs">
+      <Link>details\Selector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\Serialization.cs">
+      <Link>details\Serialization.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\TcpListener.cs">
+      <Link>details\TcpListener.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\UdpListener.cs">
+      <Link>details\UdpListener.cs</Link>
+    </Compile>
+    <Compile Include="..\src\details\WaterFlowManager.cs">
+      <Link>details\WaterFlowManager.cs</Link>
+    </Compile>
+    <Compile Include="..\src\ExceptionBase.cs">
+      <Link>ExceptionBase.cs</Link>
+    </Compile>
+    <Compile Include="..\src\IncomingMessage.cs">
+      <Link>IncomingMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\src\IncomingMessageHandler.cs">
+      <Link>IncomingMessageHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\src\LogHandler.cs">
+      <Link>LogHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\src\NoSuchNameException.cs">
+      <Link>NoSuchNameException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\OptionNames.cs">
+      <Link>OptionNames.cs</Link>
+    </Compile>
+    <Compile Include="..\src\OutgoingMessage.cs">
+      <Link>OutgoingMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\src\Parameters.cs">
+      <Link>Parameters.cs</Link>
+    </Compile>
+    <Compile Include="..\src\RawBinaryDataSource.cs">
+      <Link>RawBinaryDataSource.cs</Link>
+    </Compile>
+    <Compile Include="..\src\UnexpectedValueException.cs">
+      <Link>UnexpectedValueException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\ValuePublisher.cs">
+      <Link>ValuePublisher.cs</Link>
+    </Compile>
+    <Compile Include="..\src\Version.cs">
+      <Link>Version.cs</Link>
+    </Compile>
+    <Compile Include="..\src\YAMIIOException.cs">
+      <Link>YAMIIOException.cs</Link>
+    </Compile>
+    <Compile Include="..\src\YAMISerializable.cs">
+      <Link>YAMISerializable.cs</Link>
+    </Compile>
+    <Compile Include="AgentTest.cs" />
+    <Compile Include="details\ChannelTest.cs" />
+    <Compile Include="ListenerTest.cs" />
+    <Compile Include="ParametersTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SubscriptionTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>"$(SolutionDir)nunit\nunit-console.exe" "$(TargetPath)"
+</PostBuildEvent>
+  </PropertyGroup>
+</Project>

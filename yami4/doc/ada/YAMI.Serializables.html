@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Serializables</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#subprograms">subprograms</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Serialization_Buffer</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Serialization_Buffer</span> <span class="ada-special">(</span><span class="ada-identifier">Size</span> <span class="ada-special">:</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">)</span> <span class="ada-keyword">is</span>
+      <span class="ada-keyword">record</span>
+         <span class="ada-identifier">Buffer</span> <span class="ada-special">:</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Array</span> <span class="ada-special">(</span><span class="ada-number">1</span> <span class="ada-special">..</span> <span class="ada-identifier">Size</span><span class="ada-special">);</span>
+      <span class="ada-keyword">end</span> <span class="ada-keyword">record</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Serialization_Buffer_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Serialization_Buffer</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Wrapper type for serialization and deserialization segments.
+</p>
+<h4 class="unit-name">Serialization_Buffer_List</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Serialization_Buffer_List</span> <span class="ada-keyword">is</span>
+     <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Positive</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Serialization_Buffer_Access</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+List of serialization and deserialization segments.
+</p>
+<h4 class="unit-name">Serializable</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Serializable</span> <span class="ada-keyword">is</span> <span class="ada-keyword">limited</span> <span class="ada-keyword">interface</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Common interface for serializable entities.
+</p>
+<hr />
+<h2><a name="subprograms">Subprograms</a></h2>
+<h4 class="unit-name">Free</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Free</span> <span class="ada-special">(</span><span class="ada-identifier">Buffer</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Serialization_Buffer_Access</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Deallocates the dynamically allocated buffer.
+</p>
+<h4 class="unit-name">Serialize_Buffer_Size</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Serialize_Buffer_Size</span> <span class="ada-special">(</span><span class="ada-identifier">S</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializable</span><span class="ada-special">)</span>
+                                  <span class="ada-keyword">return</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span>
+     <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Computes the total size of serialization buffer(s) for the current
+content of this object.
+</p>
+<h4 class="unit-name">Serialize</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Serialize</span> <span class="ada-special">(</span><span class="ada-identifier">S</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializable</span><span class="ada-special">;</span>
+                        <span class="ada-identifier">Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span><span class="ada-special">)</span>
+     <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Serializes the current content of this object into the given
+buffer(s).
+</p><p>
+
+The serialization buffer does not have to be contiguous and any number
+of buffer segments is allowed, provided that the size of each buffer
+segment is a multiple of 4 (32 bits).
+The function scatters the serialized data into subsequent buffers
+as they become filled.
+</p>
+<h4 class="unit-name">Core_Object</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Core_Object</span> <span class="ada-special">(</span><span class="ada-identifier">S</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializable</span><span class="ada-special">)</span>
+                        <span class="ada-keyword">return</span> <span class="ada-identifier">Details.Void_Ptr</span> <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Used only by the binding layer.
+</p>
+<hr />
+</body>
+</html>

@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C# Express 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Publisher", "Publisher\Publisher.csproj", "{2ED3473B-075C-4D45-8EAC-5AF9130C1CC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Subscriber", "Subscriber\Subscriber.csproj", "{CC36D12D-D488-4281-9E3B-45D9F5C5C210}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inspirel.YAMI", "..\..\src\Inspirel.YAMI.csproj", "{036104E8-049C-469E-B1C1-D866E3AC5856}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2ED3473B-075C-4D45-8EAC-5AF9130C1CC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ED3473B-075C-4D45-8EAC-5AF9130C1CC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ED3473B-075C-4D45-8EAC-5AF9130C1CC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ED3473B-075C-4D45-8EAC-5AF9130C1CC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC36D12D-D488-4281-9E3B-45D9F5C5C210}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC36D12D-D488-4281-9E3B-45D9F5C5C210}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC36D12D-D488-4281-9E3B-45D9F5C5C210}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC36D12D-D488-4281-9E3B-45D9F5C5C210}.Release|Any CPU.Build.0 = Release|Any CPU
+		{036104E8-049C-469E-B1C1-D866E3AC5856}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{036104E8-049C-469E-B1C1-D866E3AC5856}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{036104E8-049C-469E-B1C1-D866E3AC5856}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{036104E8-049C-469E-B1C1-D866E3AC5856}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

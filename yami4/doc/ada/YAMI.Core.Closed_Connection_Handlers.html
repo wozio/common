@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Core.Closed_Connection_Handlers</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#subprograms">subprograms</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Handler</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Handler</span> <span class="ada-keyword">is</span> <span class="ada-keyword">limited</span> <span class="ada-keyword">interface</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Handler_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Handler</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Callback interface for notifying about closed incoming connections.
+</p>
+<hr />
+<h2><a name="subprograms">Subprograms</a></h2>
+<h4 class="unit-name">Closed_Connection</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Closed_Connection</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Source</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Updates the progress information.
+</p>
+<hr />
+</body>
+</html>

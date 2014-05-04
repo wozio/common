@@ -1,0 +1,1025 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Parameters</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#fields">fields</a>] [<a href="#subprograms">subprograms</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">YAMI_Integer</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">YAMI_Integer</span> <span class="ada-keyword">is</span> <span class="ada-keyword">new</span> <span class="ada-identifier">Interfaces.C.int</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">YAMI_Long_Long_Integer</span> <span class="ada-keyword">is</span> <span class="ada-keyword">new</span> <span class="ada-identifier">Interfaces.Integer_64</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">YAMI_Long_Float</span> <span class="ada-keyword">is</span> <span class="ada-keyword">new</span> <span class="ada-identifier">Interfaces.C.double</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+YAMI-specific types.
+</p><p>
+
+These types are most likely identical to standard Integer,
+Long_Long_Integer and Long_Float, but are defined distinctly
+to avoid interfacing problems with other compilers.
+</p>
+<h4 class="unit-name">Parameter_Type</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Parameter_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(</span><span class="ada-identifier">Boolean_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Integer_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Long_Long_Integer_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Long_Float_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">String_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Binary_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Boolean_Array_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Integer_Array_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Long_Long_Integer_Array_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Long_Float_Array_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">String_Array_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Binary_Array_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Nested_Parameters_Type</span><span class="ada-special">,</span>
+                           <span class="ada-identifier">Nested_Parameters_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Type of parameter entry.
+</p>
+<h4 class="unit-name">Parameters_Collection</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Parameters_Collection</span> <span class="ada-special">(&lt;&gt;)</span> <span class="ada-keyword">is</span> <span class="ada-keyword">limited</span>
+     <span class="ada-keyword">new</span> <span class="ada-identifier">Serializables.Serializable</span> <span class="ada-keyword">with</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Parameters_Collection_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+The collection of message parameters,
+which are typed {name, value} pairs.
+</p><p>
+
+Each entry in this collection has a unique name and can have
+one of the following types:
+</p>
+<ul>
+<li>Boolean or Boolean array</li>
+<li>integer or integer array (for 32-bit signed values)</li>
+<li>long integer or long integer array (for 64-bit signed values)</li>
+<li>long float or long float array (for 64-bit floating point values)</li>
+<li>String or String array</li>
+<li>binary or binary array</li>
+<li>nested parameters object, which provides its own scope for naming.</li>
+</ul>
+<p>
+
+This type is not copyable and not task-safe, although distinct
+instances of this type can be used by different tasks without
+synchronization.
+</p><p>
+
+<b>Note:</b>
+The entries are <i>ordered</i> - the order in which they are created
+influences the final serialized form of the message payload.<br />
+Newly created entries are appended to the end of the collection unless
+there is an existing empty slot that can be reused - the appropriate
+slot is searched for from the beginning to the end of the collection
+and if no free slot is found the collection is extended at the end.
+<br />
+The above guarantee concerns the user code that relies on
+predictable serialization.
+</p>
+<h4 class="unit-name">Count_Type</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">subtype</span> <span class="ada-identifier">Count_Type</span> <span class="ada-keyword">is</span> <span class="ada-identifier">YAMI_Integer</span> <span class="ada-keyword">range</span> <span class="ada-number">0</span> <span class="ada-special">..</span> <span class="ada-identifier">YAMI_Integer</span><span class="ada-special">'</span><span class="ada-identifier">Last</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Type for representing length of internal arrays.
+</p>
+<h4 class="unit-name">Index_Type</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">subtype</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-identifier">YAMI_Integer</span> <span class="ada-keyword">range</span> <span class="ada-number">1</span> <span class="ada-special">..</span> <span class="ada-identifier">YAMI_Integer</span><span class="ada-special">'</span><span class="ada-identifier">Last</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Index type for addressing individual components of internal arrays.
+</p>
+<h4 class="unit-name">Parameter_Cursor</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Parameter_Cursor</span> <span class="ada-keyword">is</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Iterator for inspecting entries in the collection.
+</p>
+<h4 class="unit-name">Parameter_Entry</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Parameter_Entry</span> <span class="ada-keyword">is</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Read-only view on the parameters entry.
+</p><p>
+
+This view is a lightweight proxy that itself is copyable, but
+the copying of this type does not create new copies of
+the underlying entry.
+</p>
+<hr />
+<h2><a name="fields">Variables, Constants and Fields</a></h2>
+<h4 class="unit-name">No_Parameter</h4>
+<pre class="ada-code">
+   <span class="ada-identifier">No_Parameter</span> <span class="ada-special">:</span> <span class="ada-keyword">constant</span> <span class="ada-identifier">Parameter_Cursor</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Special iterator value representing end of iteration.
+</p>
+<hr />
+<h2><a name="subprograms">Subprograms</a></h2>
+<h4 class="unit-name">Make_Parameters</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Make_Parameters</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Working_Area</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Address</span> <span class="ada-special">:=</span> <span class="ada-identifier">System.Null_Address</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Area_Size</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Storage_Elements.Storage_Count</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+   <span class="ada-keyword">function</span> <span class="ada-identifier">New_Parameters</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Working_Area</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Address</span> <span class="ada-special">:=</span> <span class="ada-identifier">System.Null_Address</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Area_Size</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Storage_Elements.Storage_Count</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Parameters_Collection_Access</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Creates an empty parameters collection object.
+</p><p>
+
+The second version allocates the object dynamically,
+this object can still have its working area given explicitly.
+</p><p>
+
+<b>Notes:</b>
+</p>
+<ul>
+<li>If <code>Working_Area = Null_Address and Area_Size = 0</code>
+(the default) then all dependent objects are separately allocated
+on the global store.</li>
+<li>If <code>Working_Area /= Null_Address and Area_Size /= 0</code> then
+the given block is used as a private area.</li>
+</ul>
+<p>
+
+<b>Note:</b>
+Do not attempt to create objects sharing the same working area.
+</p>
+<h4 class="unit-name">Free</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Free</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection_Access</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Deallocates the parameters collection object.
+</p>
+<h4 class="unit-name">Set_Boolean</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Boolean</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                          <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span> <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Boolean</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type Boolean to the first available slot.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Boolean</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Boolean</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                         <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                        <span class="ada-keyword">return</span> <span class="ada-identifier">Boolean</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the Boolean value from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_Integer</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Integer</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                          <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span> <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">YAMI_Integer</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type YAMI_Integer to the first available slot.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Integer</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Integer</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                         <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                        <span class="ada-keyword">return</span> <span class="ada-identifier">YAMI_Integer</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the YAMI_Integer value from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_Long_Long</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Long_Long</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                            <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                            <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">YAMI_Long_Long_Integer</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type YAMI_Long_Long_Integer
+to the first available slot.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Long_Long</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Long_Long</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                           <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                          <span class="ada-keyword">return</span> <span class="ada-identifier">YAMI_Long_Long_Integer</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the YAMI_Long_Long_Integer value
+from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_Long_Float</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Long_Float</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                             <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                             <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">YAMI_Long_Float</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type YAMI_Long_Float
+to the first available slot.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Long_Float</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Long_Float</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                            <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                           <span class="ada-keyword">return</span> <span class="ada-identifier">YAMI_Long_Float</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the YAMI_Long_Float value from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_String</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_String</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                         <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                         <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type String to the first available slot.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_String</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_String</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                        <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                       <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the String value from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_Binary</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Binary</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                         <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                         <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Array</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type binary to the first available slot.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Binary</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Binary</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                        <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                       <span class="ada-keyword">return</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Array</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the binary value from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_Boolean_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Boolean_Array_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Boolean</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Boolean_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Boolean_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type Boolean array to the first available slot.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Boolean_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Boolean_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                      <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                     <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of Boolean array from the entry given by its name.
+</p>
+<h4 class="unit-name">Get_Boolean_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Boolean_Array_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Boolean</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Get_Boolean_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Boolean_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Extracts the array of Boolean values from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_Integer_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Integer_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Integer_Array_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Integer_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Integer_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Integer_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type Integer array to the first available slot.
+Values from the user-provided array are converted
+to the YAMI_Integer type.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Integer_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Integer_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                      <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                     <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of Integer array from the entry given by its name.
+</p>
+<h4 class="unit-name">Get_Integer_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Integer_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Integer_Array_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Integer_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Get_Integer_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Integer_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Extracts the array of Integer values from the entry given by its name.
+Values from internally managed buffers are converted
+to the user-defined integer type.
+</p>
+<h4 class="unit-name">Set_Long_Long_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Long_Integer_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Long_Integer_Array_Type</span> <span class="ada-keyword">is</span>
+        <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Long_Long_Integer_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Long_Long_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Long_Long_Integer_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type Long_Long_Integer array
+to the first available slot.
+Values from the user-provided array are converted
+to the YAMI_Long_Long_Integer type.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Long_Long_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Long_Long_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                        <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                       <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of Long_Long_Integer array
+from the entry given by its name.
+</p>
+<h4 class="unit-name">Get_Long_Long_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Long_Integer_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Long_Integer_Array_Type</span> <span class="ada-keyword">is</span>
+        <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Long_Long_Integer_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Get_Long_Long_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Long_Long_Integer_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Extracts the array of Long_Long_Integer values
+from the entry given by its name.
+Values from internally managed buffers are converted
+to the user-defined long long integer type.
+</p>
+<h4 class="unit-name">Set_Long_Float_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Float_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">digits</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Float_Array_Type</span> <span class="ada-keyword">is</span>
+        <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Long_Float_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Long_Float_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                   <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                   <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Long_Float_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new entry of type Long_Float array
+to the first available slot.
+Values from the user-provided array are converted
+to the YAMI_Long_Float type.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Long_Float_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Long_Float_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                         <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                        <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of Long_Float array
+from the entry given by its name.
+</p>
+<h4 class="unit-name">Get_Long_Float_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Float_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">digits</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Float_Array_Type</span> <span class="ada-keyword">is</span>
+        <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Long_Float_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Get_Long_Float_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                   <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                   <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Long_Float_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Extracts the array of Long_Float values
+from the entry given by its name.
+Values from internally managed buffers are converted
+to the user-defined long float type.
+</p>
+<h4 class="unit-name">Create_String_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Create_String_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Length</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Creates a new empty entry of type String array.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_String_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_String_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                     <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                    <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of String array from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_String_In_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_String_In_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Index</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Index_Type</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new String value (possibly replacing the old one)
+to already existing String array at the given index.
+</p>
+<h4 class="unit-name">Get_String_In_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_String_In_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                 <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                 <span class="ada-identifier">Index</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Index_Type</span><span class="ada-special">)</span>
+                                <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the String value from the given index of String array.
+</p>
+<h4 class="unit-name">Create_Binary_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Create_Binary_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Length</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Creates a new empty entry of type binary array.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+</p>
+<h4 class="unit-name">Get_Binary_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Binary_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                     <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                    <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of binary array from the entry given by its name.
+</p>
+<h4 class="unit-name">Set_Binary_In_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Set_Binary_In_Array</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Index</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Index_Type</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Array</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Inserts a new binary value (possibly replacing the old one)
+to already existing binary array at the given index.
+</p>
+<h4 class="unit-name">Get_Binary_In_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Binary_In_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                 <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                 <span class="ada-identifier">Index</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Index_Type</span><span class="ada-special">)</span>
+                                <span class="ada-keyword">return</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Array</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the binary value from the given index of binary array.
+</p>
+<h4 class="unit-name">Create_Nested_Parameters</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Create_Nested_Parameters</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                      <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                     <span class="ada-keyword">return</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Creates a new nested parameters collection entry
+in the first available slot.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+The returned value is a proxy that refers
+to the internally managed nested object.
+</p>
+<h4 class="unit-name">Get_Nested_Parameters</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Nested_Parameters</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                   <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                  <span class="ada-keyword">return</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts nested parameters from the entry given by its name.
+The returned value is a proxy that refers
+to the internally managed nested object.
+</p>
+<h4 class="unit-name">Create_Nested_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Create_Nested_Array</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                                  <span class="ada-identifier">Length</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Creates a new empty entry of type nested parameters array.
+If the entry with the given name already exists it is replaced
+without changing the order of entries.
+After the array is created, all its elements are
+empty parameters objects.
+</p>
+<h4 class="unit-name">Get_Nested_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Nested_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                                     <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                                    <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of binary array from the entry given by its name.
+</p>
+<h4 class="unit-name">Get_Nested_In_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Nested_In_Array</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Parent_Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Index</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Index_Type</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts nested parameters from the given array.
+The returned value is a proxy that refers
+to the internally managed nested object.
+</p>
+<h4 class="unit-name">Remove</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Remove</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span> <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Removes the entry given by its name.
+</p>
+<h4 class="unit-name">Clear</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Clear</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Clears the content of the parameters collection.
+</p>
+<h4 class="unit-name">Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Length</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Returns the size of the collection - that is,
+the number of all non-empty slots.
+</p>
+<h4 class="unit-name">Entry_Type</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Entry_Type</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                        <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+                       <span class="ada-keyword">return</span> <span class="ada-identifier">Parameter_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the type of the entry given by its name.
+</p>
+<h4 class="unit-name">First</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">First</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Parameter_Cursor</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Returns the iterator pointing to the beginning of the collection,
+which means the first used slot.
+</p>
+<h4 class="unit-name">Find</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Find</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">Found</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Boolean</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Returns the view on the entry specified by its name.
+</p>
+<h4 class="unit-name">Serialize_Buffer_Size</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">overriding</span>
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Serialize_Buffer_Size</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">)</span>
+                                  <span class="ada-keyword">return</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Computes the total size of serialization buffer(s) for the current
+content of this object.
+</p>
+<h4 class="unit-name">Serialize</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">overriding</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Serialize</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+                        <span class="ada-identifier">Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Serializes the current content of this object into the given
+buffer(s).
+</p><p>
+
+The serialization buffer does not have to be contiguous and any number
+of buffer segments is allowed, provided that the size of each buffer
+segment is a multiple of 4 (32 bits).<br />
+The function scatters the serialized data into subsequent buffers
+as they become filled.<br />
+</p>
+<h4 class="unit-name">Deserialize</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Deserialize</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serialization_Buffer_List</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Deserializes content from the given buffer(s).
+</p><p>
+
+The data buffer does not have to be contiguous and any number
+of buffer segments is allowed, provided that the size of each buffer
+segment is a multiple of 4 (32 bits).<br />
+The function gathers the serialized data from subsequent buffers
+as they are consumed.<br />
+</p><p>
+
+<b>Note:</b> The current content of this object is not cleared
+before attempting deserialization and each retrieved data element
+is <i>merged</i> into the current content as if done by individual
+calls to appropriate <code>Set_XYZ</code> procedures.<br />
+In most cases deserialization will be performed to the empty
+parameters object (to reconstruct it to the form that was used
+for serialization), but deserialization onto non-empty object
+might be occasionally useful as a way of merging two collections.
+</p>
+<h4 class="unit-name">Deserialize</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Deserialize</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Core.Serialization_Buffers_Descriptor</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Deserializes content from the given buffers
+(used for buffers that are already prepared by Core).
+</p>
+<h4 class="unit-name">Core_Object</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">overriding</span>
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Core_Object</span> <span class="ada-special">(</span><span class="ada-identifier">Params</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">)</span>
+                        <span class="ada-keyword">return</span> <span class="ada-identifier">Details.Void_Ptr</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Helper function for data transfer between Ada and Core.
+</p>
+<h4 class="unit-name">Has_Element</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Has_Element</span> <span class="ada-special">(</span><span class="ada-identifier">Position</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Cursor</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Boolean</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Returns true if the current position is associated with existing entry.
+</p>
+<h4 class="unit-name">Next</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Next</span> <span class="ada-special">(</span><span class="ada-identifier">Position</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Cursor</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Parameter_Cursor</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Next</span> <span class="ada-special">(</span><span class="ada-identifier">Position</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Parameter_Cursor</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Advances to the next used entry (skips unused slots in the collection).
+</p>
+<h4 class="unit-name">Get_Entry</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Entry</span> <span class="ada-special">(</span><span class="ada-identifier">Position</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Cursor</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Returns the read-only view on the parameters entry.
+</p>
+<h4 class="unit-name">Entry_Type</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Entry_Type</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Parameter_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Returns the type of the underlying entry
+in the associated parameters object.
+</p>
+<h4 class="unit-name">Entry_Name</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Entry_Name</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Returns the name of the underlying entry
+in the associated parameters object.
+</p>
+<h4 class="unit-name">Get_Boolean</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Boolean</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">Boolean</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the Boolean value from the current entry.
+</p>
+<h4 class="unit-name">Get_Integer</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Integer</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">YAMI_Integer</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the YAMI_Integer value from the current entry.
+</p>
+<h4 class="unit-name">Get_Long_Long</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Long_Long</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                          <span class="ada-keyword">return</span> <span class="ada-identifier">YAMI_Long_Long_Integer</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the YAMI_Long_Long_Integer value from the current entry.
+</p>
+<h4 class="unit-name">Get_Long_Float</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Long_Float</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">YAMI_Long_Float</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the YAMI_Long_Float value from the current entry.
+</p>
+<h4 class="unit-name">Get_String</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_String</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the String value from the current entry.
+</p>
+<h4 class="unit-name">Get_Binary</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Binary</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                       <span class="ada-keyword">return</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Array</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the binary value from the current entry.
+</p>
+<h4 class="unit-name">Get_Boolean_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Boolean_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                                     <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of Boolean array from the current entry.
+</p>
+<h4 class="unit-name">Entry_Get_Boolean_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Boolean_Array_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Boolean</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Entry_Get_Boolean_Array</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">;</span>
+                                      <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Boolean_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Extracts the Boolean array from the current entry.
+</p>
+<h4 class="unit-name">Get_Integer_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Integer_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                                     <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of integer array from the current entry.
+</p>
+<h4 class="unit-name">Entry_Get_Integer_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Integer_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Integer_Array_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Integer_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Entry_Get_Integer_Array</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">;</span>
+                                      <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Integer_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Extracts the integer array from the current entry.
+Values from internally managed array are converted
+to the user-defined Integer_Type.
+</p>
+<h4 class="unit-name">Get_Long_Long_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Long_Long_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                                       <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of long integer array from the current entry.
+</p>
+<h4 class="unit-name">Entry_Get_Long_Long_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Long_Integer_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Long_Integer_Array_Type</span> <span class="ada-keyword">is</span>
+        <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Long_Long_Integer_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Entry_Get_Long_Long_Array</span>
+     <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Long_Long_Integer_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Extracts the long integer array from the current entry.
+Values from internally managed array are converted
+to the user-defined Long_Long_Integer_Type.
+</p>
+<h4 class="unit-name">Get_Long_Float_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Long_Float_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                                        <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of long float array from the current entry.
+</p>
+<h4 class="unit-name">Entry_Get_Long_Float_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">generic</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Float_Type</span> <span class="ada-keyword">is</span> <span class="ada-keyword">digits</span> <span class="ada-special">&lt;&gt;;</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Index_Type</span> <span class="ada-keyword">is</span> <span class="ada-special">(&lt;&gt;);</span>
+      <span class="ada-keyword">type</span> <span class="ada-identifier">Long_Float_Array_Type</span> <span class="ada-keyword">is</span>
+        <span class="ada-keyword">array</span> <span class="ada-special">(</span><span class="ada-identifier">Index_Type</span> <span class="ada-keyword">range</span> <span class="ada-special">&lt;&gt;)</span> <span class="ada-keyword">of</span> <span class="ada-identifier">Long_Float_Type</span><span class="ada-special">;</span>
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Entry_Get_Long_Float_Array</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">;</span>
+                                         <span class="ada-identifier">Values</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Long_Float_Array_Type</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Extracts the long float array from the current entry.
+Values from internally managed array are converted
+to the user-defined Long_Float_Type.
+</p>
+<h4 class="unit-name">Get_String_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_String_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                                    <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of String array from the current entry.
+</p>
+<h4 class="unit-name">Get_String_In_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_String_In_Array</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">;</span>
+                                 <span class="ada-identifier">Index</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Index_Type</span><span class="ada-special">)</span> <span class="ada-keyword">return</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the String value from the String array at the given index.
+</p>
+<h4 class="unit-name">Get_Binary_Array_Length</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Binary_Array_Length</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                                    <span class="ada-keyword">return</span> <span class="ada-identifier">Count_Type</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the length of binary array from the current entry.
+</p>
+<h4 class="unit-name">Get_Binary_In_Array</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Binary_In_Array</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">;</span>
+                                 <span class="ada-identifier">Index</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Index_Type</span><span class="ada-special">)</span>
+                                <span class="ada-keyword">return</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Array</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Extracts the binary value from the binary array at the given index.
+</p>
+<h4 class="unit-name">Get_Nested_Parameters</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Get_Nested_Parameters</span> <span class="ada-special">(</span><span class="ada-identifier">E</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameter_Entry</span><span class="ada-special">)</span>
+                                  <span class="ada-keyword">return</span> <span class="ada-identifier">Parameters_Collection</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Returns the view on the nested parameters object
+from the current entry.
+</p>
+<hr />
+</body>
+</html>

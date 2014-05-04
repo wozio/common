@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Core</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Channel_Descriptor</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Channel_Descriptor</span> <span class="ada-keyword">is</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Descriptor of the communication channel.
+</p>
+<h4 class="unit-name">Serialization_Buffers_Descriptor</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Serialization_Buffers_Descriptor</span> <span class="ada-keyword">is</span> <span class="ada-keyword">record</span>
+      <span class="ada-identifier">Buffers</span> <span class="ada-special">:</span> <span class="ada-keyword">access</span> <span class="ada-identifier">Details.Void_Ptr</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Buffer_Sizes</span> <span class="ada-special">:</span> <span class="ada-keyword">access</span> <span class="ada-identifier">Details.Size_T</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Num_Of_Buffers</span> <span class="ada-special">:</span> <span class="ada-identifier">Details.Size_T</span><span class="ada-special">;</span>
+   <span class="ada-keyword">end</span> <span class="ada-keyword">record</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Serialization buffer descriptor, used for passing raw
+buffer pointers from Core to Ada.
+</p>
+<hr />
+</body>
+</html>

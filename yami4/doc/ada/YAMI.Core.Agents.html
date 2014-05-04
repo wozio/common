@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Core.Agents</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#fields">fields</a>] [<a href="#subprograms">subprograms</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Agent</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Agent</span> <span class="ada-special">(&lt;&gt;)</span> <span class="ada-keyword">is</span> <span class="ada-keyword">tagged</span> <span class="ada-keyword">limited</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Message broker.
+</p><p>
+
+The message broker that encapsulates physical channel management,
+incoming and outgoing message queues, listeners and resource
+management.
+</p><p>
+
+A single agent object can manage many listeners, which are responsible
+for accepting remote connections, and many incoming and outgoing
+connections.
+</p><p>
+
+The agent objects can be created and destroyed without constraints
+on the stack, dynamically or as library-level objects.
+</p>
+<h4 class="unit-name">Agent_Access</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Agent_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Access type designating the agent.
+</p>
+<hr />
+<h2><a name="fields">Variables, Constants and Fields</a></h2>
+<h4 class="unit-name">Max_Target_Length</h4>
+<pre class="ada-code">
+   <span class="ada-identifier">Max_Target_Length</span> <span class="ada-special">:</span> <span class="ada-keyword">constant</span> <span class="ada-special">:=</span> <span class="ada-number">300</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Maximum length of the target name.
+</p>
+<hr />
+<h2><a name="subprograms">Subprograms</a></h2>
+<h4 class="unit-name">Make_Agent</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Make_Agent</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Message_Handler</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message_Handlers.Handler_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Closed_Connection_Handler</span> <span class="ada-special">:</span>
+      <span class="ada-keyword">in</span> <span class="ada-identifier">Closed_Connection_Handlers.Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Working_Area</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Address</span> <span class="ada-special">:=</span> <span class="ada-identifier">System.Null_Address</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Area_Size</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Storage_Elements.Storage_Count</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+   <span class="ada-keyword">function</span> <span class="ada-identifier">New_Agent</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Message_Handler</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message_Handlers.Handler_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Closed_Connection_Handler</span> <span class="ada-special">:</span>
+      <span class="ada-keyword">in</span> <span class="ada-identifier">Closed_Connection_Handlers.Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Working_Area</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Address</span> <span class="ada-special">:=</span> <span class="ada-identifier">System.Null_Address</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Area_Size</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Storage_Elements.Storage_Count</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Agent_Access</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Creates new agent object with default option values.
+Alternative New_Agent function allocates the agent object dynamically.
+</p>
+<h4 class="unit-name">Make_Agent</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Make_Agent</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Options</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters.Parameters_Collection</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Message_Handler</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message_Handlers.Handler_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Closed_Connection_Handler</span> <span class="ada-special">:</span>
+      <span class="ada-keyword">in</span> <span class="ada-identifier">Closed_Connection_Handlers.Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Working_Area</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Address</span> <span class="ada-special">:=</span> <span class="ada-identifier">System.Null_Address</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Area_Size</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Storage_Elements.Storage_Count</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+   <span class="ada-keyword">function</span> <span class="ada-identifier">New_Agent</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Options</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Parameters.Parameters_Collection</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Message_Handler</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Incoming_Message_Handlers.Handler_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Closed_Connection_Handler</span> <span class="ada-special">:</span>
+      <span class="ada-keyword">in</span> <span class="ada-identifier">Closed_Connection_Handlers.Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Working_Area</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Address</span> <span class="ada-special">:=</span> <span class="ada-identifier">System.Null_Address</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Area_Size</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">System.Storage_Elements.Storage_Count</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Agent_Access</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Creates new agent object with the given option values.
+Alternative New_Agent function allocates the agent object dynamically.
+</p>
+<h4 class="unit-name">Free</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Free</span> <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent_Access</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Frees the dynamically allocated agent object.
+</p>
+<h4 class="unit-name">Install_Event_Notification_Handler</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Install_Event_Notification_Handler</span>
+     <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Handler</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Event_Notification_Handlers.Handler_Access</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Installs the event notification handler.
+</p><p>
+
+Installs the logging monitor.
+The previously installed callback (if any) is overriden.
+</p><p>
+
+This function is not synchronized.
+</p>
+<h4 class="unit-name">Open</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Open</span> <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Creates new channel for the given target.
+</p><p>
+
+Create a new channel for the given target. If the channel
+already exists for the given target, this procedure does nothing.
+</p><p>
+
+The supported target formats are:
+</p>
+<ul>
+<li>"tcp://host:port" for TCP/IP connections, where <code>host</code>
+can be provided in the symbolic or numeric form</li>
+<li>"udp://host:port" for UDP communication, where <code>host</code>
+can be provided in the symbolic or numeric form</li>
+<li>"unix://path" for Unix connections, where <code>path</code>
+can be relative or absolute</li>
+<li>"file://filename" or "file://filename?write" for writing to
+regular files</li>
+<li>"file://filename?read" for reading from regular files</li>
+<li>"file://filename?append" for appending to regular files</li>
+</ul>
+
+<h4 class="unit-name">Open</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Open</span> <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">Descriptor</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Channel_Descriptor</span><span class="ada-special">;</span>
+                   <span class="ada-identifier">Created_New</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Boolean</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Creates new channel for the given target.
+</p><p>
+
+Create a new channel for the given target and return its descriptor.
+If the channel already exists for the given target,
+this procedure does nothing.
+</p>
+<h4 class="unit-name">Is_Open</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Is_Open</span> <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+                      <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                      <span class="ada-identifier">Result</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Boolean</span><span class="ada-special">;</span>
+                      <span class="ada-identifier">Descriptor</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Channel_Descriptor</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Checks if the given channel is already open.
+</p><p>
+
+If the given channel already exists, Result is set to True and
+the channel's descriptor is returned.
+Otherwise Result is set to False.
+</p>
+<h4 class="unit-name">Close</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Close</span> <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+                    <span class="ada-identifier">Descriptor</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Channel_Descriptor</span><span class="ada-special">;</span>
+                    <span class="ada-identifier">Priority</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Natural</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Closes the given channel.
+</p><p>
+
+Closes the channel identified by the given descriptor.
+</p><p>
+
+The priority allows to properly handle the existing outgoing
+messages that are waiting in the outgoing queue for transmission.
+The existing messages with lower priority are
+abandoned, whereas the existing messages with priority equal
+or higher to the one provided as parameter are retained in the
+outgoing queue and are properly pushed for transmission
+before the channel is physically closed.
+The channel is closed immediately only if there are no
+messages waiting in its outgoing queue.
+</p>
+<h4 class="unit-name">Close</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Close</span> <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+                    <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                    <span class="ada-identifier">Priority</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Natural</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Closes the given channel.
+</p><p>
+
+Closes the channel identified by the target name.
+</p>
+<h4 class="unit-name">Post</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Post</span>
+     <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Channel</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Channel_Descriptor</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Message_Header</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serializable</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Message_Body</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serializable</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Priority</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Natural</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Progress_Handler</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Message_Progress_Handlers.Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Posts new message for sending.
+</p><p>
+
+Posts a new message to the outgoing queue of the given channel.
+</p><p>
+
+The message is composed of two sets of parameters, one for the
+header information and one for the body. This distinction is
+supposed to support arbitrary routing conventions defined by
+user code. Any of these parts can be empty.
+</p><p>
+
+The priority of the message is taken into account for proper
+ordering of the frames in the outgoing queue - frames created
+for messages with higher priority will be transmitted before
+frames having lower priority. Messages with equal priority are
+ordered according to the FIFO regime.
+</p><p>
+
+The callback handler can be provided to allow the user code trace
+the progress of the message. For each frame that was successfully
+pushed for physical transmission the callback is performed with
+the number of bytes that were transmitted from the beginning of the
+message and the total number of bytes for the whole message.
+When these two arguments are equal then it indicates that the whole
+message has been transmitted. If both are zero it means that there
+was an error and the message was abandoned.
+</p>
+<h4 class="unit-name">Post</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Post</span>
+     <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Message_Header</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serializable</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Message_Body</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serializable</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Priority</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Natural</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Progress_Handler</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Message_Progress_Handlers.Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Posts new message for sending.
+</p><p>
+
+Posts a new message to the outgoing queue of the given channel
+where the channel is identified by its target.
+</p>
+<h4 class="unit-name">Add_Listener</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Add_Listener</span>
+     <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Resolved_Target</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Resolved_Target_Last</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Natural</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Connection_Handler</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">New_Connection_Handlers.Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Adds new listener.
+</p><p>
+
+Adds a new listener for the given target address.
+</p><p>
+
+The supported target formats are:
+</p>
+<ul>
+<li>"tcp://host:port" for TCP/IP connections, where <code>host</code>
+can be provided in the symbolic or numeric form</li>
+<li>"tcp://*:port" for TCP/IP connections, for "any" local address</li>
+<li>"tcp://port" for TCP/IP connections, for "any" local address</li>
+<li>"udp://host:port" for UDP communication, with rules as for TCP/IP</li>
+<li>"unix://path" for Unix connections</li>
+</ul>
+<p>
+
+The port for TCP/IP and UDP protocols can be
+<code>0</code> or <code>*</code>,
+in which case the actual port number is assigned by the system.
+</p>
+<h4 class="unit-name">Remove_Listener</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Remove_Listener</span> <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span> <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Removes existing listener.
+</p><p>
+
+Removes the listener denoted by its actual target name.
+Note that the actual target name might be different from the name
+provided when the listener was created, due to target resolution.
+</p>
+<h4 class="unit-name">Do_Some_Work</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Do_Some_Work</span>
+     <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Timeout</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Duration</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Timed_Out</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Boolean</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Allow_Outgoing_Traffic</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Boolean</span> <span class="ada-special">:=</span> <span class="ada-identifier">True</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Allow_Incoming_Traffic</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Boolean</span> <span class="ada-special">:=</span> <span class="ada-identifier">True</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Performs a portion of I/O or internal management work.
+</p><p>
+
+Performs a portion of work with the given timeout.
+If there is some pending work at the call time it is performed
+immediately and procedure returns without waiting for further work;
+otherwise the call blocks waiting for the work with the given timeout.
+</p><p>
+
+The pending work can include any of:
+</p>
+<ul>
+<li>any of the listeners is ready to accept new connection</li>
+<li>any of the channels is ready for reading data</li>
+<li>any of the channels is ready for output operation and there are
+pending frames in its outgoing queue</li>
+<li>there was some change in the internal data structures that needs
+to be acted upon</li>
+</ul>
+<p>
+
+<b>Note</b>: All callbacks initiated by the agent are executed in
+the context of the task that calls this procedure.
+The task calling this procedure is also the only one that performs
+actual data transfer.
+</p><p>
+
+<b>Note</b>: The timeout value is subject to system limits
+as defined for the select function.
+</p><p>
+
+<b>Note</b>: In the typical usage scenario this procedure should be
+called in a tight loop.
+</p>
+<h4 class="unit-name">Interrupt_Work_Waiter</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Interrupt_Work_Waiter</span> <span class="ada-special">(</span><span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Agent</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Artificially interrupts the wait state of Do_Some_Work.
+</p>
+<hr />
+</body>
+</html>

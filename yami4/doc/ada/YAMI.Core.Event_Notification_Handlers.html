@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Core.Event_Notification_Handlers</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#subprograms">subprograms</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Handler</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Handler</span> <span class="ada-keyword">is</span> <span class="ada-keyword">limited</span> <span class="ada-keyword">interface</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Handler_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Handler</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Callback interface for processing event notifications.
+</p>
+<hr />
+<h2><a name="subprograms">Subprograms</a></h2>
+<h4 class="unit-name">Agent_Closed</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Agent_Closed</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">)</span> <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<h4 class="unit-name">Listener_Added</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Listener_Added</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span> <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<h4 class="unit-name">Listener_Removed</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Listener_Removed</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span> <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<h4 class="unit-name">Incoming_Connection_Open</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Incoming_Connection_Open</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span> <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<h4 class="unit-name">Outgoing_Connection_Open</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Outgoing_Connection_Open</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span> <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<h4 class="unit-name">Connection_Closed</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Connection_Closed</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span> <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<h4 class="unit-name">Connection_Error</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Connection_Error</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span> <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<h4 class="unit-name">Message_Sent</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Message_Sent</span>
+     <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Size</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<h4 class="unit-name">Message_Received</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Message_Received</span>
+     <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Handler</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Size</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Ada.Streams.Stream_Element_Count</span><span class="ada-special">)</span>
+      <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+
+<hr />
+</body>
+</html>

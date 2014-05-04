@@ -1,0 +1,13 @@
+package Print_Example is   
+
+   type Text is
+      Content : String;
+   end Text;
+
+   interface Printer is
+      oneway message Print (T : in Text);
+      message Print_Synchronously (T : in Text);
+   end Printer;
+
+end Print_Example;
+

@@ -1,0 +1,21 @@
+COMPILER = gcc
+OPTIONS = -g
+
+INCLUDES = -I../../../../include `gnustep-config --objc-flags`
+
+LIBS = -L../../../../lib -lyamiobjc -lyamicpp -lyamicore -lstdc++ `gnustep-config --base-libs`
+
+
+all : publisher subscriber
+
+publisher : publisher.m
+	$(COMPILER) publisher.m -o publisher \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+subscriber : subscriber.m
+	$(COMPILER) subscriber.m -o subscriber \
+		$(OPTIONS) $(INCLUDES) $(LIBS)
+
+
+clean :
+	rm -f publisher subscriber

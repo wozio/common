@@ -1,0 +1,9 @@
+with "../../../../../ada/yami.gpr";
+
+project Calculator is
+   for Main use ("client", "server");
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat05");
+   end Compiler;
+end Calculator;

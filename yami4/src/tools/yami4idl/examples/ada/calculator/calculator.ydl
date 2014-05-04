@@ -1,0 +1,20 @@
+package Calculator is
+
+   type Operands is
+      A : Integer;
+      B : Integer;
+   end Operands;
+
+   type Results is
+      Sum : Integer;
+      Difference : Integer;
+      Product : Integer;
+      Ratio : optional Integer; -- does not exist if B = 0
+   end Results;
+
+   interface Operations is
+      message Calculate (Op : in Operands; Res : out Results);
+   end Operations;
+
+end Calculator;
+

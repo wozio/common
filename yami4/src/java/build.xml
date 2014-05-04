@@ -1,0 +1,32 @@
+<project default="main">
+
+  <property name="src.dir"     value="src"/>
+  <property name="build.dir"   value="build"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="lib.dir"     value="../../lib"/>
+  <property name="jar.file"    value="${lib.dir}/yami4.jar"/>
+  <property name="javadoc.dir" value="../../doc/java"/>
+
+  <target name="main" depends="clean,jar"/>
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar destfile="${jar.file}" basedir="${classes.dir}"/>
+  </target>
+
+  <target name="javadoc">
+    <javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}"
+             excludepackagenames="com.inspirel.yami.details"
+             Windowtitle="YAMI4 API Documentation"/>
+  </target>
+
+  <target name="clean">
+    <delete file="${jar.file}"/>
+    <delete dir="${build.dir}"/>
+  </target>
+
+</project>

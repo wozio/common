@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Ada Documentation</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+    </head>
+<body>
+<h1>package YAMI.Value_Publishers</h1>
+
+<table>
+<tr>
+<td>Public </td><td>[<a href="#types">types</a>] [<a href="#subprograms">subprograms</a>] </td>
+</tr>
+</table>
+<hr />
+<h2><a name="types">Types</a></h2>
+<h4 class="unit-name">Overflow_Handler</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Overflow_Handler</span> <span class="ada-keyword">is</span> <span class="ada-keyword">interface</span><span class="ada-special">;</span>
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Overflow_Handler_Access</span> <span class="ada-keyword">is</span> <span class="ada-keyword">access</span> <span class="ada-keyword">all</span> <span class="ada-identifier">Overflow_Handler</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Callback interface type for reporting publication overflow conditions.
+</p>
+<h4 class="unit-name">Overflow_Action</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Overflow_Action</span> <span class="ada-keyword">is</span> <span class="ada-special">(</span><span class="ada-identifier">WAIT_FOR_PREVIOUS_MESSAGE</span><span class="ada-special">,</span>
+                            <span class="ada-identifier">ABANDON_MESSAGE</span><span class="ada-special">,</span>
+                            <span class="ada-identifier">ABANDON_SUBSCRIPTION</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+User action for the overflow condition.
+</p>
+<h4 class="unit-name">Value_Publisher</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">type</span> <span class="ada-identifier">Value_Publisher</span> <span class="ada-special">(&lt;&gt;)</span> <span class="ada-keyword">is</span> <span class="ada-keyword">limited</span>
+     <span class="ada-keyword">new</span> <span class="ada-identifier">Incoming_Messages.Message_Handler</span> <span class="ada-keyword">with</span> <span class="ada-keyword">private</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+The subscription publisher that notifies remote listeners
+with published value updates.
+</p><p>
+
+Remote listeners can subscribe and unsubscribe at any time.
+</p><p>
+
+The publisher is not registered at any agent after its creation.
+</p><p>
+
+Note:
+The "subscribe" and "unsubscribe" messages are also forwarded
+to the Command_Handler, but these two messages are already
+processed by the publisher's implementation.
+</p>
+<hr />
+<h2><a name="subprograms">Subprograms</a></h2>
+<h4 class="unit-name">Overflow</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Overflow</span> <span class="ada-special">(</span><span class="ada-identifier">H</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Overflow_Handler</span><span class="ada-special">;</span>
+                       <span class="ada-identifier">Server_Name</span><span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                       <span class="ada-identifier">Object_Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                       <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-identifier">YAMI.Serializables.Serializable</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+                       <span class="ada-identifier">Reaction</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Overflow_Action</span><span class="ada-special">)</span> <span class="ada-keyword">is</span> <span class="ada-keyword">abstract</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+User-defined reaction to the publication overflow condition.
+</p>
+<h4 class="unit-name">Make_Value_Publisher</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">function</span> <span class="ada-identifier">Make_Value_Publisher</span>
+     <span class="ada-special">(</span><span class="ada-identifier">Command_Handler</span> <span class="ada-special">:</span> <span class="ada-identifier">Incoming_Messages.Message_Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Max_Queue_Length</span> <span class="ada-special">:</span> <span class="ada-identifier">Positive</span> <span class="ada-special">:=</span> <span class="ada-number">1</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Overflow_Handler</span> <span class="ada-special">:</span> <span class="ada-identifier">Overflow_Handler_Access</span> <span class="ada-special">:=</span> <span class="ada-keyword">null</span><span class="ada-special">)</span>
+     <span class="ada-keyword">return</span> <span class="ada-identifier">Value_Publisher</span><span class="ada-special">;</span>
+</pre>
+<p>
+
+Constructor function for value publisher objects.
+</p>
+<h4 class="unit-name">Subscribe</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Subscribe</span> <span class="ada-special">(</span><span class="ada-identifier">P</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Value_Publisher</span><span class="ada-special">;</span>
+                        <span class="ada-identifier">Destination_Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+                        <span class="ada-identifier">Destination_Object</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Subscribes the new listener.
+</p><p>
+
+This function is usually called internally as a result of
+processing the remote "subscribe" message, but can be also
+used locally if the listener's location is obtained via
+other means.
+</p>
+<h4 class="unit-name">Unsubscribe</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Unsubscribe</span> <span class="ada-special">(</span><span class="ada-identifier">P</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Value_Publisher</span><span class="ada-special">;</span>
+                          <span class="ada-identifier">Destination_Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Unsubscribes the given listener.
+</p>
+<h4 class="unit-name">Publish</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Publish</span> <span class="ada-special">(</span><span class="ada-identifier">P</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Value_Publisher</span><span class="ada-special">;</span>
+                      <span class="ada-identifier">Value</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Serializables.Serializable</span><span class="ada-special">'</span><span class="ada-identifier">Class</span><span class="ada-special">;</span>
+                      <span class="ada-identifier">Priority</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">Natural</span> <span class="ada-special">:=</span> <span class="ada-number">0</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Publishes the new value.
+</p><p>
+
+Sends the update message to all active listeners with the given value.
+In case of any errors or communication problems, the problematic
+listener is automatically unsubscribed.
+</p>
+<h4 class="unit-name">Number_Of_Subscribers</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Number_Of_Subscribers</span>
+     <span class="ada-special">(</span><span class="ada-identifier">P</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Value_Publisher</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Num</span> <span class="ada-special">:</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Natural</span><span class="ada-special">);</span>
+</pre>
+<p>
+
+Returns the number of active subscribers.
+</p>
+<h4 class="unit-name">Iterate_Subscribers_Info</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Iterate_Subscribers_Info</span>
+     <span class="ada-special">(</span><span class="ada-identifier">P</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Value_Publisher</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Process</span> <span class="ada-special">:</span> <span class="ada-keyword">not</span> <span class="ada-keyword">null</span> <span class="ada-keyword">access</span> <span class="ada-keyword">procedure</span>
+      <span class="ada-special">(</span><span class="ada-identifier">Destination_Target</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">;</span>
+       <span class="ada-identifier">Destination_Object</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">));</span>
+</pre>
+<p>
+
+Inspects the information about all active subscribers.
+</p><p>
+
+Note:
+The iteration is performed in the mutually exclusive context
+so no operations affecting the same value publisher should be
+attempted from within the Process procedure.
+</p>
+<h4 class="unit-name">Register_At</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Register_At</span>
+     <span class="ada-special">(</span><span class="ada-identifier">P</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Value_Publisher</span><span class="ada-special">;</span>
+      <span class="ada-identifier">The_Agent</span> <span class="ada-special">:</span> <span class="ada-identifier">Agents.Agent_Access</span><span class="ada-special">;</span>
+      <span class="ada-identifier">Object_Name</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-identifier">String</span><span class="ada-special">);</span>
+</pre>
+
+<h4 class="unit-name">Unregister</h4>
+<pre class="ada-code">
+   <span class="ada-keyword">procedure</span> <span class="ada-identifier">Unregister</span> <span class="ada-special">(</span><span class="ada-identifier">P</span> <span class="ada-special">:</span> <span class="ada-keyword">in</span> <span class="ada-keyword">out</span> <span class="ada-identifier">Value_Publisher</span><span class="ada-special">);</span>
+</pre>
+
+<hr />
+</body>
+</html>

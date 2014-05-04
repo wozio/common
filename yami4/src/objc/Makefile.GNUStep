@@ -1,0 +1,41 @@
+COMPILER = g++
+
+# These options are intended for final use
+OBJCPP_OPTIONS = -O2 -I../../include `gnustep-config --objc-flags`
+
+PUBLIC_HEADERS = Agent.h Exception.h Parameters.h ValuePublisher.h YAMI4.h
+
+OBJECT_FILES = Agent.o \
+	Exception.o \
+	Parameters.o \
+	ValuePublisher.o
+
+OUTPUT = libyamiobjc.a
+
+
+all : $(OUTPUT)
+	cp $(OUTPUT) ../../lib
+	cp $(PUBLIC_HEADERS) ../../include/yami4-objc
+
+$(OUTPUT) : $(OBJECT_FILES)
+	ar rsv $@ $(OBJECT_FILES)
+
+
+Agent.o : Agent.mm
+	$(COMPILER) $(OBJCPP_OPTIONS) -c -o $@ $?
+
+Exception.o : Exception.mm
+	$(COMPILER) $(OBJCPP_OPTIONS) -c -o $@ $?
+
+Parameters.o : Parameters.mm
+	$(COMPILER) $(OBJCPP_OPTIONS) -c -o $@ $?
+
+ValuePublisher.o : ValuePublisher.mm
+	$(COMPILER) $(OBJCPP_OPTIONS) -c -o $@ $?
+
+
+clean : clean_objects
+	rm -f $(OUTPUT)
+
+clean_objects :
+	rm -f *.o
