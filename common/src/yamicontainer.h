@@ -3,20 +3,14 @@
 
 #include <yami4-cpp/yami.h>
 
-#define YC home_system::yami_container::instance()
-#define AGENT YC.agent()
-
 namespace home_system
 {
 
 class yami_container
 {
 public:
-  static yami_container& instance()
-  {
-    static yami_container i;
-    return i;
-  }
+  yami_container();
+  ~yami_container(){};
   
   class event_callback_impl : public yami::event_callback
   {
@@ -39,13 +33,16 @@ public:
   void operator()(int ec, const char* desc);
 
 private:
-  yami_container();
-  
   yami::agent agent_;
   std::string endpoint_;
 };
 
 }
+
+extern home_system::yami_container _yc;
+
+#define YC ::_yc
+#define AGENT YC.agent()
 
 #endif	/* YAMICONTAINER_H */
 

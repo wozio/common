@@ -6,8 +6,6 @@
 #include <map>
 #include <set>
 
-#define DISCOVERY home_system::discovery::instance()
-
 namespace home_system
 {
 
@@ -19,10 +17,8 @@ typedef std::map<size_t, subsription> subsriptions;
 class discovery
 {
 public:
-  static discovery& instance();
+  discovery();
   ~discovery();
-
-  void thread_exec();
 
   std::string get(const std::string& name);
   void get_all(std::map<std::string, std::string>& services);
@@ -37,8 +33,6 @@ public:
   void on_connection_closed(const char* endpoint);
 
 private:
-  discovery();
-
   // known external services (key is name, value is yamie endpoint)
   std::map<std::string, std::string> known_services_;
 
@@ -85,6 +79,10 @@ class service_not_found
 };
 
 }
+
+extern home_system::discovery _discovery;
+
+#define DISCOVERY ::_discovery
 
 #endif	/* DISCOVERY_H */
 

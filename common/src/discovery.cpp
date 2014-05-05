@@ -1,6 +1,6 @@
 #include "discovery.h"
 #include "mcs.h"
-#include "logger.h"
+//#include "logger.h"
 #include "yamicontainer.h"
 #include "ios_wrapper.h"
 #include "service.h"
@@ -15,12 +15,6 @@ using namespace boost::asio;
 
 namespace home_system
 {
-
-discovery& discovery::instance()
-{
-  static discovery d;
-  return d;
-}
 
 discovery::discovery()
 : idle_dt_(ios_.io_service()),
@@ -221,7 +215,7 @@ void discovery::store_service(const std::string& name, const std::string& ye)
   
   if (known_services_.find(name) == known_services_.end())
   {
-    LOG("storing service: " << name << " (" << ye << ")");
+    //LOG("storing service: " << name << " (" << ye << ")");
 
     known_services_[name] = ye;
     for (auto i = on_service_subscriptions.begin();
@@ -246,7 +240,7 @@ void discovery::erase_service(const std::string& name)
   
   if (known_services_.find(name) != known_services_.end())
   {
-    LOG("erasing service: " << name);
+    //LOG("erasing service: " << name);
     known_services_.erase(name);
     notify_received_.erase(name);
     
