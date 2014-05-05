@@ -54,10 +54,12 @@ CCADMIN=CCadmin
 build: .build-post
 
 .build-pre:
-# Add your pre 'build' code here...
+	cd ../yami4/src/core && $(MAKE)
+	cd ../yami4/src/cpp && $(MAKE)
 
 .build-post: .build-impl
 # Add your post 'build' code here...
+
 
 
 # clean
