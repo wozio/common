@@ -62,7 +62,7 @@
           <warningLevel>2</warningLevel>
         </asmTool>
         <archiverTool>
-          <output>../${CND_CONF}/libcommon.a</output>
+          <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
         <requiredProjects>
           <makeArtifact PL="../yami4/src/core"
@@ -148,7 +148,7 @@
           <developmentMode>5</developmentMode>
         </asmTool>
         <archiverTool>
-          <output>../${CND_CONF}/libcommon.a</output>
+          <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
         <requiredProjects>
           <makeArtifact PL="../yami4/src/core"
@@ -233,7 +233,7 @@
           <warningLevel>2</warningLevel>
         </asmTool>
         <archiverTool>
-          <output>../${CND_CONF}/libcommon.a</output>
+          <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
         <requiredProjects>
           <makeArtifact PL="../yami4/src/core"
@@ -318,7 +318,7 @@
           <warningLevel>2</warningLevel>
         </asmTool>
         <archiverTool>
-          <output>../${CND_CONF}/libcommon.a</output>
+          <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
         <requiredProjects>
           <makeArtifact PL="../yami4/src/core"
@@ -403,7 +403,7 @@
           <warningLevel>2</warningLevel>
         </asmTool>
         <archiverTool>
-          <output>../${CND_CONF}/libcommon.a</output>
+          <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
         <requiredProjects>
           <makeArtifact PL="../yami4/src/core"

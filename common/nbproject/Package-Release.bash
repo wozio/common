@@ -13,7 +13,7 @@ CND_BUILDDIR=build
 CND_DLIB_EXT=so
 NBTMPDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=../${CND_CONF}/libcommon.a
+OUTPUT_PATH=../bin/${CND_CONF}/libcommon.a
 OUTPUT_BASENAME=libcommon.a
 PACKAGE_TOP_DIR=common/
 

@@ -63,13 +63,13 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ../${CND_CONF}/libcommon.a
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ../bin/${CND_CONF}/libcommon.a
 
-../${CND_CONF}/libcommon.a: ${OBJECTFILES}
-	${MKDIR} -p ../${CND_CONF}
-	${RM} ../${CND_CONF}/libcommon.a
-	${AR} -rv ../${CND_CONF}/libcommon.a ${OBJECTFILES} 
-	$(RANLIB) ../${CND_CONF}/libcommon.a
+../bin/${CND_CONF}/libcommon.a: ${OBJECTFILES}
+	${MKDIR} -p ../bin/${CND_CONF}
+	${RM} ../bin/${CND_CONF}/libcommon.a
+	${AR} -rv ../bin/${CND_CONF}/libcommon.a ${OBJECTFILES} 
+	$(RANLIB) ../bin/${CND_CONF}/libcommon.a
 
 ${OBJECTDIR}/src/app.o: src/app.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
@@ -119,7 +119,7 @@ ${OBJECTDIR}/src/yamicontainer.o: src/yamicontainer.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ../${CND_CONF}/libcommon.a
+	${RM} ../bin/${CND_CONF}/libcommon.a
 
 # Subprojects
 .clean-subprojects:
