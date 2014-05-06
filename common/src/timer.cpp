@@ -4,7 +4,13 @@ namespace home_system
 {
 
 timer::timer()
-: dt_(ios_.io_service()),
+: timer(my_ios_)
+{
+}
+
+timer::timer(ios_wrapper& ios)
+: ios_(ios),
+  dt_(ios_.io_service()),
   set_(false)
 {
 }

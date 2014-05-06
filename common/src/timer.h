@@ -10,6 +10,7 @@ class timer
 {
 public:
   timer();
+  timer(ios_wrapper& ios);
   ~timer();
   timer(const timer&) = delete;
   timer& operator=(const timer&) = delete;
@@ -20,7 +21,8 @@ public:
   
 private:
   
-  ios_wrapper ios_;
+  ios_wrapper my_ios_;
+  ios_wrapper& ios_;
   boost::asio::deadline_timer dt_;
   bool set_;
 };

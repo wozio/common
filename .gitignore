@@ -1,2 +1,7 @@
 *.obj
 Debug
+yami4/lib/*
+common/nbproject/private
+*.a
+*.o
+
