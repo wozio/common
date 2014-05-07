@@ -113,8 +113,6 @@ ${OBJECTDIR}/src/yamicontainer.o: src/yamicontainer.cpp
 
 # Subprojects
 .build-subprojects:
-	cd ../yami4/src/core && ${MAKE} -f Makefile
-	cd ../yami4/src/cpp && ${MAKE} -f Makefile
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -123,8 +121,6 @@ ${OBJECTDIR}/src/yamicontainer.o: src/yamicontainer.cpp
 
 # Subprojects
 .clean-subprojects:
-	cd ../yami4/src/core && ${MAKE} -f Makefile clean
-	cd ../yami4/src/cpp && ${MAKE} -f Makefile clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl

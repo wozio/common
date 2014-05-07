@@ -8,10 +8,20 @@ namespace home_system
 
 ios_wrapper::ios_wrapper()
 {
-  io_thread_ = thread([this] () {thread_exec();});
+  start_ios();
 }
 
 ios_wrapper::~ios_wrapper()
+{
+  stop_ios();
+}
+
+void ios_wrapper::start_ios()
+{
+  io_thread_ = thread([this] () {thread_exec();});
+}
+
+void ios_wrapper::stop_ios()
 {
   work_.reset();
   io_service_.stop();
@@ -35,6 +45,20 @@ void ios_wrapper::thread_exec()
   }
   catch (const std::exception& e)
   {
+  }
+}
+
+void ios_wrapper::notify_fork(boost::asio::io_service::fork_event event)
+{
+  if (event == io_service::fork_prepare)
+  {
+    stop_ios();
+    io_service_.notify_fork(event);
+  }
+  else
+  {
+    io_service_.notify_fork(event);
+    start_ios();
   }
 }
 

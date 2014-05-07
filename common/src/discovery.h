@@ -19,6 +19,8 @@ class discovery
 public:
   discovery();
   ~discovery();
+  
+  void notify_fork(boost::asio::io_service::fork_event event);
 
   std::string get(const std::string& name);
   void get_all(std::map<std::string, std::string>& services);

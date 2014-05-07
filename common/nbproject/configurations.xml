@@ -64,28 +64,6 @@
         <archiverTool>
           <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
-        <requiredProjects>
-          <makeArtifact PL="../yami4/src/core"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/core"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-          <makeArtifact PL="../yami4/src/cpp"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/cpp"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-        </requiredProjects>
       </compileType>
       <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -150,28 +128,6 @@
         <archiverTool>
           <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
-        <requiredProjects>
-          <makeArtifact PL="../yami4/src/core"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/core"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-          <makeArtifact PL="../yami4/src/cpp"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/cpp"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-        </requiredProjects>
       </compileType>
       <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -235,28 +191,6 @@
         <archiverTool>
           <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
-        <requiredProjects>
-          <makeArtifact PL="../yami4/src/core"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/core"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-          <makeArtifact PL="../yami4/src/cpp"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/cpp"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-        </requiredProjects>
       </compileType>
       <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -320,28 +254,6 @@
         <archiverTool>
           <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
-        <requiredProjects>
-          <makeArtifact PL="../yami4/src/core"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/core"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-          <makeArtifact PL="../yami4/src/cpp"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/cpp"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-        </requiredProjects>
       </compileType>
       <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -405,28 +317,6 @@
         <archiverTool>
           <output>../bin/${CND_CONF}/libcommon.a</output>
         </archiverTool>
-        <requiredProjects>
-          <makeArtifact PL="../yami4/src/core"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/core"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-          <makeArtifact PL="../yami4/src/cpp"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="true"
-                        WD="../yami4/src/cpp"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-        </requiredProjects>
       </compileType>
       <item path="src/app.cpp" ex="false" tool="1" flavor2="0">
       </item>

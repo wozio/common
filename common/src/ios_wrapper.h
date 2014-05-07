@@ -18,11 +18,16 @@ public:
   ios_wrapper& operator=(const ios_wrapper&) = delete;
   
   boost::asio::io_service& io_service();
+  
+  void notify_fork(boost::asio::io_service::fork_event event);
+  
 private:
   boost::asio::io_service io_service_;
   std::thread io_thread_;
   std::shared_ptr<boost::asio::io_service::work> work_;
   
+  void start_ios();
+  void stop_ios();
   void thread_exec();
 };
 
