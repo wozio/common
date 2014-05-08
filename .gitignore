@@ -2,8 +2,9 @@
 Debug
 yami4/lib/*
 common/nbproject/private
+common/build
 bin
 *.a
 *.o
-
+*.o.d
 *.inc
