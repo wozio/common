@@ -3,11 +3,16 @@
 
 #include "ios_wrapper.h"
 #include <functional>
+#include <memory>
 #include <map>
 #include <set>
 
 namespace home_system
 {
+
+class discovery;
+
+typedef std::unique_ptr<home_system::discovery> discovery_t;
 
 class service;
 
@@ -17,11 +22,15 @@ typedef std::map<size_t, subsription> subsriptions;
 class discovery
 {
 public:
+
+  static discovery_t create()
+  {
+    return discovery_t(new discovery());
+  };
+
   discovery();
   ~discovery();
   
-  void notify_fork(boost::asio::io_service::fork_event event);
-
   std::string get(const std::string& name);
   void get_all(std::map<std::string, std::string>& services);
   std::map<std::string, std::string> get_all();
@@ -82,9 +91,9 @@ class service_not_found
 
 }
 
-extern home_system::discovery _discovery;
+extern home_system::discovery_t _discovery;
 
-#define DISCOVERY ::_discovery
+#define DISCOVERY (*::_discovery)
 
 #endif	/* DISCOVERY_H */
 

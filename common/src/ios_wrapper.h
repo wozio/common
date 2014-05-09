@@ -19,8 +19,6 @@ public:
   
   boost::asio::io_service& io_service();
   
-  void notify_fork(boost::asio::io_service::fork_event event);
-  
 private:
   boost::asio::io_service io_service_;
   std::thread io_thread_;

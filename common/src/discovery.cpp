@@ -43,11 +43,6 @@ discovery::~discovery()
   idle_dt_.cancel();
 }
 
-void discovery::notify_fork(boost::asio::io_service::fork_event event)
-{
-  ios_.notify_fork(event);
-}
-
 std::string discovery::get(const std::string& name)
 {
   auto i = known_services_.find(name);

@@ -48,18 +48,4 @@ void ios_wrapper::thread_exec()
   }
 }
 
-void ios_wrapper::notify_fork(boost::asio::io_service::fork_event event)
-{
-  if (event == io_service::fork_prepare)
-  {
-    stop_ios();
-    io_service_.notify_fork(event);
-  }
-  else
-  {
-    io_service_.notify_fork(event);
-    start_ios();
-  }
-}
-
 }

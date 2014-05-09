@@ -2,13 +2,24 @@
 #define	YAMICONTAINER_H
 
 #include <yami4-cpp/yami.h>
+#include <memory>
 
 namespace home_system
 {
 
+class yami_container;
+
+typedef std::unique_ptr<home_system::yami_container> yc_t;
+
 class yami_container
 {
 public:
+
+  static yc_t create()
+  {
+    return yc_t(new yami_container());
+  }
+
   yami_container();
   ~yami_container(){};
   
@@ -39,9 +50,9 @@ private:
 
 }
 
-extern home_system::yami_container _yc;
+extern home_system::yc_t _yc;
 
-#define YC ::_yc
+#define YC (*::_yc)
 #define AGENT YC.agent()
 
 #endif	/* YAMICONTAINER_H */
