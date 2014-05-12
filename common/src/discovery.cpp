@@ -9,6 +9,11 @@
 #include <sstream>
 #include <string>
 
+#ifdef _DEBUG
+  #include <iostream>
+  #define LOG(x) cout << x << endl;
+#endif
+
 using namespace std;
 //using namespace boost;
 using namespace boost::asio;
@@ -122,7 +127,10 @@ void discovery::on_idle_timeout(const boost::system::error_code& error)
     }
     // erasing timed out services
     for (size_t i = 0; i < to_remove.size(); ++i)
+    {
+      lock_guard<mutex> lock(idle_mutex);
       erase_service(to_remove[i]);
+    }
   }
 }
 
@@ -167,7 +175,8 @@ void discovery::handle_hello(const vector<string>& fields)
 {
   if (fields.size() >= 3)
   {
-    store_service(fields[1], fields[2]);
+    lock_guard<mutex> lock(idle_mutex);
+    check_service(fields[1], fields[2]);
     send_notify();
   }
 }
@@ -176,7 +185,8 @@ void discovery::handle_notify(const vector<string>& fields)
 {
   if (fields.size() >= 3)
   {
-    store_service(fields[1], fields[2]);
+    lock_guard<mutex> lock(idle_mutex);
+    check_service(fields[1], fields[2]);
   }
 }
 
@@ -184,6 +194,7 @@ void discovery::handle_bye(const vector<string>& fields)
 {
   if (fields.size() >= 1)
   {
+    lock_guard<mutex> lock(idle_mutex);
     erase_service(fields[1]);
   }
 }
@@ -209,52 +220,61 @@ void discovery::send_notify()
   }
 }
 
-void discovery::store_service(const std::string& name, const std::string& ye)
+void discovery::check_service(const std::string& name, const std::string& ye)
 {
-  lock_guard<mutex> lock(idle_mutex);
-  
-  if (known_services_.find(name) == known_services_.end())
+  auto si = known_services_.find(name);
+  if (si == known_services_.end())
   {
-    //LOG("storing service: " << name << " (" << ye << ")");
-
-    known_services_[name] = ye;
-    for (auto i = on_service_subscriptions.begin();
-      i != on_service_subscriptions.end();
-      ++i)
+    store_service(name, ye);
+  }
+  else
+  {
+    // check if yami endpoint hasn't changed
+    if (si->second != ye)
     {
-      if ((*i)->name() != name)
-        (*i)->on_remote_service_availability(name, true);
-    }
-    
-    for (size_t i = 0; i < subscriptions_.size(); ++i)
-    {
-        subscriptions_[i](name, true);
+      erase_service(name);
+      store_service(name, ye);
     }
   }
   notify_received_[name] = true;
+
+}
+
+void discovery::store_service(const std::string& name, const std::string& ye)
+{
+  LOG("storing service: " << name << " (" << ye << ")");
+
+  known_services_[name] = ye;
+  for (auto i = on_service_subscriptions.begin();
+    i != on_service_subscriptions.end();
+    ++i)
+  {
+    if ((*i)->name() != name)
+      (*i)->on_remote_service_availability(name, true);
+  }
+    
+  for (size_t i = 0; i < subscriptions_.size(); ++i)
+  {
+    subscriptions_[i](name, true);
+  }
 }
 
 void discovery::erase_service(const std::string& name)
 {
-  lock_guard<mutex> lock(idle_mutex);
+  LOG("erasing service: " << name);
+  known_services_.erase(name);
+  notify_received_.erase(name);
   
-  if (known_services_.find(name) != known_services_.end())
+  for (auto i = on_service_subscriptions.begin();
+    i != on_service_subscriptions.end();
+    ++i)
   {
-    //LOG("erasing service: " << name);
-    known_services_.erase(name);
-    notify_received_.erase(name);
-    
-    for (auto i = on_service_subscriptions.begin();
-      i != on_service_subscriptions.end();
-      ++i)
-    {
-      if ((*i)->name() != name)
-        (*i)->on_remote_service_availability(name, false);
-    }
-    for (size_t i = 0; i < subscriptions_.size(); ++i)
-    {
-        subscriptions_[i](name, false);
-    }
+    if ((*i)->name() != name)
+      (*i)->on_remote_service_availability(name, false);
+  }
+  for (size_t i = 0; i < subscriptions_.size(); ++i)
+  {
+    subscriptions_[i](name, false);
   }
 }
 

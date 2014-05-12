@@ -57,6 +57,7 @@ private:
   void on_idle_timeout(const boost::system::error_code& error);
 
 
+  void check_service(const std::string& name, const std::string& ye);
   void store_service(const std::string& name, const std::string& ye);
   void erase_service(const std::string& name);
 
