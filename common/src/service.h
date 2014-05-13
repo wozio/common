@@ -21,6 +21,7 @@ public:
   std::string ye() const;
   
   virtual void init();
+  virtual void deinit();
 
   // for discovery
   virtual void on_remote_service_availability(const std::string& name, bool availability){};
@@ -35,6 +36,7 @@ protected:
 private:
   ios_wrapper ios_;
   boost::asio::deadline_timer notify_dt_;
+  bool initialize_;
   
   void on_notify_timeout(const boost::system::error_code& error);
   

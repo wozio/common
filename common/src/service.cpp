@@ -16,9 +16,10 @@ namespace home_system
 
 service::service(const std::string& name, bool initialize)
 : name_(name),
-  notify_dt_(ios_.io_service())
+  notify_dt_(ios_.io_service()),
+  initialize_(initialize)
 {
-  if (initialize)
+  if (initialize_)
   {
     init();
   }
@@ -26,11 +27,10 @@ service::service(const std::string& name, bool initialize)
 
 service::~service()
 {
-  AGENT.unregister_object(name_);
-  
-  notify_dt_.cancel();
-  
-  send_bye();
+  if (initialize_)
+  {
+    deinit();
+  }
 }
 
 void service::init()
@@ -43,6 +43,15 @@ void service::init()
   LOG("Started service with name: " << name_ << " and YAMI endpoint: " << ye());
   
   send_hello();
+}
+
+void service::deinit()
+{
+  AGENT.unregister_object(name_);
+  
+  notify_dt_.cancel();
+  
+  send_bye();
 }
 
 std::string service::name() const
