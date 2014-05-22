@@ -1,5 +1,6 @@
 CPP = cl.exe
-CPP_OPTIONS = /nologo /EHsc /MT /O2 /D _CRT_SECURE_NO_WARNINGS /I . /c
+#CPP_OPTIONS = /nologo /EHsc /MT /O2 /D _CRT_SECURE_NO_WARNINGS /I . /c
+CPP_OPTIONS = /nologo /EHsc /MTd /D _DEBUG /I . /c
 
 ARCHIVE_OBJS = \
 	channel.obj \
