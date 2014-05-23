@@ -9,10 +9,7 @@
 #include <sstream>
 #include <string>
 
-#ifdef _DEBUG
-  #include <iostream>
-  #define LOG(x) cout << x << endl;
-#endif
+#define LOG(x) if (log_callback_ != nullptr) {std::stringstream s; s << x; log_callback_(s.str());}
 
 using namespace std;
 //using namespace boost;
@@ -21,8 +18,9 @@ using namespace boost::asio;
 namespace home_system
 {
 
-discovery::discovery()
-: idle_dt_(ios_.io_service()),
+  discovery::discovery(log_callback_t log_callback)
+  : log_callback_(log_callback),
+    idle_dt_(ios_.io_service()),
 #ifdef _DEBUG
   listen_endpoint_(ip::udp::v4(), 10001),
 #else
@@ -40,16 +38,21 @@ discovery::discovery()
 
   idle_dt_.expires_from_now(boost::posix_time::seconds(10));
   idle_dt_.async_wait([this] (const boost::system::error_code& error) { on_idle_timeout(error); });
+
+  LOG("Discovery object created");
 }
 
 discovery::~discovery()
 {
   listen_socket_.cancel();
   idle_dt_.cancel();
+
+  LOG("Discovery object destroyed");
 }
 
 std::string discovery::get(const std::string& name)
 {
+  LOG("Get: " << name);
   auto i = known_services_.find(name);
   if (i != known_services_.end())
     return i->second;
@@ -58,12 +61,15 @@ std::string discovery::get(const std::string& name)
   //ostringstream str;
   //str << "search\n" << name << "\n";
   //multicast_send(str.str());
+
+  LOG("Service " << name << " not found");
     
   throw service_not_found();
 }
 
 void discovery::get_all(std::map<std::string,std::string>& services)
 {
+  LOG("Get all");
   services.clear();
   services = get_all();
 }

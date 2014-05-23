@@ -23,12 +23,13 @@ class discovery
 {
 public:
 
-  static discovery_t create()
+  typedef std::function<void(const std::string&)> log_callback_t;
+  static discovery_t create(log_callback_t log_callback = nullptr)
   {
-    return discovery_t(new discovery());
+    return discovery_t(new discovery(log_callback));
   };
 
-  discovery();
+  discovery(log_callback_t log_callback);
   ~discovery();
   
   std::string get(const std::string& name);
@@ -44,6 +45,8 @@ public:
   void on_connection_closed(const char* endpoint);
 
 private:
+  log_callback_t log_callback_;
+
   // known external services (key is name, value is yamie endpoint)
   std::map<std::string, std::string> known_services_;
 
