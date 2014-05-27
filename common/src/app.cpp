@@ -73,7 +73,6 @@ int app::run()
   {
     cout << "Enter q to quit..." << endl;
     std::string input_line;
-    cout << ">>>";
     while (std::getline(std::cin, input_line))
     {
       vector<string> fields;
@@ -92,7 +91,6 @@ int app::run()
           }
         }
       }
-      cout << endl << ">>>";
     }
   }
   return 0;
