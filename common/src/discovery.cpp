@@ -52,7 +52,7 @@ discovery::~discovery()
 
 std::string discovery::get(const std::string& name)
 {
-  LOG("Get: " << name);
+  //LOG("Get: " << name);
   auto i = known_services_.find(name);
   if (i != known_services_.end())
     return i->second;
@@ -69,7 +69,7 @@ std::string discovery::get(const std::string& name)
 
 void discovery::get_all(std::map<std::string,std::string>& services)
 {
-  LOG("Get all");
+  //LOG("Get all");
   services.clear();
   services = get_all();
 }
@@ -82,6 +82,10 @@ std::map<std::string, std::string> discovery::get_all()
 void discovery::subscribe(service* s)
 {
   on_service_subscriptions.insert(s);
+  for (auto i : known_services_)
+  {
+    s->on_remote_service_availability(i.first, true);
+  }
 }
 
 void discovery::unsubscribe(service* s)
@@ -98,6 +102,10 @@ size_t discovery::subscribe(subsription callback)
     key++;
   }
   subscriptions_[key] = callback;
+  for (auto i : known_services_)
+  {
+    callback(i.first, true);
+  }
   return key;
 }
 
@@ -145,10 +153,9 @@ void discovery::handle_receive(const boost::system::error_code& error,
 {
   if (!error && bytes_recvd)
   {
-    /*cout << endl << "=========================================================" << endl;
-    cout << posix_time::microsec_clock::local_time() << endl;
-    cout.write(data_, bytes_recvd);
-    cout << endl;*/
+//    cout << "=========================================================" << endl;
+//    cout.write(data_, bytes_recvd);
+//    cout << endl;
     
     vector<string> fields;
     string data(&data_[0], bytes_recvd);
