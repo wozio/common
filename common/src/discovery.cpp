@@ -64,7 +64,7 @@ std::string discovery::get(const std::string& name)
 
   LOG("Service " << name << " not found");
     
-  throw service_not_found();
+  throw service_not_found(name);
 }
 
 void discovery::get_all(std::map<std::string,std::string>& services)

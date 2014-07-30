@@ -10,3 +10,4 @@ bin
 *.inc
 /common/*.user
 /common/Release
+*.so

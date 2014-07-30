@@ -91,6 +91,24 @@ private:
 class service_not_found
 : public std::exception
 {
+public:
+  service_not_found(const service_not_found& o)
+  : name_(o.name_)
+  {
+  }
+
+  service_not_found(const std::string& name)
+  : name_(name)
+  {
+  }
+
+  const char* what() const noexcept
+  {
+    return name_.c_str();
+  }
+
+private:
+  std::string name_;
 };
 
 }
