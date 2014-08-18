@@ -73,7 +73,14 @@ void service::on_msg(yami::incoming_message & im)
 void service::operator()(yami::incoming_message & im)
 {
 //  LOG("message " << im.get_message_name() << " from " << im.get_source());
-  on_msg(im);
+  try
+  {
+    on_msg(im);
+  }
+  catch (const std::exception& e)
+  {
+    LOGWARN("EXCEPTION: " << e.what());
+  }
 }
 
 // multicast send
