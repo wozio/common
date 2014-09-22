@@ -1,8 +1,10 @@
 #include "yamicontainer.h"
+#include <boost/asio.hpp>
 #include <sstream>
-#include <Poco/Net/NetworkInterface.h>
 
 #define LOG(x) if (log_callback_ != nullptr) {std::stringstream s; s << x; log_callback_(s.str());}
+
+using boost::asio::ip::tcp;
 
 namespace home_system
 {
@@ -44,18 +46,27 @@ yami_container::yami_container(log_callback_t log_callback)
 {
   agent_.register_io_error_logger(*this);
   
-  Poco::Net::NetworkInterface::NetworkInterfaceList il = Poco::Net::NetworkInterface::list();
+  endpoint_ = agent_.add_listener("tcp://*.*");
   
-  std::string ip;
-  for (size_t i = 0; i < il.size(); ++i)
+  std::string port = endpoint_.substr(endpoint_.find_last_of(":") + 1);
+  
+  size_t ind = endpoint_.find_last_of('/') + 1;
+  size_t num = endpoint_.find_last_of(":") - ind;
+  std::string hostname = endpoint_.substr(ind, num);
+  
+  boost::asio::io_service io_service;
+  tcp::resolver resolver(io_service);
+  tcp::resolver::query query(hostname, "");
+  tcp::resolver::iterator iter = resolver.resolve(query);
+  tcp::resolver::iterator end; // End marker.
+  while (iter != end)
   {
-    if (!il[i].address().isLoopback()) ip = il[i].address().toString();
+      tcp::endpoint ep = *iter++;
+      std::ostringstream s;
+      s << "tcp://" << ep.address() << ":" << port;
+      endpoint_ = s.str();
+      break;
   }
-  
-  std::string ep("tcp://");
-  ep.append(ip).append(":*");
-  
-  endpoint_ = agent_.add_listener(ep);
 }
 
 }

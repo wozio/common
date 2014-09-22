@@ -59,8 +59,8 @@ void log(level l, std::stringstream& stream)
   timeinfo = localtime (&rawtime);
   strftime(buffer, 80, "%F %T", timeinfo);
   
-  f << buffer << ": ";
-  f << stream.str() << std::endl;
+  f << buffer << ": " << stream.str() << std::endl;
+  std::cout << buffer << ": " << stream.str() << std::endl;
   stream.str("");
   f.flush();
 }
