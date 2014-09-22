@@ -37,8 +37,7 @@ void service::init()
 {
   AGENT.register_object(name_, *this);
   
-  notify_dt_.expires_from_now(posix_time::seconds(5));
-  notify_dt_.async_wait([&] (const boost::system::error_code& error) { on_notify_timeout(error); } );
+  set_notify_timeout();
   
   LOG("Started service with name: " << name_ << " and YAMI endpoint: " << ye());
   
@@ -102,8 +101,13 @@ void service::send_notify()
     << ye();
   multicast_send(str.str());
   
+  set_notify_timeout();
+}
+
+void service::set_notify_timeout()
+{
   notify_dt_.cancel();
-  notify_dt_.expires_from_now(posix_time::seconds(5));
+  notify_dt_.expires_from_now(posix_time::seconds(rand() % 4 + 1));
   notify_dt_.async_wait( [&] (const boost::system::error_code& error) { on_notify_timeout(error); } );
 }
 
