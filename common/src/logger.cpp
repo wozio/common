@@ -12,6 +12,7 @@ namespace logger
 
 std::string _log_file_path("logger.log");
 std::stringstream _log_stream;
+std::mutex _mutex;
 
 struct log_entry
 {
