@@ -69,6 +69,11 @@ yami_container::yami_container(log_callback_t log_callback)
   }
 }
 
+yami_container::~yami_container()
+{
+  log_callback_ = nullptr;
+}
+
 }
 
 

@@ -1,6 +1,5 @@
 #include "discovery.h"
 #include "mcs.h"
-//#include "logger.h"
 #include "yamicontainer.h"
 #include "ios_wrapper.h"
 #include "service.h"
@@ -38,16 +37,18 @@ namespace home_system
 
   idle_dt_.expires_from_now(boost::posix_time::seconds(10));
   idle_dt_.async_wait([this] (const boost::system::error_code& error) { on_idle_timeout(error); });
-
-  LOG("Discovery object created");
 }
 
 discovery::~discovery()
 {
-  listen_socket_.cancel();
+  log_callback_ = nullptr;
+
+  ios_.stop_ios();
+
+  listen_socket_.close();
   idle_dt_.cancel();
 
-  LOG("Discovery object destroyed");
+  subscriptions_.clear();
 }
 
 std::string discovery::get(const std::string& name)
@@ -95,7 +96,7 @@ void discovery::unsubscribe(service* s)
 
 size_t discovery::subscribe(subsription callback)
 {
-  // find first free key, not really efficient but in this system it stops at 0 for 99% cases
+  // find first free key, not really efficient but in this system it stops at 0 for almost all cases
   size_t key = 0;
   while (subscriptions_.find(key) != subscriptions_.end())
   {

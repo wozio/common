@@ -102,7 +102,7 @@ public:
   {
   }
 
-  const char* what() const noexcept
+  const char* what() const throw()
   {
     return name_.c_str();
   }
