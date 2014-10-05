@@ -7,21 +7,21 @@ CND_BASEDIR=`pwd`
 CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Debug configuration
-CND_PLATFORM_Debug=GNU_4.7.3-Linux-x86
+CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=../bin/Debug
 CND_ARTIFACT_NAME_Debug=libcommon.a
 CND_ARTIFACT_PATH_Debug=../bin/Debug/libcommon.a
-CND_PACKAGE_DIR_Debug=dist/Debug/GNU_4.7.3-Linux-x86/package
+CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
 CND_PACKAGE_NAME_Debug=common.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU_4.7.3-Linux-x86/package/common.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/common.tar
 # Release configuration
-CND_PLATFORM_Release=GNU-Linux-x86
+CND_PLATFORM_Release=MinGW-Windows
 CND_ARTIFACT_DIR_Release=../bin/Release
 CND_ARTIFACT_NAME_Release=libcommon.a
 CND_ARTIFACT_PATH_Release=../bin/Release/libcommon.a
-CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
+CND_PACKAGE_DIR_Release=dist/Release/MinGW-Windows/package
 CND_PACKAGE_NAME_Release=common.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/common.tar
+CND_PACKAGE_PATH_Release=dist/Release/MinGW-Windows/package/common.tar
 #
 # include compiler specific variables
 #
