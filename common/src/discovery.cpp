@@ -41,14 +41,16 @@ namespace home_system
 
 discovery::~discovery()
 {
-  log_callback_ = nullptr;
+  {
+    lock_guard<mutex> lock(idle_mutex);
+    log_callback_ = nullptr;
+    subscriptions_.clear();
+  }
 
   ios_.stop_ios();
 
   listen_socket_.close();
   idle_dt_.cancel();
-
-  subscriptions_.clear();
 }
 
 std::string discovery::get(const std::string& name)
@@ -96,6 +98,8 @@ void discovery::unsubscribe(service* s)
 
 size_t discovery::subscribe(subsription callback)
 {
+  lock_guard<mutex> lock(idle_mutex);
+
   // find first free key, not really efficient but in this system it stops at 0 for almost all cases
   size_t key = 0;
   while (subscriptions_.find(key) != subscriptions_.end())
@@ -112,6 +116,8 @@ size_t discovery::subscribe(subsription callback)
 
 void discovery::unsubscribe(size_t subscription_id)
 {
+  lock_guard<mutex> lock(idle_mutex);
+
   auto i = subscriptions_.find(subscription_id);
   if (i != subscriptions_.end())
   {
