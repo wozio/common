@@ -37,6 +37,8 @@ namespace home_system
 
   idle_dt_.expires_from_now(boost::posix_time::seconds(10));
   idle_dt_.async_wait([this] (const boost::system::error_code& error) { on_idle_timeout(error); });
+  
+  multicast_send("search");
 }
 
 discovery::~discovery()

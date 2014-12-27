@@ -65,7 +65,7 @@ std::string service::ye() const
 
 void service::on_msg(yami::incoming_message & im)
 {
-  LOGWARN("unknown message: " << im.get_message_name());
+  LOGWARN(name_ << ": unknown message: " << im.get_message_name());
   im.reject("unknown message");
 }
 
@@ -78,7 +78,7 @@ void service::operator()(yami::incoming_message & im)
   }
   catch (const std::exception& e)
   {
-    LOGWARN("EXCEPTION: " << e.what());
+    LOGWARN(name_ << ": EXCEPTION: " << e.what());
   }
 }
 
