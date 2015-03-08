@@ -152,7 +152,7 @@ void discovery::on_idle_timeout(const boost::system::error_code& error)
     for (size_t i = 0; i < to_remove.size(); ++i)
     {
       lock_guard<mutex> lock(idle_mutex);
-      erase_service(to_remove[i]);
+      //erase_service(to_remove[i]);
     }
   }
 }
