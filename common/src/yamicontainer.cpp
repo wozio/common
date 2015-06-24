@@ -1,6 +1,7 @@
 #include "yamicontainer.h"
-#include <sstream>
 #include <Poco/Net/NetworkInterface.h>
+#include <sstream>
+#include <iostream>
 
 #define LOG(x) if (log_callback_ != nullptr) {std::stringstream s; s << x; log_callback_(s.str());}
 
@@ -10,6 +11,11 @@ namespace home_system
 yami_container::event_callback_impl::event_callback_impl(log_callback_t log_callback)
 : log_callback_(log_callback)
 {
+}
+
+yami_container::event_callback_impl::~event_callback_impl()
+{
+  log_callback_ = nullptr;
 }
 
 void yami_container::event_callback_impl::incoming_connection_open(const char * target)
@@ -45,7 +51,6 @@ yami_container::yami_container(log_callback_t log_callback)
   agent_.register_io_error_logger(*this);
   
   Poco::Net::NetworkInterface::NetworkInterfaceList il = Poco::Net::NetworkInterface::list();
-  
   std::string ip;
   for (size_t i = 0; i < il.size(); ++i)
   {
@@ -54,10 +59,12 @@ yami_container::yami_container(log_callback_t log_callback)
   
   std::string ep("tcp://");
   ep.append(ip).append(":*");
-  
   endpoint_ = agent_.add_listener(ep);
 }
 
+yami_container::~yami_container()
+{
+  log_callback_ = nullptr;
 }
 
-
+}

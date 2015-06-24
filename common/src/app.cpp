@@ -15,8 +15,8 @@ namespace home_system
 {
 
 app::app(bool daemonize, cmd_handler_type cmd_handler)
-: cmd_handler_(cmd_handler),
-  daemonize_(daemonize)
+: daemonize_(daemonize),
+  cmd_handler_(cmd_handler)
 {
 #ifdef __linux__
   if (daemonize_)

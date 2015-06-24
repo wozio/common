@@ -38,6 +38,7 @@ private:
   boost::asio::deadline_timer notify_dt_;
   bool initialize_;
   
+  void set_notify_timeout();
   void on_notify_timeout(const boost::system::error_code& error);
   
   // multicast send

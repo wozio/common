@@ -23,12 +23,13 @@ public:
   }
 
   yami_container(log_callback_t log_callback);
-  ~yami_container(){};
+  ~yami_container();
   
   class event_callback_impl : public yami::event_callback
   {
   public:
     event_callback_impl(log_callback_t log_callback);
+    ~event_callback_impl();
 
   private:
     void incoming_connection_open(const char * target);

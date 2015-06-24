@@ -1,6 +1,5 @@
 #include "discovery.h"
 #include "mcs.h"
-//#include "logger.h"
 #include "yamicontainer.h"
 #include "ios_wrapper.h"
 #include "service.h"
@@ -38,16 +37,22 @@ namespace home_system
 
   idle_dt_.expires_from_now(boost::posix_time::seconds(10));
   idle_dt_.async_wait([this] (const boost::system::error_code& error) { on_idle_timeout(error); });
-
-  LOG("Discovery object created");
+  
+  multicast_send("search");
 }
 
 discovery::~discovery()
 {
-  listen_socket_.cancel();
-  idle_dt_.cancel();
+  {
+    lock_guard<mutex> lock(idle_mutex);
+    log_callback_ = nullptr;
+    subscriptions_.clear();
+  }
 
-  LOG("Discovery object destroyed");
+  ios_.stop_ios();
+
+  listen_socket_.close();
+  idle_dt_.cancel();
 }
 
 std::string discovery::get(const std::string& name)
@@ -64,7 +69,7 @@ std::string discovery::get(const std::string& name)
 
   LOG("Service " << name << " not found");
     
-  throw service_not_found();
+  throw service_not_found(name);
 }
 
 void discovery::get_all(std::map<std::string,std::string>& services)
@@ -95,7 +100,9 @@ void discovery::unsubscribe(service* s)
 
 size_t discovery::subscribe(subsription callback)
 {
-  // find first free key, not really efficient but in this system it stops at 0 for 99% cases
+  lock_guard<mutex> lock(idle_mutex);
+
+  // find first free key, not really efficient but in this system it stops at 0 for almost all cases
   size_t key = 0;
   while (subscriptions_.find(key) != subscriptions_.end())
   {
@@ -111,6 +118,8 @@ size_t discovery::subscribe(subsription callback)
 
 void discovery::unsubscribe(size_t subscription_id)
 {
+  lock_guard<mutex> lock(idle_mutex);
+
   auto i = subscriptions_.find(subscription_id);
   if (i != subscriptions_.end())
   {
@@ -143,7 +152,7 @@ void discovery::on_idle_timeout(const boost::system::error_code& error)
     for (size_t i = 0; i < to_remove.size(); ++i)
     {
       lock_guard<mutex> lock(idle_mutex);
-      erase_service(to_remove[i]);
+      //erase_service(to_remove[i]);
     }
   }
 }

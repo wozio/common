@@ -37,8 +37,7 @@ void service::init()
 {
   AGENT.register_object(name_, *this);
   
-  notify_dt_.expires_from_now(posix_time::seconds(5));
-  notify_dt_.async_wait([&] (const boost::system::error_code& error) { on_notify_timeout(error); } );
+  set_notify_timeout();
   
   LOG("Started service with name: " << name_ << " and YAMI endpoint: " << ye());
   
@@ -66,14 +65,21 @@ std::string service::ye() const
 
 void service::on_msg(yami::incoming_message & im)
 {
-  LOGWARN("unknown message: " << im.get_message_name());
+  LOGWARN(name_ << ": unknown message: " << im.get_message_name());
   im.reject("unknown message");
 }
 
 void service::operator()(yami::incoming_message & im)
 {
 //  LOG("message " << im.get_message_name() << " from " << im.get_source());
-  on_msg(im);
+  try
+  {
+    on_msg(im);
+  }
+  catch (const std::exception& e)
+  {
+    LOGWARN(name_ << ": EXCEPTION: " << e.what());
+  }
 }
 
 // multicast send
@@ -95,8 +101,13 @@ void service::send_notify()
     << ye();
   multicast_send(str.str());
   
+  set_notify_timeout();
+}
+
+void service::set_notify_timeout()
+{
   notify_dt_.cancel();
-  notify_dt_.expires_from_now(posix_time::seconds(5));
+  notify_dt_.expires_from_now(posix_time::seconds(rand() % 4 + 1));
   notify_dt_.async_wait( [&] (const boost::system::error_code& error) { on_notify_timeout(error); } );
 }
 

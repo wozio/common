@@ -1,18 +1,72 @@
 #include "logger.h"
-
-#include <Poco/FormattingChannel.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/ConsoleChannel.h>
-#include <Poco/FileChannel.h>
-#include <Poco/SplitterChannel.h>
-#include <Poco/AutoPtr.h>
+#include "discovery.h"
+#include "yamicontainer.h"
+#include <iostream>
+#include <list>
+#include <fstream>
 
 namespace home_system
 {
 namespace logger
 {
 
-void configure(const char* file_name, const std::string& log_level, bool console_log)
+std::string _log_file_path("logger.log");
+std::stringstream _log_stream;
+std::mutex _mutex;
+
+struct log_entry
+{
+  level level_;
+  std::string msg_;
+};
+
+std::list<log_entry> _log;
+
+
+// TODO: when more stuff to be done on constructor use this struct instead of
+// bare ofstream
+struct log_file
+{
+  std::ofstream f_;
+  log_file()
+  {
+    f_.open(_log_file_path, std::ios_base::out | std::ios_base::app);
+  }
+};
+
+void log(level l, std::stringstream& stream)
+{
+  static std::ofstream f(_log_file_path, std::ios_base::out | std::ios_base::app);
+  _log.push_back({l, stream.str() });
+  switch (l)
+  {
+    case level::debug:
+      f << "[DEBUG] ";
+      break;
+    case level::info:
+      f << "[INFO]  ";
+      break;
+    case level::warning:
+      f << "[WARN]  ";
+      break;
+    case level::error:
+      f << "[ERROR] ";
+      break;
+  }
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer [80];
+  time (&rawtime);
+  timeinfo = localtime (&rawtime);
+  strftime(buffer, 80, "%F %T", timeinfo);
+  
+  f << buffer << ": " << stream.str() << std::endl;
+  std::cout << buffer << ": " << stream.str() << std::endl;
+  stream.str("");
+  f.flush();
+}
+
+/*void configure(const char* file_name, const std::string& log_level, bool console_log)
 {
   Poco::Logger &l = Poco::Logger::root();
 
@@ -42,7 +96,7 @@ void configure(const char* file_name, const std::string& log_level, bool console
 
   l.setChannel(fc);
   l.setLevel(log_level);
-}
+}*/
 
 }  
 }
