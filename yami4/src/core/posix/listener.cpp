@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -491,6 +491,188 @@ core::result listener::prepare_unix(const char * path)
     return res;
 }
 
+#ifdef YAMI4_WITH_OPEN_SSL
+core::result listener::prepare_tcps(const char * address)
+{
+    protocol_ = proto_tcps;
+
+    ip_address ipa;
+    core::result res = parse_address(*alloc_, address, ipa,
+        io_error_callback_, io_error_callback_hint_);
+
+    if (res == core::ok)
+    {
+        const int SOCKET_ERROR = -1;
+
+        io_descriptor_type fd = ::socket(AF_INET, SOCK_STREAM, 0);
+        if (fd != SOCKET_ERROR)
+        {
+            res = core::ok;
+            if (group_->get_options().tcp_reuseaddr)
+            {
+                res = set_reuseaddr(fd);
+            }
+        }
+        else
+        {
+            handle_io_error("create tcps listener socket",
+                io_error_callback_, io_error_callback_hint_);
+
+            res = core::io_error;
+        }
+
+        if (res == core::ok)
+        {
+            sockaddr_in local;
+
+            std::memset(&local, 0, sizeof(local));
+
+            local.sin_family = AF_INET;
+            local.sin_port = ipa.port;
+
+            if (ipa.host != 0)
+            {
+                local.sin_addr.s_addr = ipa.host;
+            }
+            else
+            {
+                local.sin_addr.s_addr = htonl(INADDR_ANY);
+            }
+
+            int cc = ::bind(fd,
+                reinterpret_cast<sockaddr *>(&local), sizeof(local));
+            if (cc != SOCKET_ERROR)
+            {
+                const int backlog =
+                    group_->get_options().tcp_listen_backlog;
+
+                cc = ::listen(fd, backlog);
+                if (cc != SOCKET_ERROR)
+                {
+                    fd_ = fd;
+                }
+                else
+                {
+                    handle_io_error("tcps listen",
+                        io_error_callback_, io_error_callback_hint_);
+
+                    res = core::io_error;
+                }
+
+                if (res == core::ok)
+                {
+                    // recreate the target based on (possibly)
+                    // system-assigned values
+
+                    // max length of the string representing the target
+                    // (arbitrary, but should allow for prefix,
+                    // address and port)
+                    // note that address alone can be 256 chars
+                    const std::size_t max_target_length = 270;
+
+                    char * buf = static_cast<char *>(
+                        alloc_->allocate(max_target_length));
+
+                    if (buf != NULL)
+                    {
+                        socklen_t dummy = sizeof(local);
+                        cc = ::getsockname(fd,
+                            reinterpret_cast<sockaddr*>(&local), &dummy);
+                        if (cc != SOCKET_ERROR)
+                        {
+                            const int assigned_port = ntohs(local.sin_port);
+
+                            // assigned_addr is in network byte order
+                            const int assigned_addr = local.sin_addr.s_addr;
+
+                            if (assigned_addr == 0)
+                            {
+                                // if assigned address is local ANY,
+                                // recreate it from gethostname
+
+                                char this_host[max_target_length];
+                                cc = ::gethostname(
+                                    this_host, max_target_length);
+                                if (cc == 0)
+                                {
+                                    ::snprintf(buf, max_target_length,
+                                        "tcps://%s:%d",
+                                        this_host, assigned_port);
+                                }
+                                else
+                                {
+                                    handle_io_error(
+                                        "tcps listener gethostname",
+                                        io_error_callback_,
+                                        io_error_callback_hint_);
+
+                                    res = core::io_error;
+                                }
+                            }
+                            else
+                            {
+                                // the address was provided by user
+                                // and resolved to number in the parse phase
+
+                                const unsigned char * addr_bytes =
+                                    reinterpret_cast<const unsigned char *>(
+                                        &assigned_addr);
+
+                                // note: address is in network byte order
+                                ::snprintf(buf, max_target_length,
+                                    "tcps://%d.%d.%d.%d:%d",
+                                    static_cast<int>(addr_bytes[0]),
+                                    static_cast<int>(addr_bytes[1]),
+                                    static_cast<int>(addr_bytes[2]),
+                                    static_cast<int>(addr_bytes[3]),
+                                    assigned_port);
+                            }
+
+                            target_ = buf;
+                        }
+                        else
+                        {
+                            alloc_->deallocate(buf);
+
+                            handle_io_error("tcps listener getsockname",
+                                io_error_callback_, io_error_callback_hint_);
+
+                            res = core::io_error;
+                        }
+                    }
+                    else
+                    {
+                        res = core::no_memory;
+                    }
+                }
+            }
+            else
+            {
+                handle_io_error("tcps listener bind",
+                    io_error_callback_, io_error_callback_hint_);
+
+                res = core::io_error;
+            }
+        }
+
+        if (res != core::ok)
+        {
+            if (fd != SOCKET_ERROR)
+            {
+                ::close(fd);
+            }
+
+            if (target_ != NULL)
+            {
+                alloc_->deallocate(target_);
+            }
+        }
+    }
+
+    return res;
+}
+#endif // YAMI4_WITH_OPEN_SSL
+
 void listener::close_socket()
 {
     ::close(fd_);
@@ -516,10 +698,18 @@ core::result listener::do_some_work()
     case proto_unix:
         res = accept_unix();
         break;
+#ifdef YAMI4_WITH_OPEN_SSL
+    case proto_tcps:
+        res = accept_tcps();
+        break;
+#endif // YAMI4_WITH_OPEN_SSL
 
     default:
         // the file protocol is impossible here
         fatal_failure(__FILE__, __LINE__);
+
+        // unreachable, to please the compiler
+        res = core::unexpected_value;
     }
 
     return res;
@@ -587,9 +777,10 @@ core::result listener::accept_tcp()
                     group_->get_options().tcp_frame_size;
 
                 core::channel_descriptor new_descriptor;
+                channel * dummy_new_channel;
 
                 res = group_->add_existing(target, new_fd, proto_tcp,
-                    preferred_frame_size, new_descriptor);
+                    preferred_frame_size, new_descriptor, dummy_new_channel);
 
                 // at this point the new channel is already seen
                 // in the proper state
@@ -793,9 +984,10 @@ core::result listener::accept_unix()
                         group_->get_options().unix_frame_size;
 
                     core::channel_descriptor new_descriptor;
+                    channel * dummy_new_channel;
 
                     res = group_->add_existing(target, new_fd, proto_unix,
-                        preferred_frame_size, new_descriptor);
+                        preferred_frame_size, new_descriptor, dummy_new_channel);
 
                     // at this point the new channel is already seen
                     // in the proper state
@@ -855,3 +1047,122 @@ core::result listener::accept_unix()
 
     return res;
 }
+
+#ifdef YAMI4_WITH_OPEN_SSL
+core::result listener::accept_tcps()
+{
+    core::result res;
+
+    sockaddr_in client_addr;
+    socklen_t client_addr_size = sizeof(client_addr);
+
+    const int SOCKET_ERROR = -1;
+
+    const io_descriptor_type new_fd = ::accept(fd_,
+        reinterpret_cast<sockaddr *>(&client_addr), &client_addr_size);
+    if (new_fd != SOCKET_ERROR)
+    {
+        res = core::ok;
+
+        if (group_->get_options().tcp_nonblocking)
+        {
+            res = set_nonblocking(new_fd);
+        }
+
+        if (res == core::ok)
+        {
+            if (group_->get_options().tcp_nodelay)
+            {
+                res = set_nodelay(new_fd);
+            }
+        }
+
+        if (res == core::ok)
+        {
+            if (group_->get_options().tcp_keepalive)
+            {
+                res = set_keepalive(new_fd);
+            }
+        }
+
+        if (res == core::ok)
+        {
+            // extract the client address and create new channel
+            // with that address as the target
+
+            // target created for the new channel will have the form:
+            // "tcp://xxx.xxx.xxx.xxx:yyyyyyy"
+            const std::size_t target_size = 30;
+            char * target = static_cast<char *>(
+                alloc_->allocate(target_size));
+            if (target != NULL)
+            {
+                const unsigned char * tmp =
+                    reinterpret_cast<unsigned char *>(&client_addr.sin_addr);
+
+                ::snprintf(target, target_size, "tcps://%d.%d.%d.%d:%d",
+                    static_cast<int>(tmp[0]),
+                    static_cast<int>(tmp[1]),
+                    static_cast<int>(tmp[2]),
+                    static_cast<int>(tmp[3]),
+                    ntohs(client_addr.sin_port));
+
+                const std::size_t preferred_frame_size =
+                    group_->get_options().tcp_frame_size;
+
+                core::channel_descriptor new_descriptor;
+
+                res = group_->add_existing_ssl(target, new_fd, proto_tcps,
+                    preferred_frame_size, new_descriptor);
+
+                // at this point the new channel is already seen
+                // in the proper state
+
+                if (res == core::ok && connection_hook_ != NULL)
+                {
+                    mtx_->unlock();
+
+                    std::size_t index;
+                    std::size_t sequence_number;
+                    new_descriptor.get_details(index, sequence_number);
+
+                    try
+                    {
+                        connection_hook_(connection_hook_hint_,
+                            target, index, sequence_number);
+                    }
+                    catch (...)
+                    {
+                        // ignore exceptions from user code
+                    }
+
+                    mtx_->lock();
+                }
+
+                if (res != core::ok)
+                {
+                    alloc_->deallocate(target);
+                }
+            }
+            else
+            {
+                res = core::no_memory;
+            }
+        }
+
+        if (res != core::ok)
+        {
+            ::close(new_fd);
+        }
+    }
+    else
+    {
+        handle_io_error("tcps listener accept",
+            io_error_callback_, io_error_callback_hint_);
+
+        res = core::io_error;
+    }
+
+    return res;
+}
+#endif // YAMI4_WITH_OPEN_SSL

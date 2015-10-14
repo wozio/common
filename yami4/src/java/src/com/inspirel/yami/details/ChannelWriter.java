@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -144,6 +144,9 @@ class ChannelWriter {
         if (connection.connectedChannel != null) {
             // TCP connection
             connection.connectedChannel.write(frame.buffers);
+        } else if (connection.blockingSocket != null) {
+            // TCP SSL connection
+            connection.writingQueue.write(frame.buffers);
         } else {
             // UDP connection
             connection.datagramChannel.send(frame.getSingleBuffer(),

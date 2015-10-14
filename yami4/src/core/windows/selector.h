@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 #include "../core.h"
 #include "../details-fwd.h"
 #include "details-types.h"
-#include <Winsock.h>
+#include <Winsock2.h>
 
 namespace yami
 {
@@ -36,7 +36,7 @@ class selector
 public:
 
     // shuld be called once
-    core::result init();
+    core::result init(allocator & alloc);
 
     void install_io_error_logger(
         core::io_error_function io_error_callback,
@@ -47,10 +47,10 @@ public:
     // can be called many times
     void reset();
 
-    void add_channel(const channel & ch,
+    core::result add_channel(channel & ch,
         bool allow_outgoing_traffic, bool allow_incoming_traffic);
 
-    void add_listener(const listener & lst);
+    core::result add_listener(listener & lst);
 
     void get_channel_usage(int & max_allowed, int & used);
 
@@ -68,6 +68,11 @@ private:
 
     mutable fd_set read_set_;
     mutable fd_set write_set_;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    mutable fd_set ssl_pending_set_;
+    mutable bool ssl_pending_;
+#endif // YAMI4_WITH_OPEN_SSL
 
     int num_of_channels_used_;
 

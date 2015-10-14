@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class IOWorker implements Runnable {
@@ -41,6 +43,9 @@ public class IOWorker implements Runnable {
     private final Map<SelectionKey, Listener> listenersForSelection;
             
     private final Map<SelectionKey, Channel> channelsForSelection;
+    
+    private final List<Channel> blockingChannelsReadyForReading;
+    private final List<Channel> blockingChannelsReadyForWriting;
 
     private boolean stopRequest;
     
@@ -50,6 +55,9 @@ public class IOWorker implements Runnable {
     // if there is no change in the set of selected channels
     private boolean steadyMode = true;
     private boolean lastAllowInput = true;
+    
+    private boolean keepWaiting = false;
+    private boolean useBlockingOnly = false;
     
     public IOWorker(Map<String, Channel> channels,
             Map<String, Listener> listeners,
@@ -72,6 +80,9 @@ public class IOWorker implements Runnable {
         listenersForSelection = new HashMap<SelectionKey, Listener>();
         channelsForSelection = new HashMap<SelectionKey, Channel>();
         
+        blockingChannelsReadyForReading = new ArrayList<Channel>();
+        blockingChannelsReadyForWriting = new ArrayList<Channel>();
+        
         stopRequest = false;
     }
     
@@ -85,8 +96,12 @@ public class IOWorker implements Runnable {
         synchronized (this) {
             if (selector != null) {
                 selector.wakeup();
-                steadyMode = false;
             }
+
+            steadyMode = false;
+            keepWaiting = false;
+            
+            this.notify();
         }
     }
     
@@ -96,31 +111,50 @@ public class IOWorker implements Runnable {
             if (selector != null) {
                 selector.wakeup();
             }
+
+            keepWaiting = false;
+            
+            this.notify();
+        }
+    }
+    
+    public void useBlockingChannelsOnly() {
+        synchronized (this) {
+            useBlockingOnly = true;
+            keepWaiting = false;
+            
+            this.notify();
         }
     }
     
     private void openSelector() {
-        try {
-            synchronized (this) {
-                selector = Selector.open();
-                if (stopRequest) {
-                    selector.wakeup();
+        synchronized (this) {
+            if (useBlockingOnly) {
+                selector = null;
+            } else {
+                try {
+                    selector = Selector.open();
+                    if (stopRequest) {
+                        selector.wakeup();
+                    }
+                } catch (IOException ex) {
+                    // ignore
                 }
             }
-        } catch (IOException ex) {
-            // ignore
         }
     }
 
     private void closeSelector() {
         try {
             synchronized (this) {
-                for (SelectionKey key : selector.keys()) {
-                    key.cancel();
+                if (useBlockingOnly == false) {
+                    for (SelectionKey key : selector.keys()) {
+                        key.cancel();
+                    }
+                    selector.selectNow();
+                    selector.close();
+                    selector = null;
                 }
-                selector.selectNow();
-                selector.close();
-                selector = null;
             }
         } catch (IOException ex) {
             // ignore, will never happen
@@ -128,10 +162,13 @@ public class IOWorker implements Runnable {
     }
     
     private void registerListenersAndChannels() {
+    	
+        blockingChannelsReadyForReading.clear();
+        blockingChannelsReadyForWriting.clear();
 
         listenersForSelection.clear();
         channelsForSelection.clear();
-
+        
         // flow control:
         // the outgoing traffic is controlled at the level of
         // send/send_one_way functions - that is, even before the message
@@ -145,12 +182,19 @@ public class IOWorker implements Runnable {
         final boolean allowInput = incomingFlowManager.isAllowed();
         lastAllowInput = allowInput;
 
+        boolean onlyBlocking;
+        synchronized (this) {
+            onlyBlocking = useBlockingOnly;
+        }
+        
         synchronized (listeners) {
             for (Map.Entry<String, Listener> e : listeners.entrySet()) {
                 Listener lst = e.getValue();
-                    
-                SelectionKey key = lst.registerForSelection(selector);
-                listenersForSelection.put(key, lst);
+                
+                if (onlyBlocking == false) {
+                    SelectionKey key = lst.registerForSelection(selector);
+                    listenersForSelection.put(key, lst);
+                }
             }
         }
 
@@ -158,17 +202,43 @@ public class IOWorker implements Runnable {
             for (Map.Entry<String, Channel> e : channels.entrySet()) {
                 Channel ch = e.getValue();
 
-                SelectionKey key = ch.registerForSelection(
-                        selector, allowInput, allowOutput);
+                Channel.SelectionKeys keys = ch.registerForSelection(
+                        selector, allowInput, allowOutput, onlyBlocking);
                     
-                if (key != null) {
-                    channelsForSelection.put(key, ch);
+                if (keys.key != null){
+                    channelsForSelection.put(keys.key, ch);
+                } else if (keys.blockingChannelReadyForReading) {
+                    blockingChannelsReadyForReading.add(ch);
+                } else if (keys.blockingChannelReadyForWriting) {
+                    blockingChannelsReadyForWriting.add(ch);
                 }
             }
         }
     }
     
     private void waitUntilReady() {
+        if (blockingChannelsReadyForReading.size() != 0 || blockingChannelsReadyForWriting.size() != 0) {
+            // there are some blocking channels that are immediately available,
+            // no need to wait on selector
+            
+            return;
+        }
+    	
+        synchronized (this) {
+            if (useBlockingOnly) {
+                keepWaiting = true;
+                while (keepWaiting) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
+                }
+    		
+                return;
+            }
+        }
+    	
         try {
             selector.select();
         } catch (IOException ex) {
@@ -225,6 +295,7 @@ public class IOWorker implements Runnable {
                         // no such channel, create it
                         ch = new Channel(target, options,
                                 incomingMessageDispatchCallback,
+                                null, // IOWorker not needed there
                                 logCallback, logLevel);
                         channels.put(target, ch);
                     }
@@ -285,41 +356,55 @@ public class IOWorker implements Runnable {
     }
     
     private void useReadyListenersAndChannels() {
-        
-        Iterator<SelectionKey> it = selector.selectedKeys().iterator();
-        while (it.hasNext()) {
-            SelectionKey key = it.next();
-                
-            // remove this key from the selected set
-            it.remove();
 
-            final int operations = key.readyOps();
-            
-            final boolean doAccept =
-                    (operations & SelectionKey.OP_ACCEPT) != 0;
-            if (doAccept) {
-                Listener lst = listenersForSelection.get(key);
-                useReadyListener(lst);
+        if (blockingChannelsReadyForReading.size() != 0) {
+            for (Channel ch : blockingChannelsReadyForReading) {
+                useReadyChannel(ch, true, false);
             }
-            
-            final boolean doInput =
-                    (operations & SelectionKey.OP_READ) != 0;
-            final boolean doOutput =
-                    (operations & SelectionKey.OP_WRITE) != 0;
+        }
+    	
+        if (blockingChannelsReadyForWriting.size() != 0) {
+            for (Channel ch : blockingChannelsReadyForWriting) {
+                useReadyChannel(ch, false, true);
+            }
+        }
+
+        if (selector != null) {
+            Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+            while (it.hasNext()) {
+                SelectionKey key = it.next();
+	        
+                // remove this key from the selected set
+                it.remove();
                 
-            if (doInput || doOutput) {
-                Channel ch = channelsForSelection.get(key);
-
-                if (ch != null) {
-                    useReadyChannel(ch, doInput, doOutput);
-                } else {
-                    // if the channel was not found in the channel set,
-                    // it might be because it was actually a UDP channel
-                    // working as a listener - in which case its operation
-                    // is OP_READ, but it was added to the listener set
-
+                final int operations = key.readyOps();
+	        
+                final boolean doAccept =
+                    (operations & SelectionKey.OP_ACCEPT) != 0;
+                if (doAccept) {
                     Listener lst = listenersForSelection.get(key);
                     useReadyListener(lst);
+                }
+	        
+                final boolean doInput =
+                    (operations & SelectionKey.OP_READ) != 0;
+                final boolean doOutput =
+                    (operations & SelectionKey.OP_WRITE) != 0;
+                
+                if (doInput || doOutput) {
+                    Channel ch = channelsForSelection.get(key);
+                    
+                    if (ch != null) {
+                        useReadyChannel(ch, doInput, doOutput);
+                    } else {
+                        // if the channel was not found in the channel set,
+                        // it might be because it was actually a UDP channel
+                        // working as a listener - in which case its operation
+                        // is OP_READ, but it was added to the listener set
+                        
+                        Listener lst = listenersForSelection.get(key);
+                        useReadyListener(lst);
+                    }
                 }
             }
         }
@@ -358,10 +443,11 @@ public class IOWorker implements Runnable {
             	//    (channel writer returns this flag)
             	// 5. channel has new outgoing frames
             	//    (agent calls wakeup, which resets steadyMode)
+                // 6. the blocking sockets are in use
             	
             	boolean steady;
             	synchronized (this) {
-            	    steady = steadyMode;
+                    steady = steadyMode && (useBlockingOnly == false);
                     finished = stopRequest;
             	}
             	

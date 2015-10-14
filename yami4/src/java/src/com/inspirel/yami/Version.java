@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -24,10 +24,10 @@ public class Version {
     /**
      * Library verion name.
      */
-    public static final String versionName = "1.9.0";
+    public static final String versionName = "1.10.1";
 
     /**
      * Library version number (X * 10000 + Y * 100 + Z).
      */
-    public static final int versionNumber = 10900;
+    public static final int versionNumber = 11001;
 }

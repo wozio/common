@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -17,10 +17,20 @@
 #ifndef YAMICORE_CHANNEL_GROUP_H_INCLUDED
 #define YAMICORE_CHANNEL_GROUP_H_INCLUDED
 
+#include "channel.h"
 #include "channel_descriptor.h"
 #include "core.h"
 #include "details-fwd.h"
 #include "options.h"
+
+#ifdef YAMI4_WITH_OPEN_SSL
+#ifdef _WIN32
+// this is necessary to avoid conflicts between
+// WinSock2.h (used by YAMI4) and winsock.h (used by OpenSSL):
+#include <WinSock2.h>
+#endif // _WIN32
+#include <openssl/ssl.h>
+#endif // YAMI4_WITH_OPEN_SSL
 
 // selected per platform
 #include <details-types.h>
@@ -77,12 +87,22 @@ public:
     core::result add_existing(
         char * target, io_descriptor_type fd, protocol prot,
         std::size_t preferred_frame_size,
+        core::channel_descriptor & new_descriptor,
+        channel * & new_channel);
+#ifdef YAMI4_WITH_OPEN_SSL
+    core::result add_existing_ssl(
+        char * target, io_descriptor_type fd, protocol prot,
+        std::size_t preferred_frame_size,
         core::channel_descriptor & new_descriptor);
+#endif // YAMI4_WITH_OPEN_SSL
 
     // insert a poison pill to the given channel
     // do nothing if no such channel exists
-    core::result close(core::channel_descriptor cd, std::size_t priority);
-    core::result close(const char * target, std::size_t priority);
+    // close immediately and ignore priority if hard_close == true
+    core::result close(core::channel_descriptor cd,
+        bool hard_close, std::size_t priority);
+    core::result close(const char * target,
+        bool hard_close, std::size_t priority);
 
     // serializes the new message into frames and injects them
     // into the output queue of the given channel
@@ -137,6 +157,7 @@ private:
 
     core::result do_close(channel * ch, std::size_t priority,
         std::size_t index);
+    core::result do_hard_close(channel * ch, std::size_t index);
 
     // finds existing channel with the given target name
     // returns ok or no_such_name
@@ -186,6 +207,10 @@ private:
 
     core::io_error_function io_error_callback_;
     void * io_error_callback_hint_;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    SSL_CTX * ssl_ctx_;
+#endif // YAMI4_WITH_OPEN_SSL
 };
 
 } // namespace details

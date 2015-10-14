@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -15,6 +15,7 @@
 // along with YAMI4.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "selector.h"
+#include "../allocator.h"
 #include "../channel.h"
 #include "../io_error_handler.h"
 #include "../listener.h"
@@ -25,8 +26,10 @@
 using namespace yami;
 using namespace details;
 
-core::result selector::init()
+core::result selector::init(allocator & alloc)
 {
+    (void)alloc;
+
     core::result res = core::io_error;
 
     WORD versionRequested = MAKEWORD(2, 0);
@@ -128,6 +131,11 @@ void selector::reset()
     FD_ZERO(&read_set_);
     FD_ZERO(&write_set_);
 
+#ifdef YAMI4_WITH_OPEN_SSL
+    FD_ZERO(&ssl_pending_set_);
+    ssl_pending_ = false;
+#endif // YAMI4_WITH_OPEN_SSL
+
     // always add the internal interrupt pipe
 
     FD_SET(interrupt_pipe_read_, &read_set_);
@@ -135,7 +143,7 @@ void selector::reset()
     num_of_channels_used_ = 1; // internal pipe
 }
 
-void selector::add_channel(const channel & ch,
+core::result selector::add_channel(channel & ch,
     bool allow_outgoing_traffic, bool allow_incoming_traffic)
 {
     io_descriptor_type fd;
@@ -146,6 +154,19 @@ void selector::add_channel(const channel & ch,
     if ((direction == input || direction == inout) && allow_incoming_traffic)
     {
         FD_SET(fd, &read_set_);
+
+#ifdef YAMI4_WITH_OPEN_SSL
+        SSL * ssl = ch.get_ssl();
+        if (ssl != NULL)
+        {
+            int pending = SSL_pending(ssl);
+            if (pending != 0)
+            {
+                FD_SET(fd, &ssl_pending_set_);
+                ssl_pending_ = true;
+            }
+        }
+#endif // YAMI4_WITH_OPEN_SSL
     }
 
     if ((direction == output || direction == inout) && allow_outgoing_traffic)
@@ -154,15 +175,19 @@ void selector::add_channel(const channel & ch,
     }
     
     ++num_of_channels_used_;
+
+    return core::ok;
 }
 
-void selector::add_listener(const listener & lst)
+core::result selector::add_listener(listener & lst)
 {
     io_descriptor_type fd = lst.get_io_descriptor();
 
     FD_SET(fd, &read_set_);
     
     ++num_of_channels_used_;
+
+    return core::ok;
 }
 
 void selector::get_channel_usage(int & max_allowed, int & used)
@@ -176,6 +201,17 @@ core::result selector::wait(std::size_t timeout)
     core::result res;
 
     struct timeval tv;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    if (ssl_pending_)
+    {
+        // if there are any bytes pending in SSL buffers,
+        // we do not want to wait on select, but still want
+        // to poll the state of all file descriptors
+
+        timeout = 0;
+    }
+#endif // YAMI4_WITH_OPEN_SSL
 
     tv.tv_sec = timeout / 1000;
     tv.tv_usec = 1000 * (timeout % 1000);
@@ -213,7 +249,24 @@ core::result selector::wait(std::size_t timeout)
     }
     else if (cc == 0)
     {
+#ifdef YAMI4_WITH_OPEN_SSL
+        if (ssl_pending_)
+        {
+            // the timeout == 0 expired, but since there are some
+            // pending bytes in SSL buffers, we consider it as
+            // a valid outcome of the selection process
+
+            res = core::ok;
+        }
+        else
+        {
+            res = core::timed_out;
+        }
+#else // YAMI4_WITH_OPEN_SSL
+
         res = core::timed_out;
+
+#endif // YAMI4_WITH_OPEN_SSL
     }
     else
     {
@@ -243,6 +296,13 @@ bool selector::is_channel_ready(
         {
             ready_for_reading = true;
         }
+
+#ifdef YAMI4_WITH_OPEN_SSL
+            if (FD_ISSET(fd, &ssl_pending_set_) != 0)
+            {
+                ready_for_reading = true;
+            }
+#endif // YAMI4_WITH_OPEN_SSL
     }
 
     if (dir == output || dir == inout)

@@ -3,8 +3,14 @@ COMPILER = c++
 # These options are used for development
 #OPTIONS = -Wall -Wextra -W -Wshadow -Weffc++ -pedantic -Wno-long-long -g
 
+# These options are used for development with OpenSSL
+#OPTIONS = -DYAMI4_WITH_OPEN_SSL -Wall -Wextra -W -Wshadow -Weffc++ -pedantic -Wno-long-long -g
+
 # These options are intended for final use
 OPTIONS = -O2 $(USER_COMPILER_OPTIONS)
+
+# These options are intended for final use with OpenSSL
+#OPTIONS = -O2 -DYAMI4_WITH_OPEN_SSL $(USER_COMPILER_OPTIONS)
 
 PLATFORM = posix
 INCLUDE_PLATFORM = -I$(PLATFORM)

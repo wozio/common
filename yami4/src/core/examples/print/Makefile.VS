@@ -1,10 +1,11 @@
-LIB_YAMI = ..\..\..\..\lib\yamicore.lib
-INCLUDE_YAMI = ..\..\..\..\include
+!INCLUDE ..\..\..\Makefile.VS.common
+
+YAMI_LIB = ..\..\..\..\lib\yamicore.lib
+YAMI_INCLUDE = ..\..\..\..\include
 PLATFORM_INCLUDE = ..\common_utils\windows
 
 CPP = cl.exe
-CPP_OPTIONS = /nologo /EHsc /MD /O2 /D _CRT_SECURE_NO_WARNINGS \
-            /I $(INCLUDE_YAMI) /I $(PLATFORM_INCLUDE)
+CPP_OPTIONS = /nologo /EHsc /MD /O2 /D _CRT_SECURE_NO_WARNINGS /I $(YAMI_INCLUDE) /I $(PLATFORM_INCLUDE) $(OPEN_SSL_OPTIONS)
 
 EXAMPLES = \
 	client.exe \
@@ -13,7 +14,7 @@ EXAMPLES = \
 all : $(EXAMPLES)
 
 .cpp.exe:
-	$(CPP) $(CPP_OPTIONS) $< /link $(LIB_YAMI) Ws2_32.lib
+	$(CPP) $(CPP_OPTIONS) $< /link $(YAMI_LIB) $(OPEN_SSL_LIBS) Ws2_32.lib
 	
 clean :
 	del /Q $(EXAMPLES) *.obj

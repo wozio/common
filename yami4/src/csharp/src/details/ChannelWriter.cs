@@ -1,4 +1,4 @@
-// Copyright Paweł Kierski 2010, 2014.
+// Copyright Paweł Kierski 2010, 2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -158,6 +158,13 @@ namespace Inspirel.YAMI.details
             // TCP connection
                 int sent = 
                     connection.connectedChannel.Send(frame.BuffersToSent);
+                frame.AddSentBytes(sent);
+            }
+            else if (connection.ssl != null)
+            {
+                // TCP SSL connection
+                int sent =
+                    connection.writingQueue.PutMany(frame.BuffersToSent);
                 frame.AddSentBytes(sent);
             }
             else

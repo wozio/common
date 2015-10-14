@@ -1,4 +1,4 @@
-// Copyright Paweł Kierski 2010, 2014.
+// Copyright Paweł Kierski 2010, 2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -74,7 +74,7 @@ namespace Inspirel.YAMI.details
 
             if (connection != null)
             {
-                if (connection.connectedChannel != null)
+                if (connection.connectedChannel != null || connection.ssl != null)
                 {
                 // stream-based connection
                     headerBuffer = new MemoryStream(Frame.FRAME_HEADER_SIZE);
@@ -181,13 +181,22 @@ namespace Inspirel.YAMI.details
             int readn = 0;
 
             try
-            {
-                readn = connection.connectedChannel.Receive(
-                    headerBuffer.GetBuffer(),
-                    (int)headerBuffer.Position,
-                    (int)(headerBuffer.Capacity - headerBuffer.Position),
-                    System.Net.Sockets.SocketFlags.None
-                    );
+            {
+                if (connection.connectedChannel != null)
+                {
+                    readn = connection.connectedChannel.Receive(
+                        headerBuffer.GetBuffer(),
+                        (int)headerBuffer.Position,
+                        (int)(headerBuffer.Capacity - headerBuffer.Position),
+                        System.Net.Sockets.SocketFlags.None);
+                }
+                else if (connection.ssl != null)
+                {
+                    readn = connection.readingQueue.Receive(
+                        headerBuffer.GetBuffer(),
+                        (int)headerBuffer.Position,
+                        (int)(headerBuffer.Capacity - headerBuffer.Position));
+                }
             }
             catch(ObjectDisposedException)
             {
@@ -204,7 +213,7 @@ namespace Inspirel.YAMI.details
                 throw new YAMIIOException("EOF");
             }
 
-            headerBuffer.Position += headerBuffer.Position + readn;
+            headerBuffer.Position += readn;
 
             if (headerBuffer.Position == headerBuffer.Capacity)
             {
@@ -221,13 +230,24 @@ namespace Inspirel.YAMI.details
             System.Diagnostics.Debug.Assert(
                 state == InputState.READING_FRAME_PAYLOAD);
 
-            MemoryStream dataBuffer = currentIncomingFrame.dataBuffer;
-            int readn = connection.connectedChannel.Receive(
-                dataBuffer.GetBuffer(),
-                (int)dataBuffer.Position,
-                (int)(dataBuffer.Capacity - dataBuffer.Position),
-                System.Net.Sockets.SocketFlags.None
-            );
+            MemoryStream dataBuffer = currentIncomingFrame.dataBuffer;
+            int readn = 0;
+
+            if (connection.connectedChannel != null)
+            {
+                readn = connection.connectedChannel.Receive(
+                    dataBuffer.GetBuffer(),
+                    (int)dataBuffer.Position,
+                    (int)(dataBuffer.Capacity - dataBuffer.Position),
+                    System.Net.Sockets.SocketFlags.None);
+            }
+            else if (connection.ssl != null)
+            {
+                readn = connection.readingQueue.Receive(
+                    dataBuffer.GetBuffer(),
+                    (int)dataBuffer.Position,
+                    (int)(dataBuffer.Capacity - dataBuffer.Position));
+            }
 
             if (readn == -1 || readn == 0)
             {

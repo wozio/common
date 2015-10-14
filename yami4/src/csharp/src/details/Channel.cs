@@ -1,4 +1,4 @@
-// Copyright Paweł Kierski 2010, 2014.
+// Copyright Paweł Kierski 2010, 2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -35,7 +35,8 @@ namespace Inspirel.YAMI.details
         private readonly LogEventArgs.LogLevel logLevel;
 
         internal Channel(string target, Options options, 
-            IncomingMessageDispatchCallback incomingMessageDispatchCallback, 
+            IncomingMessageDispatchCallback incomingMessageDispatchCallback,
+            IOWorker ioWorker,
             LogCallback logCallback, LogEventArgs.LogLevel logLevel)
         {
             this.target = target;
@@ -44,7 +45,7 @@ namespace Inspirel.YAMI.details
             this.logCallback = logCallback;
             this.logLevel = logLevel;
 
-            connect(incomingMessageDispatchCallback);
+            connect(incomingMessageDispatchCallback, ioWorker);
 
             if (logCallback != null)
             {
@@ -53,7 +54,7 @@ namespace Inspirel.YAMI.details
             }
         }
 
-    // used by listener when accepting new connections
+        // used by listener when accepting new connections
         internal Channel(Socket acceptedChannel, string sourceTarget, 
             IncomingMessageDispatchCallback incomingMessageDispatchCallback, 
             Options options, LogCallback logCallback, 
@@ -174,8 +175,15 @@ namespace Inspirel.YAMI.details
             channelReader.injectFullFrame(frameBuffer);
         }
 
-        internal virtual Socket registerForSelection(Selector selector, 
-            bool allowInput, bool allowOutput)
+        internal class SelectionKeys
+        {
+            internal Socket key;
+            internal bool blockingChannelReadyForReading;
+            internal bool blockingChannelReadyForWriting;
+        }
+
+        internal virtual SelectionKeys registerForSelection(Selector selector,
+            bool allowInput, bool allowOutput, bool useBlockingOnly)
         {
 
             Selector.Direction operations = Selector.Direction.NONE;
@@ -198,7 +206,7 @@ namespace Inspirel.YAMI.details
             {
                 try
                 {
-                    key = connection.register(selector, operations);
+                    key = connection.register(selector, operations, useBlockingOnly);
                 }
                     //TODO replace with proper exception
                 catch
@@ -206,9 +214,17 @@ namespace Inspirel.YAMI.details
                 {
                 // ignore, will never happen
                 }
-            }
-
-            return key;
+            }
+
+            SelectionKeys keys = new SelectionKeys();
+            keys.key = key;
+            keys.blockingChannelReadyForReading =
+                    ((operations & Selector.Direction.READ) != 0) &&
+                    connection.readingQueue != null &&
+                    connection.readingQueue.HasDataOrEOF();
+            keys.blockingChannelReadyForWriting = (operations & Selector.Direction.WRITE) != 0;
+            
+            return keys;
         }
 
         internal virtual void doSomeWork(
@@ -232,13 +248,22 @@ namespace Inspirel.YAMI.details
             }
         }
 
-        private void connect(
-            IncomingMessageDispatchCallback incomingMessageDispatchCallback)
+        private void connect(
+            IncomingMessageDispatchCallback incomingMessageDispatchCallback, IOWorker ioWorker)
         {
             if (NetworkUtils.protocolIsTcp(target))
             {
                 connection = NetworkUtils.connectTcp(target, options);
-            }
+            }
+            else if (NetworkUtils.protocolIsTcps(target))
+            {
+                connection = NetworkUtils.connectTcps(target, options, ioWorker);
+
+                // additionally, instruct I/O Worker that blocking sockets
+                // are the only ones that should be acted upon
+
+                ioWorker.UseBlockingChannelsOnly();
+            }
             else if (NetworkUtils.protocolIsUdp(target))
             {
                 connection = NetworkUtils.createUdp(target, options);

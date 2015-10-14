@@ -1,4 +1,4 @@
-// Copyright Paweł Kierski 2010, 2014.
+// Copyright Paweł Kierski 2010, 2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -646,8 +646,8 @@ namespace Inspirel.YAMI
         public OutgoingMessage Send(OutgoingMessageHandler updateCallback,
             string target, string objectName,
             string messageName, YAMISerializable content)
-        {
-            return doSend(null, target, objectName, messageName, content,
+        {
+            return doSend(updateCallback, target, objectName, messageName, content,
                 0, true, false);
         }
 
@@ -688,8 +688,8 @@ namespace Inspirel.YAMI
         public OutgoingMessage Send(OutgoingMessageHandler updateCallback,
             string target, string objectName,
             string messageName, YAMISerializable content, int priority)
-        {
-            return doSend(null, target, objectName, messageName, content,
+        {
+            return doSend(updateCallback, target, objectName, messageName, content,
                 priority, true, false);
         }
 
@@ -732,8 +732,8 @@ namespace Inspirel.YAMI
             string target, string objectName,
             string messageName, YAMISerializable content,
             int priority, bool autoConnect)
-        {
-            return doSend(null, target, objectName, messageName, content,
+        {
+            return doSend(updateCallback, target, objectName, messageName, content,
                 priority, autoConnect, false);
         }
 
@@ -1399,7 +1399,8 @@ namespace Inspirel.YAMI
                     try
                     {
                         ch = new Channel(target, options, 
-                            incomingMessageDispatchCallback, 
+                            incomingMessageDispatchCallback,
+                            ioWorker,
                             (LogCallback)this, logLevel);
 
                         reportChannelEvent(target, 

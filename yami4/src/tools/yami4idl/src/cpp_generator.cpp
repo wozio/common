@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/filesystem.hpp>
 
+#include <cctype>
 #include <cstdio>
 
 using namespace structures;
@@ -56,7 +57,7 @@ std::string base_file_name(
     boost::filesystem::path p =
         boost::filesystem::path(output_dir) / boost::filesystem::path(base_name);
 
-    return p.native();
+    return p.string();
 }
 
 std::string header_file_name(

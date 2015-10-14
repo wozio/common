@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -42,7 +42,17 @@ class channel_group;
 class mutex;
 struct options;
 
-enum protocol { proto_tcp, proto_udp, proto_unix, proto_file };
+enum protocol
+{
+    proto_tcp,
+    proto_udp,
+    proto_unix,
+    proto_file
+#ifdef YAMI4_WITH_OPEN_SSL
+    , proto_tcps
+#endif // YAMI4_WITH_OPEN_SSL
+};
+
 enum io_direction { none, input, output, inout };
 
 class dump_sink;

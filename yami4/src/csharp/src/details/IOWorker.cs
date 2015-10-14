@@ -1,4 +1,4 @@
-// Copyright Paweł Kierski 2010, 2014.
+// Copyright Paweł Kierski 2010, 2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Inspirel.YAMI.details
 {
@@ -37,9 +38,15 @@ namespace Inspirel.YAMI.details
 
         private readonly IDictionary<Socket, Channel> channelsForSelection;
 
+        private readonly IList<Channel> blockingChannelsReadyForReading;
+        private readonly IList<Channel> blockingChannelsReadyForWriting;
+
         private bool stopRequest;
 
         private Selector selector;
+
+        private bool keepWaiting = false;
+        private bool useBlockingOnly = false;
 
         public IOWorker(
             IDictionary<string, Channel> channels, 
@@ -64,6 +71,9 @@ namespace Inspirel.YAMI.details
             listenersForSelection = new Dictionary<Socket, Listener>();
             channelsForSelection = new Dictionary<Socket, Channel>();
 
+            blockingChannelsReadyForReading = new List<Channel>();
+            blockingChannelsReadyForWriting = new List<Channel>();
+
             stopRequest = false;
         }
 
@@ -75,6 +85,10 @@ namespace Inspirel.YAMI.details
                 {
                     selector.Wakeup();
                 }
+
+                keepWaiting = false;
+
+                Monitor.Pulse(this);
             }
         }
 
@@ -87,52 +101,79 @@ namespace Inspirel.YAMI.details
                 {
                     selector.Wakeup();
                 }
+
+                keepWaiting = false;
+
+                Monitor.Pulse(this);
             }
+        }
+
+        public void UseBlockingChannelsOnly() {
+        lock (this)
+            {
+        useBlockingOnly = true;
+        keepWaiting = false;
+
+                Monitor.Pulse(this);
+        }
         }
 
         private void openSelector()
         {
-            try
+            lock (this)
             {
-                lock (this)
+                if (useBlockingOnly)
                 {
-                    selector = new Selector();
-                    // Selector.open();
-                    if (stopRequest)
+                    selector = null;
+                }
+                else
+                {
+                    try
                     {
-                        selector.Wakeup();
+                        selector = new Selector();
+                        // Selector.open();
+                        if (stopRequest)
+                        {
+                            selector.Wakeup();
+                        }
+                    }
+                    catch (SocketException)
+                    {
+                        // ignore
                     }
                 }
-            }
-            catch (SocketException)
-            {
-            // ignore
             }
         }
 
         private void closeSelector()
         {
-            try
+            lock (this)
             {
-                lock (this)
+                if (useBlockingOnly == false)
                 {
-                    //foreach (Socket key in selector.keys())
-                    //{
-                    //    key.cancel();
-                    //}
-                    // selector.SelectNow();
-                    selector.Close();
-                    selector = null;
+                    try
+                    {
+                        //foreach (Socket key in selector.keys())
+                        //{
+                        //    key.cancel();
+                        //}
+                        // selector.SelectNow();
+                        selector.Close();
+                        selector = null;
+                    }
+                    catch (SocketException)
+                    {
+                        // ignore, will never happen
+                    }
                 }
-            }
-            catch (SocketException)
-            {
-            // ignore, will never happen
             }
         }
 
         private void registerListenersAndChannels()
         {
+            blockingChannelsReadyForReading.Clear();
+            blockingChannelsReadyForWriting.Clear();
+
             selector.Clear();
             listenersForSelection.Clear();
             channelsForSelection.Clear();
@@ -149,14 +190,23 @@ namespace Inspirel.YAMI.details
             const bool allowOutput = true;
             bool allowInput = incomingFlowManager.isAllowed();
 
-            lock (listeners)
+            bool onlyBlocking;
+            lock (this)
             {
-                foreach (KeyValuePair<string, Listener> e in listeners)
-                {
-                    Listener lst = e.Value;
+            onlyBlocking = useBlockingOnly;
+            }
 
-                    Socket key = lst.registerForSelection(selector);
-                    listenersForSelection.Add(key, lst);
+            if (onlyBlocking == false)
+            {
+                lock (listeners)
+                {
+                    foreach (KeyValuePair<string, Listener> e in listeners)
+                    {
+                        Listener lst = e.Value;
+
+                        Socket key = lst.registerForSelection(selector);
+                        listenersForSelection.Add(key, lst);
+                    }
                 }
             }
 
@@ -166,12 +216,20 @@ namespace Inspirel.YAMI.details
                 {
                     Channel ch = e.Value;
 
-                    Socket key = ch.registerForSelection(
-                        selector, allowInput, allowOutput);
+                    Channel.SelectionKeys keys = ch.registerForSelection(
+                        selector, allowInput, allowOutput, onlyBlocking);
 
-                    if (key != null)
+                    if (keys.key != null)
                     {
-                        channelsForSelection.Add(key, ch);
+                        channelsForSelection.Add(keys.key, ch);
+                    }
+                    else if (keys.blockingChannelReadyForReading)
+                    {
+                        blockingChannelsReadyForReading.Add(ch);
+                    }
+                    else if (keys.blockingChannelReadyForWriting)
+                    {
+                        blockingChannelsReadyForWriting.Add(ch);
                     }
                 }
             }
@@ -179,6 +237,35 @@ namespace Inspirel.YAMI.details
 
         private void waitUntilReady()
         {
+            if (blockingChannelsReadyForReading.Count != 0 || blockingChannelsReadyForWriting.Count != 0)
+            {
+                // there are some blocking channels that are immediately available,
+                // no need to wait on selector
+
+                return;
+            }
+
+            lock (this)
+            {
+                if (useBlockingOnly)
+                {
+                    keepWaiting = true;
+                    while (keepWaiting)
+                    {
+                        try
+                        {
+                            Monitor.Wait(this);
+                        }
+                        catch (System.Exception)
+                        {
+                            // ignore
+                        }
+                    }
+
+                    return;
+                }
+            }
+
             try
             {
                 selector.Select();
@@ -245,7 +332,8 @@ namespace Inspirel.YAMI.details
                         {
                         // no such channel, create it
                             ch = new Channel(target, options, 
-                                incomingMessageDispatchCallback, 
+                                incomingMessageDispatchCallback,
+                                null, // IOWorker not needed there
                                 logCallback, logLevel);
                             channels.Add(target, ch);
                         }
@@ -276,14 +364,12 @@ namespace Inspirel.YAMI.details
 
         private void useReadyChannel(Channel ch, bool doInput, bool doOutput)
         {
-
             try
             {
                 ch.doSomeWork(doInput, doOutput);
             }
             catch (Exception)
             {
-
             // in case of error during I/O operation
             // on any channel, close it and abandon
             // all incoming and outgoing messages
@@ -306,33 +392,52 @@ namespace Inspirel.YAMI.details
 
         private void useReadyListenersAndChannels()
         {
-            foreach(Socket key in selector.SelectedKeys)
+            if (blockingChannelsReadyForReading.Count != 0)
             {
-                bool doAccept = selector.ReadyForAccept(key);
-                if (doAccept)
+                foreach (Channel ch in blockingChannelsReadyForReading)
                 {
-                    Listener lst = listenersForSelection[key];
-                    useReadyListener(lst);
+                    useReadyChannel(ch, true, false);
                 }
-
-                bool doInput = selector.ReadyForRead(key);
-                bool doOutput = selector.ReadyForWrite(key);
-                if (doInput || doOutput)
+            }
+    
+            if (blockingChannelsReadyForWriting.Count != 0)
+            {
+                foreach (Channel ch in blockingChannelsReadyForWriting)
                 {
-                    if (channelsForSelection.ContainsKey(key))
-                    {
-                        useReadyChannel(channelsForSelection[key], 
-                            doInput, doOutput);
-                    }
-                    else
-                    {
-                    // if the channel was not found in the channel set,
-                    // it might be because it was actually a UDP channel
-                    // working as a listener - in which case its operation
-                    // is OP_READ, but it was added to the listener set
+                    useReadyChannel(ch, false, true);
+                }
+            }
 
+            if (selector != null)
+            {
+                foreach (Socket key in selector.SelectedKeys)
+                {
+                    bool doAccept = selector.ReadyForAccept(key);
+                    if (doAccept)
+                    {
                         Listener lst = listenersForSelection[key];
                         useReadyListener(lst);
+                    }
+
+                    bool doInput = selector.ReadyForRead(key);
+                    bool doOutput = selector.ReadyForWrite(key);
+                    if (doInput || doOutput)
+                    {
+                        if (channelsForSelection.ContainsKey(key))
+                        {
+                            useReadyChannel(channelsForSelection[key],
+                                doInput, doOutput);
+                        }
+                        else
+                        {
+                            // if the channel was not found in the channel set,
+                            // it might be because it was actually a UDP channel
+                            // working as a listener - in which case its operation
+                            // is OP_READ, but it was added to the listener set
+
+                            Listener lst = listenersForSelection[key];
+                            useReadyListener(lst);
+                        }
                     }
                 }
             }

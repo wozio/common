@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -15,6 +15,7 @@
 // along with YAMI4.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "water_flow_manager.h"
+#include "errors.h"
 #include "mutex_lock.h"
 #include <yami4-core/fatal_errors.h>
 
@@ -37,7 +38,7 @@ void water_flow_manager::set_limits(
 {
     if (high_mark < low_mark)
     {
-        fatal_failure(__FILE__, __LINE__);
+        throw yami::yami_logic_error("Wrong limit values.");
     }
 
     high_water_mark_ = high_mark;

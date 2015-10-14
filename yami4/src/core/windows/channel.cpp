@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -270,53 +270,104 @@ core::result channel::read_bytes(char * buf, std::size_t size,
 {
     core::result res;
 
-    if (protocol_ == proto_udp)
+    switch (protocol_)
     {
-        // the UDP frame has to be read as a single operation
+    case proto_udp:
 
-        struct sockaddr_in remote_address;
-        int address_size = sizeof(remote_address);
-
-        int rn = ::recvfrom(fd_, buf, size, 0,
-            reinterpret_cast<sockaddr *>(&remote_address), &address_size);
-
-        if (rn != SOCKET_ERROR)
         {
-            readn = static_cast<std::size_t>(rn);
-            res = core::ok;
-        }
-        else
-        {
-            handle_io_error("udp receive",
-                io_error_callback_, io_error_callback_hint_);
+            // the UDP frame has to be read as a single operation
 
-            res = core::io_error;
-        }
-    }
-    else
-    {
-        int rn = ::recv(fd_, buf, size, 0);
-        if (rn == SOCKET_ERROR)
-        {
-            handle_io_error("stream read",
-                io_error_callback_, io_error_callback_hint_);
+            struct sockaddr_in remote_address;
+            int address_size = sizeof(remote_address);
 
-            res = core::io_error;
-        }
-        else
-        {
-            if (rn != 0)
+            int rn = ::recvfrom(fd_, buf, size, 0,
+                reinterpret_cast<sockaddr *>(&remote_address), &address_size);
+
+            if (rn != SOCKET_ERROR)
             {
                 readn = static_cast<std::size_t>(rn);
                 res = core::ok;
             }
             else
             {
-                res = core::channel_closed;
+                handle_io_error("udp receive",
+                    io_error_callback_, io_error_callback_hint_);
+
+                res = core::io_error;
             }
         }
-    }
+        
+        break;
+        
+    case proto_tcp:
 
+        {
+            int rn = ::recv(fd_, buf, size, 0);
+            if (rn == SOCKET_ERROR)
+            {
+                handle_io_error("stream read",
+                    io_error_callback_, io_error_callback_hint_);
+
+                res = core::io_error;
+            }
+            else
+            {
+                if (rn != 0)
+                {
+                    readn = static_cast<std::size_t>(rn);
+                    res = core::ok;
+                }
+                else
+                {
+                    res = core::channel_closed;
+                }
+            }
+        }
+        
+        break;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    case proto_tcps:
+        
+        {
+            int rn = SSL_read(ssl_, buf, size);
+
+            if (rn > 0)
+            {
+                readn = static_cast<std::size_t>(rn);
+                res = core::ok;
+            }
+            else if (rn == 0)
+            {
+                // most likely the SSL channel was closed
+
+                res = core::channel_closed;
+            }
+            else // rn < 0
+            {
+                int ssl_error = SSL_get_error(ssl_, rn);
+                if (ssl_error == SSL_ERROR_WANT_READ || ssl_error == SSL_ERROR_WANT_WRITE)
+                {
+                    // with non-blocking I/O this means incomplete handshake
+                    // - retry with the next I/O worker cycle
+
+                    readn = 0;
+                    res = core::ok;
+                }
+                else
+                {
+                    handle_io_error("SSL handshake",
+                        io_error_callback_, io_error_callback_hint_);
+
+                    res = core::io_error;
+                }
+            }
+        }
+
+        break;
+#endif // YAMI4_WITH_OPEN_SSL
+    }
+    
     return res;
 }
 
@@ -325,44 +376,99 @@ core::result channel::write_bytes(const char * buf, std::size_t size,
 {
     core::result res;
 
-    if (protocol_ == proto_udp)
+    switch (protocol_)
     {
-        // the UDP frame is either successfully pushed as a whole
-        // or the operation is considered as failing
+    case proto_udp:
 
-        int wn = ::sendto(fd_, buf, size, 0,
-            reinterpret_cast<sockaddr *>(target_address_),
-            target_address_size_);
-        if (wn == size)
         {
-            res = core::ok;
-        }
-        else
-        {
-            handle_io_error("udp send",
-                io_error_callback_, io_error_callback_hint_);
+            // the UDP frame is either successfully pushed as a whole
+            // or the operation is considered as failing
 
-            res = core::io_error;
+            int wn = ::sendto(fd_, buf, size, 0,
+                reinterpret_cast<sockaddr *>(target_address_),
+                target_address_size_);
+            if (wn == size)
+            {
+                res = core::ok;
+            }
+            else
+            {
+                handle_io_error("udp send",
+                    io_error_callback_, io_error_callback_hint_);
+
+                res = core::io_error;
+            }
         }
+        
+        break;
+    
+    case proto_tcp:
+
+        {
+            // this is a stream channel
+
+            int wn = ::send(fd_, buf, size, 0);
+            if (wn == SOCKET_ERROR)
+            {
+                handle_io_error("stream write",
+                    io_error_callback_, io_error_callback_hint_);
+
+                res = core::io_error;
+            }
+            else
+            {
+                written = static_cast<std::size_t>(wn);
+                res = core::ok;
+            }
+        }
+        
+        break;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    case proto_tcps:
+
+        {
+            int wn = SSL_write(ssl_, buf, size);
+
+            if (wn > 0)
+            {
+                written = static_cast<std::size_t>(wn);
+                res = core::ok;
+            }
+            else if (wn == 0)
+            {
+                // most likely the SSL channel was closed
+
+                handle_io_error("SSL write",
+                    io_error_callback_, io_error_callback_hint_);
+
+                written = 0;
+                res = core::ok;
+            }
+            else // wn < 0
+            {
+                int ssl_error = SSL_get_error(ssl_, wn);
+                if (ssl_error == SSL_ERROR_WANT_READ || ssl_error == SSL_ERROR_WANT_WRITE)
+                {
+                    // with non-blocking I/O this means incomplete handshake
+                    // - retry with the next I/O worker cycle
+
+                    written = 0;
+                    res = core::ok;
+                }
+                else
+                {
+                    handle_io_error("SSL handshake",
+                        io_error_callback_, io_error_callback_hint_);
+
+                    res = core::io_error;
+                }
+            }
+        }
+
+        break;
+#endif // YAMI4_WITH_OPEN_SSL
     }
-    else
-    {
-        // this is a stream channel
-
-        int wn = ::send(fd_, buf, size, 0);
-        if (wn == SOCKET_ERROR)
-        {
-            handle_io_error("stream write",
-                io_error_callback_, io_error_callback_hint_);
-
-            res = core::io_error;
-        }
-        else
-        {
-            written = static_cast<std::size_t>(wn);
-            res = core::ok;
-        }
-    }
-
+    
     return res;
 }

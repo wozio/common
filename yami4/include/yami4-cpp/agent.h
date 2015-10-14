@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -313,6 +313,17 @@ public:
     ///        messages in the outgoing queue.
     void close_connection(const std::string & target,
         std::size_t priority = 0);
+
+    /// \brief Immediately closes the given communication channel.
+    ///
+    /// Closes the channel identified by name.
+    ///
+    /// The channel is closed immediately and those messages that are
+    /// waiting in its outgoing queue are abandoned. Integrity of the
+    /// message that was already partly transmitted is not guaranteed.
+    ///
+    /// @param target The name of the target endpoint.
+    void hard_close_connection(const std::string & target);
 
     /// \brief Registers the monitor for connection-related events.
     ///

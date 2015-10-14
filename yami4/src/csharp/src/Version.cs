@@ -1,4 +1,4 @@
-// Copyright Paweł Kierski 2010, 2014.
+// Copyright Paweł Kierski 2010, 2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -22,8 +22,8 @@ namespace Inspirel.YAMI
     public class Version
     {
         private const int major = 1;
-        private const int minor = 8;
-        private const int build = 0;
+        private const int minor = 10;
+        private const int build = 1;
 
         /// <summary>
         /// Library verion name.

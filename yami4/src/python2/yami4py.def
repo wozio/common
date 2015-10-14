@@ -19,6 +19,7 @@ EXPORTS
 	yami4_agent_get_next_incoming_message
 	yami4_agent_get_next_connection_event
 	yami4_agent_close_connection
+	yami4_agent_hard_close_connection
 	yami4_outgoing_message_get_state
 	yami4_outgoing_message_wait_for_transmission
 	yami4_outgoing_message_wait_for_completion

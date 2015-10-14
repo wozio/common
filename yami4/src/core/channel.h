@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -21,6 +21,15 @@
 #include "details-fwd.h"
 #include "options.h"
 #include <cstddef>
+
+#ifdef YAMI4_WITH_OPEN_SSL
+#ifdef _WIN32
+// this is necessary to avoid conflicts between
+// WinSock2.h (used by YAMI4) and winsock.h (used by OpenSSL):
+#include <WinSock2.h>
+#endif // _WIN32
+#include <openssl/ssl.h>
+#endif // YAMI4_WITH_OPEN_SSL
 
 // selected per platform
 #include <details-types.h>
@@ -69,6 +78,11 @@ public:
         core::io_error_function io_error_callback,
         void * io_error_callback_hint);
 
+#ifdef YAMI4_WITH_OPEN_SSL
+    void set_client_ssl(SSL * ssl);
+    void set_server_ssl(SSL * ssl);
+#endif // YAMI4_WITH_OPEN_SSL
+
     void close_connection();
     void clean();
 
@@ -94,8 +108,22 @@ public:
     const char * get_target() const { return target_; }
     const char * move_target();
 
+    io_descriptor_type get_io_descriptor() const { return fd_; }
+
     void get_io_descriptor(
         io_descriptor_type & fd, io_direction & direction) const;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    SSL * get_ssl() const { return ssl_; }
+
+    void set_pending_read(bool pending) { pending_read_ = pending; }
+    bool get_pending_read() const { return pending_read_; }
+#endif // YAMI4_WITH_OPEN_SSL
+
+    protocol get_protocol() const { return protocol_; }
+
+    void set_selector_index(int index) { selector_index_ = index; }
+    int get_selector_index() const { return selector_index_; }
 
     void inc_ref() { ++ref_count_; }
     void dec_ref() { --ref_count_; }
@@ -155,6 +183,9 @@ private:
     core::result connect_to_tcp(const char * tcp_address);
     core::result connect_to_udp(const char * udp_address);
     core::result connect_to_unix(const char * path);
+#ifdef YAMI4_WITH_OPEN_SSL
+    core::result connect_to_tcps(const char * tcp_address);
+#endif // YAMI4_WITH_OPEN_SSL
 
     core::result read_bytes(char * buf, std::size_t size,
         std::size_t & readn);
@@ -164,12 +195,19 @@ private:
     options configuration_options_;
     allocator * alloc_;
 
+#ifdef YAMI4_WITH_OPEN_SSL
+    SSL * ssl_;
+    bool pending_read_;
+#endif // YAMI4_WITH_OPEN_SSL
+
     mutex * mtx_; // provided by channel group
 
     char * target_;
     protocol protocol_;
     io_direction direction_;
     io_descriptor_type fd_;
+    int selector_index_;
+
     std::size_t preferred_frame_size_;
 
     // used only with UDP, as it is needed with every send operation

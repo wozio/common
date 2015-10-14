@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/filesystem.hpp>
 
+#include <cctype>
 #include <cstdio>
 
 using namespace structures;
@@ -136,11 +137,11 @@ std::string name_to_path(const std::string & from_dir, const std::string & name)
 
     if (tail.empty())
     {
-        return p.native();
+        return p.string();
     }
     else
     {
-        return name_to_path(p.native(), tail);
+        return name_to_path(p.string(), tail);
     }
 }
 
@@ -154,7 +155,7 @@ std::string file_name(const std::string & output_dir,
         boost::filesystem::path(name_to_path(output_dir, j_package_name)) /
         boost::filesystem::path(j_class_name);
 
-    return p.native() + ".java";
+    return p.string() + ".java";
 }
 
 void make_directory_for_package(const std::string & output_dir,

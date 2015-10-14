@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -55,7 +55,7 @@ std::string resolved_file_name(const std::string & file_name)
 
         if (boost::filesystem::exists(candidate_path))
         {
-            return candidate_path.native();
+            return candidate_path.string();
         }
     }
 

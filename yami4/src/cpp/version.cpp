@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 namespace yami
 {
 
-const char * const version_name = "1.9.0";
-const int version_number = 10900;
+const char * const version_name = "1.10.1";
+const int version_number = 11001;
 
 } // namespace yami

@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -76,7 +76,7 @@ class ChannelReader {
         incomingFrames = new HashMap<Integer, IncomingMessageFrames>();
 
         if (connection != null) {
-            if (connection.connectedChannel != null) {
+            if (connection.connectedChannel != null || connection.blockingSocket != null) {
                 // stream-based connection
                 headerBuffer = ByteBuffer.allocate(Frame.FRAME_HEADER_SIZE);
                 setReadingFrameHeaderState();
@@ -173,8 +173,15 @@ class ChannelReader {
 
     private void doReadHeader() throws IOException {
         assert(state == InputState.READING_FRAME_HEADER);
-
-        int readn = connection.connectedChannel.read(headerBuffer);
+        
+        int readn = -1;
+        
+        if (connection.connectedChannel != null) {
+        	readn = connection.connectedChannel.read(headerBuffer);
+        } else if (connection.blockingSocket != null) {
+        	readn = connection.readingQueue.read(headerBuffer);
+        }
+        
         if (readn == -1) {
             // EOF - signal it as an artificial exception
             // so that the channel can be closed and removed
@@ -195,7 +202,14 @@ class ChannelReader {
         assert(state == InputState.READING_FRAME_PAYLOAD);
 
         ByteBuffer dataBuffer = currentIncomingFrame.dataBuffer;
-        int readn = connection.connectedChannel.read(dataBuffer);
+        int readn = -1;
+        
+        if (connection.connectedChannel != null) {
+        	readn = connection.connectedChannel.read(dataBuffer);
+        } else if (connection.blockingSocket != null) {
+        	readn = connection.readingQueue.read(dataBuffer);
+        }
+
         if (readn == -1) {
             // EOF - signal it as an artificial exception
             // so that the channel can be closed and removed

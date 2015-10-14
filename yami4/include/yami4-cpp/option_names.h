@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -39,6 +39,11 @@ DLL const char unix_nonblocking[] =    "unix_nonblocking";
 DLL const char unix_frame_size[] =     "unix_frame_size";
 DLL const char file_nonblocking[] =    "file_nonblocking";
 DLL const char file_frame_size[] =     "file_frame_size";
+
+#ifdef YAMI4_WITH_OPEN_SSL
+DLL const char ssl_certificate_file[] = "ssl_certificate_file";
+DLL const char ssl_private_key_file[] = "ssl_private_key_file";
+#endif // YAMI4_WITH_OPEN_SSL
 
 // additional options for C++
 DLL const char dispatcher_threads[] =            "dispatcher_threads";

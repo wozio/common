@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -49,6 +49,7 @@ void channel::common_init(allocator & alloc, mutex & mtx,
     mode_ = operational;
     direction_ = input;
     fd_ = empty_io_descriptor;
+    selector_index_ = -1;
     target_address_ = NULL;
     datagram_buffer_ = NULL;
     output_frame_offset_ = 0;
@@ -71,6 +72,10 @@ void channel::common_init(allocator & alloc, mutex & mtx,
     event_notification_hint_ = event_notification_hint;
     io_error_callback_ = io_error_callback;
     io_error_callback_hint_ = io_error_callback_hint;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    ssl_ = NULL;
+#endif // YAMI4_WITH_OPEN_SSL
 }
 
 // to be synchronized by caller
@@ -98,6 +103,13 @@ void channel::clean()
 
     clean_outgoing_frames(first_outgoing_frame_);
     clean_incoming_messages();
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    if (ssl_ != NULL)
+    {
+        SSL_free(ssl_);
+    }
+#endif // YAMI4_WITH_OPEN_SSL
 }
 
 // should be called outside of critical section
@@ -168,6 +180,22 @@ void channel::init(allocator & alloc, mutex & mtx,
     preferred_frame_size_ = preferred_frame_size;
 }
 
+#ifdef YAMI4_WITH_OPEN_SSL
+void channel::set_client_ssl(SSL * ssl)
+{
+    ssl_ = ssl;
+
+    SSL_set_connect_state(ssl_);
+}
+
+void channel::set_server_ssl(SSL * ssl)
+{
+    ssl_ = ssl;
+
+    SSL_set_accept_state(ssl_);
+}
+#endif // YAMI4_WITH_OPEN_SSL
+
 core::result channel::connect()
 {
     core::result res;
@@ -183,6 +211,11 @@ core::result channel::connect()
 
     const char file_prefix[] = "file://";
     const std::size_t file_prefix_size = sizeof(file_prefix) - 1;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    const char tcps_prefix[] = "tcps://";
+    const std::size_t tcps_prefix_size = sizeof(tcps_prefix) - 1;
+#endif // YAMI4_WITH_OPEN_SSL
 
     if (std::strncmp(tcp_prefix, target_, tcp_prefix_size) == 0)
     {
@@ -204,6 +237,22 @@ core::result channel::connect()
         const char * file_name = target_ + file_prefix_size;
         res = connect_to_file(file_name);
     }
+#ifdef YAMI4_WITH_OPEN_SSL
+    else if (std::strncmp(tcps_prefix, target_, tcps_prefix_size) == 0)
+    {
+        // note: connect_to_tcp() is used to create SSL connections,
+        // there are no special actions to be taken other than
+        // setting up different protocol value
+
+        const char * tcp_address = target_ + tcps_prefix_size;
+        res = connect_to_tcp(tcp_address);
+
+        if (res == core::ok)
+        {
+            protocol_ = proto_tcps;
+        }
+    }
+#endif // YAMI4_WITH_OPEN_SSL
     else
     {
         res = core::bad_protocol;

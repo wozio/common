@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -1171,6 +1171,26 @@ void agent_close_str(void * p, const char * target,
         static_cast<yami::core::agent *>(p);
 
     *result = translate_result(the_agent->close(target, priority));
+}
+
+void agent_hard_close_cd(void * p,
+    std::size_t index, std::size_t seq_num,
+    int * result)
+{
+    yami::core::agent * the_agent =
+        static_cast<yami::core::agent *>(p);
+
+    const yami::core::channel_descriptor cd(index, seq_num);
+    *result = translate_result(the_agent->hard_close(cd));
+}
+
+void agent_hard_close_str(void * p, const char * target,
+    int * result)
+{
+    yami::core::agent * the_agent =
+        static_cast<yami::core::agent *>(p);
+
+    *result = translate_result(the_agent->hard_close(target));
 }
 
 void agent_post_cd(void * p,

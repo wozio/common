@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -181,6 +181,10 @@ public:
     /// - "file://filename?read" for reading from regular files
     /// - "file://filename?append" for appending to regular files
     ///
+    /// If the library is compiled with OpenSSL support,
+    /// the additional target format is:
+    /// - "tcps://host:port" for SSL connections
+    ///
     /// @param target The target for the new connection.
     /// @return
     ///         - <code>ok</code> if the operation was successful or the
@@ -255,6 +259,26 @@ public:
     /// See the other <code>close</code> function for the description
     /// of arguments, return values and the discussion of priorities.
     result close(const char * target, std::size_t priority = 0);
+
+    /// \brief Immediately closes the given channel.
+    ///
+    /// Closes the channel identified by the given descriptor.
+    ///
+    /// The channel is closed immediately and those messages that are
+    /// waiting in its outgoing queue are abandoned. Integrity of the
+    /// message that was already partly transmitted is not guaranteed.
+    /// @param cd Descriptor of the channel that should be closed.
+    /// @return
+    ///         - <code>ok</code> if the operation was successful or the
+    ///           appropriate problem description
+    result hard_close(channel_descriptor cd);
+
+    /// \brief Immediately closes the given channel.
+    ///
+    /// Closes the channel identified by the target name.
+    ///
+    /// See the other <code>hard_close</code> function for the description.
+    result hard_close(const char * target);
 
     /// \brief Posts new message for sending.
     ///

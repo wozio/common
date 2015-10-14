@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -30,6 +30,10 @@ class parameters;
 namespace details
 {
 
+#ifdef YAMI4_WITH_OPEN_SSL
+const std::size_t max_file_path_len = 200;
+#endif // YAMI4_WITH_OPEN_SSL
+
 struct options
 {
     void init(const core::parameters * params);
@@ -52,6 +56,11 @@ struct options
 
     bool file_nonblocking;
     std::size_t file_frame_size;
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    char ssl_certificate_file[max_file_path_len];
+    char ssl_private_key_file[max_file_path_len];
+#endif // YAMI4_WITH_OPEN_SSL
 };
 
 } // namespace details

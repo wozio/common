@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -123,6 +123,11 @@ void agent::send_one_way(const std::string & target,
 void agent::close_connection(const std::string & target, std::size_t priority)
 {
     pimpl_->close_connection(target, priority);
+}
+
+void agent::hard_close_connection(const std::string & target)
+{
+    pimpl_->hard_close_connection(target);
 }
 
 void agent::get_outgoing_flow_state(std::size_t & current_level,

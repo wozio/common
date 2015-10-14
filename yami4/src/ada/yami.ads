@@ -1,4 +1,4 @@
---  Copyright Maciej Sobczak 2008-2014.
+--  Copyright Maciej Sobczak 2008-2015.
 --  This file is part of YAMI4.
 --
 --  YAMI4 is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ package YAMI is
    --
    --  Library version information.
    --
-   Version_Name : constant String := "1.9.0";
-   Version_Number : constant := 10900;
+   Version_Name : constant String := "1.10.1";
+   Version_Number : constant := 11001;
 
 end YAMI;

@@ -1,4 +1,4 @@
---  Copyright Maciej Sobczak 2008-2014.
+--  Copyright Maciej Sobczak 2008-2015.
 --  This file is part of YAMI4.
 --
 --  YAMI4 is free software: you can redistribute it and/or modify
@@ -48,6 +48,10 @@ package YAMI.Option_Names is
 
    File_Frame_Size : String renames Core.Option_Names.File_Frame_Size;
 
+   SSL_Certificate_File : String renames Core.Option_Names.SSL_Certificate_File;
+   
+   SSL_Private_Key_File : String renames Core.Option_Names.SSL_Private_Key_File;
+   
    --
    --  Additional option names for the general-purpose library.
    --

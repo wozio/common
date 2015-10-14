@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -15,7 +15,9 @@
 // along with YAMI4.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "start_thread.h"
+#include "../errors.h"
 #include <yami4-core/fatal_errors.h>
+#include <errno.h>
 #include <pthread.h>
 
 using namespace yami;
@@ -52,7 +54,17 @@ void details::start_thread(thread_function tf, void * arg)
     int cc = pthread_create(&th, NULL, starter_function, sa);
     if (cc != 0)
     {
-        fatal_failure(__FILE__, __LINE__);
+        delete sa;
+
+        if (cc == EAGAIN)
+        {
+            throw yami::yami_runtime_error(
+                "Not enough resources (cannot create thread).");
+        }
+        else
+        {
+            fatal_failure(__FILE__, __LINE__);
+        }
     }
 
     cc = pthread_detach(th);
