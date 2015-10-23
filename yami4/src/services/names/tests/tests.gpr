@@ -1,9 +1,0 @@
-with "../../../ada/yami.gpr";
-
-project Tests is
-   for Main use ("bind", "resolve", "list");
-
-   package Compiler is
-      for Default_Switches ("Ada") use ("-O2", "-gnat05");
-   end Compiler;
-end Tests;

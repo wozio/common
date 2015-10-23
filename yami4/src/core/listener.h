@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -20,6 +20,15 @@
 #include "core.h"
 #include "details-fwd.h"
 #include <cstddef>
+
+#ifdef YAMI4_WITH_OPEN_SSL
+#ifdef _WIN32
+// this is necessary to avoid conflicts between
+// WinSock2.h (used by YAMI4) and winsock.h (used by OpenSSL):
+#include <WinSock2.h>
+#endif // _WIN32
+#include <openssl/ssl.h>
+#endif // YAMI4_WITH_OPEN_SSL
 
 // selected per platform
 #include <details-types.h>
@@ -52,6 +61,9 @@ public:
 
     io_descriptor_type get_io_descriptor() const { return fd_; }
 
+    void set_selector_index(int index) { selector_index_ = index; }
+    int get_selector_index() const { return selector_index_; }
+
     void inc_ref() { ++ref_count_; }
     void dec_ref() { --ref_count_; }
     bool can_be_removed() const { return ref_count_ == 0; }
@@ -70,6 +82,11 @@ private:
     core::result accept_udp();
     core::result accept_unix();
 
+#ifdef YAMI4_WITH_OPEN_SSL
+    core::result prepare_tcps(const char * address);
+    core::result accept_tcps();
+#endif // YAMI4_WITH_OPEN_SSL
+
     allocator * alloc_;
     mutex * mtx_;
     std::size_t ref_count_;
@@ -79,6 +96,8 @@ private:
     int tcp_port_; // network port (in local order)
 
     io_descriptor_type fd_;
+
+    int selector_index_;
 
     channel_group * group_;
 

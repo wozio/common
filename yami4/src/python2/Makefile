@@ -1,4 +1,4 @@
-INCLUDE_DIRS = -I../../include -I/usr/include/python2.7
+INCLUDE_DIRS = -I../../include -I$(HOME)/include/python2.7
 LIB_DIRS = -L../../lib
 LIBS = -lyamicpp-fPIC -lyamicore-fPIC -lpthread
 

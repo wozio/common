@@ -1,6 +1,7 @@
+!INCLUDE ..\..\Makefile.VS.common
+
 CPP = cl.exe
-#CPP_OPTIONS = /nologo /EHsc /MT /O2 /D _CRT_SECURE_NO_WARNINGS /I . /c
-CPP_OPTIONS = /nologo /EHsc /MTd /D _DEBUG /I . /c
+CPP_OPTIONS = /c /nologo /EHsc /MD /O2 /D _CRT_SECURE_NO_WARNINGS /I . $(OPEN_SSL_OPTIONS)
 
 ARCHIVE_OBJS = \
 	channel.obj \

@@ -1,4 +1,4 @@
-# Copyright Maciej Sobczak 2008-2014.
+# Copyright Maciej Sobczak 2008-2015.
 # This file is part of YAMI4.
 #
 # YAMI4 is free software: you can redistribute it and/or modify
@@ -1336,6 +1336,18 @@ class Agent(object):
         yami4py.yami4_agent_close_connection(
             self.__agent, _utf8(target), priority)
 
+    def hard_close_connection(self, target):
+        """Immediately closes the given communication channel.
+        
+        Closes the channel identified by name.
+        
+        The channel is closed immediately and those messages that are
+        waiting in its outgoing queue are abandoned. Integrity of the
+        message that was already partly transmitted is not guaranteed."""
+
+        yami4py.yami4_agent_hard_close_connection(
+            self.__agent, _utf8(target))
+
 
 class ValuePublisher(object):
     """Simple subscription publisher.
@@ -1623,8 +1635,8 @@ class ValuePublisher(object):
         sub.last_messages = []
 
 
-VERSION_NAME = "1.9.0"
-VERSION_NUMBER = 10900
+VERSION_NAME = "1.10.1"
+VERSION_NUMBER = 11001
 
 # initialization
 
@@ -1665,6 +1677,7 @@ else:
     yami4py.yami4_agent_get_next_incoming_message.restype = ctypes.c_void_p
     yami4py.yami4_agent_get_next_connection_event.restype = ctypes.c_void_p
     yami4py.yami4_agent_close_connection.restype = None
+    yami4py.yami4_agent_hard_close_connection.restype = None
     yami4py.yami4_outgoing_message_get_state.restype = ctypes.c_void_p
     yami4py.yami4_outgoing_message_wait_for_transmission.restype = ctypes.c_void_p
     yami4py.yami4_outgoing_message_wait_for_completion.restype = ctypes.c_void_p

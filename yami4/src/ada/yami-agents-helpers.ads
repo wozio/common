@@ -1,4 +1,4 @@
---  Copyright Maciej Sobczak 2008-2014.
+--  Copyright Maciej Sobczak 2008-2015.
 --  This file is part of YAMI4.
 --
 --  YAMI4 is free software: you can redistribute it and/or modify

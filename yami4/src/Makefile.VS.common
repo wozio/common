@@ -1,0 +1,37 @@
+#
+# Set this to non-zero value to enable OpenSSL support:
+#
+USE_OPEN_SSL = 0
+
+#
+# Set these to where OpenSSL installed its header and library files:
+#
+OPEN_SSL_INCLUDE = C:\OpenSSL-Win32\include
+OPEN_SSL_LIBDIR = C:\OpenSSL-Win32\lib
+
+#
+# Set this to where Boost is installed:
+# (Boost is needed for tools and services only,
+# core and C++ libraries are not dependent on Boost.)
+#
+BOOST_HOME = C:\boost_1_55_0
+BOOST_INCLUDE = $(BOOST_HOME)
+BOOST_LIBDIR = $(BOOST_HOME)\stage\lib
+
+#
+# This value will depend on compiler version and how Boost is installed
+# - it will be appended to every Boost library name, for example:
+# libboost_filesystem$(BOOST_LIB_SUFFIX).lib
+#
+BOOST_LIB_SUFFIX = -vc120-mt-1_55
+
+#
+########################################################################
+# Do not change the following part (unless you know what you are doing):
+#
+!IF $(USE_OPEN_SSL)
+
+OPEN_SSL_OPTIONS = /D YAMI4_WITH_OPEN_SSL /I $(OPEN_SSL_INCLUDE)
+OPEN_SSL_LIBS = $(OPEN_SSL_LIBDIR)\libeay32.lib $(OPEN_SSL_LIBDIR)\ssleay32.lib
+
+!ENDIF

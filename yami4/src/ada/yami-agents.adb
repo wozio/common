@@ -1,4 +1,4 @@
---  Copyright Maciej Sobczak 2008-2014.
+--  Copyright Maciej Sobczak 2008-2015.
 --  This file is part of YAMI4.
 --
 --  YAMI4 is free software: you can redistribute it and/or modify
@@ -231,6 +231,12 @@ package body YAMI.Agents is
    begin
       The_Agent.Core_Agent.all.Close (Target, Priority);
    end Close_Connection;
+
+   procedure Hard_Close_Connection (The_Agent : in out Agent;
+                                    Target : in String) is
+   begin
+      The_Agent.Core_Agent.all.Hard_Close (Target);
+   end Hard_Close_Connection;
 
    procedure Register_Connection_Event_Monitor
      (The_Agent : in out Agent;

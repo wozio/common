@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -210,7 +210,7 @@ result agent::close(channel_descriptor cd, std::size_t priority)
     result res;
     if (initialized_)
     {
-        res = ch_group_->close(cd, priority);
+        res = ch_group_->close(cd, false, priority);
     }
     else
     {
@@ -225,7 +225,37 @@ result agent::close(const char * target, std::size_t priority)
     result res;
     if (initialized_)
     {
-        res = ch_group_->close(target, priority);
+        res = ch_group_->close(target, false, priority);
+    }
+    else
+    {
+        res = bad_state;
+    }
+
+    return res;
+}
+
+result agent::hard_close(channel_descriptor cd)
+{
+    result res;
+    if (initialized_)
+    {
+        res = ch_group_->close(cd, true, 0);
+    }
+    else
+    {
+        res = bad_state;
+    }
+
+    return res;
+}
+
+result agent::hard_close(const char * target)
+{
+    result res;
+    if (initialized_)
+    {
+        res = ch_group_->close(target, true, 0);
     }
     else
     {

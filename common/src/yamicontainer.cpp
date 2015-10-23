@@ -54,7 +54,9 @@ yami_container::yami_container(log_callback_t log_callback)
   std::string ip;
   for (size_t i = 0; i < il.size(); ++i)
   {
-    if (!il[i].address().isLoopback()) ip = il[i].address().toString();
+    if (!il[i].address().isLoopback())
+        if (il[i].address().family() == Poco::Net::IPAddress::Family::IPv4)
+            ip = il[i].address().toString();
   }
   
   std::string ep("tcp://");

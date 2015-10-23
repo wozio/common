@@ -1,10 +1,14 @@
 COMPILER = c++
 OPTIONS = -g -I../posix -L.. -lyamicore
 
+# These options are used for development with OpenSSL
+#OPTIONS = -g -DYAMI4_WITH_OPEN_SSL -I../posix -L.. -lyamicore -lssl
+
 all : build test
 
 EXECS = allocator-test parameters-test channel-test connect-test1 \
-	message-test1 message-test2 message-test3 message-test4
+	message-test1 message-test1-hard \
+	message-test2 message-test3 message-test4
 
 build : $(EXECS)
 
@@ -14,6 +18,7 @@ test :
 	./channel-test
 	./connect-test1
 	./message-test1
+	./message-test1-hard
 	./message-test2
 	./message-test3
 	./message-test4
@@ -32,6 +37,9 @@ connect-test1 : connect-test1.cpp
 
 message-test1 : message-test1.cpp
 	$(COMPILER) message-test1.cpp -o message-test1 $(OPTIONS)
+
+message-test1-hard : message-test1-hard.cpp
+	$(COMPILER) message-test1-hard.cpp -o message-test1-hard $(OPTIONS)
 
 message-test2 : message-test2.cpp
 	$(COMPILER) message-test2.cpp -o message-test2 $(OPTIONS)

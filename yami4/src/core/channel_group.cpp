@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -375,7 +375,48 @@ core::result channel_group::init(allocator & alloc,
     selector_mtx_.init();
     mtx_.init();
 
-    const core::result res = selector_.init();
+    core::result res = selector_.init(alloc);
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    ssl_ctx_ = NULL;
+    if (res == core::ok)
+    {
+        // the SSL context is always created;
+        // but the incoming SSL connections will be possible
+        // only with proper certificate
+
+        (void)SSL_library_init();
+
+        ssl_ctx_ = SSL_CTX_new(SSLv23_method());
+        if (ssl_ctx_ != NULL)
+        {
+            SSL_CTX_set_verify(ssl_ctx_, SSL_VERIFY_NONE, NULL);
+
+            if (configuration_options_.ssl_certificate_file[0] != '\0' &&
+                configuration_options_.ssl_private_key_file[0] != '\0')
+            {
+                int ssl_ret1 = SSL_CTX_use_certificate_file(ssl_ctx_,
+                    configuration_options_.ssl_certificate_file,
+                    SSL_FILETYPE_PEM);
+                int ssl_ret2 = SSL_CTX_use_PrivateKey_file(ssl_ctx_,
+                    configuration_options_.ssl_private_key_file,
+                    SSL_FILETYPE_PEM);
+                
+                if (ssl_ret1 != 1 || ssl_ret2 != 1)
+                {
+                    SSL_CTX_free(ssl_ctx_);
+                    ssl_ctx_ = NULL;
+
+                    res = core::unexpected_value;
+                }
+            }
+        }
+        else
+        {
+            res = core::not_enough_space;
+        }
+    }
+#endif // YAMI4_WITH_OPEN_SSL
 
     return res;
 }
@@ -536,6 +577,14 @@ void channel_group::clean(bool uses_private_area)
             // ignore errors from user callback
         }
     }
+
+#ifdef YAMI4_WITH_OPEN_SSL
+    if (ssl_ctx_ != NULL)
+    {
+        SSL_CTX_free(ssl_ctx_);
+        ssl_ctx_ = NULL;
+    }
+#endif // YAMI4_WITH_OPEN_SSL
 }
 
 core::result channel_group::open(const char * target,
@@ -599,6 +648,40 @@ core::result channel_group::open(const char * target,
                     event_notification_callback_, event_notification_hint_,
                     io_error_callback_, io_error_callback_hint_);
 
+#ifdef YAMI4_WITH_OPEN_SSL
+                if (res == core::ok)
+                {
+                    protocol prot = ch->get_protocol();
+                    if (prot == proto_tcps)
+                    {
+                        SSL * ssl = SSL_new(ssl_ctx_);
+                        if (ssl != NULL)
+                        {
+                            io_descriptor_type fd = ch->get_io_descriptor();
+
+                            int ssl_ret = SSL_set_fd(ssl, fd);
+                            if (ssl_ret == 1)
+                            {
+                                ch->set_client_ssl(ssl);
+                            }
+                            else
+                            {
+                                SSL_free(ssl);
+
+                                ch->clean();
+
+                                res = core::io_error;
+                            }
+                        }
+                        else
+                        {
+                            ch->clean();
+
+                            res = core::not_enough_space;
+                        }
+                    }
+                }
+#endif // YAMI4_WITH_OPEN_SSL
 
                 if (res == core::ok)
                 {
@@ -727,7 +810,8 @@ core::result channel_group::is_open(const char * target,
 core::result channel_group::add_existing(
     char * target, io_descriptor_type fd, protocol prot,
     std::size_t preferred_frame_size,
-    core::channel_descriptor & new_descriptor)
+    core::channel_descriptor & new_descriptor,
+    channel * & new_channel)
 {
     core::result res;
     if (closing_)
@@ -777,6 +861,8 @@ core::result channel_group::add_existing(
                     new_descriptor =
                         core::channel_descriptor(index, sequence_number);
 
+                    new_channel = ch;
+
                     if (event_notification_callback_ != NULL)
                     {
                         try
@@ -802,6 +888,45 @@ core::result channel_group::add_existing(
 
     return res;
 }
+
+#ifdef YAMI4_WITH_OPEN_SSL
+// synchronized by caller
+core::result channel_group::add_existing_ssl(
+    char * target, io_descriptor_type fd, protocol prot,
+    std::size_t preferred_frame_size,
+    core::channel_descriptor & new_descriptor)
+{
+    core::result res;
+
+    SSL * ssl = SSL_new(ssl_ctx_);
+    if (ssl != NULL)
+    {
+        int ssl_ret = SSL_set_fd(ssl, fd);
+        if (ssl_ret == 1)
+        {
+            channel * new_channel;
+            res = add_existing(target,
+                fd, prot, preferred_frame_size, new_descriptor, new_channel);
+            if (res == core::ok)
+            {
+                new_channel->set_server_ssl(ssl);
+            }
+        }
+        else
+        {
+            SSL_free(ssl);
+
+            res = core::io_error;
+        }
+    }
+    else
+    {
+        res = core::not_enough_space;
+    }
+
+    return res;
+}
+#endif // YAMI4_WITH_OPEN_SSL
 
 core::result channel_group::post(
     core::channel_descriptor cd,
@@ -909,7 +1034,7 @@ core::result channel_group::post(
 }
 
 core::result channel_group::close(
-    core::channel_descriptor cd, std::size_t priority)
+    core::channel_descriptor cd, bool hard_close, std::size_t priority)
 {
     core::result res;
     if (closing_)
@@ -937,7 +1062,14 @@ core::result channel_group::close(
             {
                 if (ch_holder.get_sequence_number() == sequence_number)
                 {
-                    res = do_close(ch, priority, index);
+                    if (hard_close)
+                    {
+                        res = do_hard_close(ch, index);
+                    }
+                    else
+                    {
+                        res = do_close(ch, priority, index);
+                    }
                 }
             }
         }
@@ -948,7 +1080,8 @@ core::result channel_group::close(
     return res;
 }
 
-core::result channel_group::close(const char * target, std::size_t priority)
+core::result channel_group::close(const char * target,
+    bool hard_close, std::size_t priority)
 {
     core::result res;
     if (closing_)
@@ -969,7 +1102,14 @@ core::result channel_group::close(const char * target, std::size_t priority)
 
         if (res == core::ok)
         {
-            res = do_close(ch, priority, index);
+            if (hard_close)
+            {
+                res = do_hard_close(ch, index);
+            }
+            else
+            {
+                res = do_close(ch, priority, index);
+            }
         }
         else if (res == core::no_such_name)
         {
@@ -994,15 +1134,25 @@ core::result channel_group::do_close(
     {
         // immediate close
 
-        bool destroyed = channel_dec_ref(index, ch);
-        if (destroyed == false)
-        {
-            // channel was not destroyed,
-            // because there are more references to it
-            // -> wake up the worker, so it can finalize the process
+        res = do_hard_close(ch, index);
+    }
 
-            res = interrupt_work_waiter();
-        }
+    return res;
+}
+
+// synchronized by caller
+core::result channel_group::do_hard_close(channel * ch, std::size_t index)
+{
+    core::result res = core::ok;
+
+    bool destroyed = channel_dec_ref(index, ch);
+    if (destroyed == false)
+    {
+        // channel was not destroyed,
+        // because there are more references to it
+        // -> wake up the worker, so it can finalize the process
+        
+        res = interrupt_work_waiter();
     }
 
     return res;
@@ -1166,13 +1316,15 @@ core::result channel_group::do_some_work(std::size_t timeout,
             selector_.reset();
 
             // freeze the shadow channel array and add channels to selector
-            for (std::size_t i = 0; i != channels_num_; ++i)
+            for (std::size_t i = 0;
+                 (res == core::ok) && (i != channels_num_); ++i)
             {
                 channel * ch = channel_holders_[i].get_channel();
                 if (ch != NULL)
                 {
                     ch->inc_ref();
-                    selector_.add_channel(*ch,
+
+                    res = selector_.add_channel(*ch,
                         allow_outgoing_traffic, allow_incoming_traffic);
                 }
 
@@ -1182,120 +1334,119 @@ core::result channel_group::do_some_work(std::size_t timeout,
             // add listeners to selector
 
             listener * lst = first_listener_;
-            while (lst != NULL)
+            while ((res == core::ok) && (lst != NULL))
             {
-                selector_.add_listener(*lst);
-
                 lst->inc_ref();
+
+                res = selector_.add_listener(*lst);
 
                 lst = lst->next;
             }
-
-            // at this point all channels and listeners are "pinned"
-            // with increased ref counters
-
-            mtx_.unlock();
-
+        }
+        
+        // at this point all channels and listeners are "pinned"
+        // with increased ref counters
+        
+        mtx_.unlock();
+        
+        if (res == core::ok)
+        {
             // wait for the work
             // (the main mutex is unlocked during the waiting phase)
 
             res = selector_.wait(timeout);
-
-            mtx_.lock();
-
-            for (std::size_t i = 0;
-                 res == core::ok && i != shadow_channels_num_; ++i)
+        }
+        
+        mtx_.lock();
+        
+        for (std::size_t i = 0;
+             (res == core::ok) && (i != shadow_channels_num_); ++i)
+        {
+            channel * ch = shadow_channels_[i];
+            
+            if (ch != NULL)
             {
-                channel * ch = shadow_channels_[i];
-
-                if (ch != NULL)
+                io_direction direction;
+                if (selector_.is_channel_ready(*ch, direction))
                 {
-                    io_direction direction;
-                    if (selector_.is_channel_ready(*ch, direction))
+                    bool close_me = false;
+                    res = ch->do_some_work(direction, close_me);
+                    
+                    if (close_me)
                     {
-                        bool close_me = false;
-                        res = ch->do_some_work(direction, close_me);
-
-                        if (close_me)
+                        // the channel should be closed due to error, EOF
+                        // or regular close request in the outgoing queue
+                        
+                        if (res == core::channel_closed)
                         {
-                            // the channel should be closed due to error, EOF
-                            // or regular close request in the outgoing queue
-
-                            if (res == core::channel_closed)
+                            // the EOF condition is not an error
+                            // from the point of view of higher layers
+                            // (ie. from the point of view of what
+                            // do_some_work returns)
+                            
+                            // note: the channel_closed value was
+                            // used for the callback above to propagate
+                            // proper reason to the user code
+                            
+                            res = core::ok;
+                        }
+                        else
+                        {
+                            // error condition
+                            
+                            if (event_notification_callback_ != NULL)
                             {
-                                // the EOF condition is not an error
-                                // from the point of view of higher layers
-                                // (ie. from the point of view of what
-                                // do_some_work returns)
-
-                                // note: the channel_closed value was
-                                // used for the callback above to propagate
-                                // proper reason to the user code
-
-                                res = core::ok;
-                            }
-                            else
-                            {
-                                // error condition
-
-                                if (event_notification_callback_ != NULL)
+                                try
                                 {
-                                    try
-                                    {
-                                        event_notification_callback_(
-                                            event_notification_hint_,
-                                            core::connection_error,
-                                            ch->get_target(), 0);
-                                    }
-                                    catch (...)
-                                    {
-                                        // ignore errors from user callback
-                                    }
+                                    event_notification_callback_(
+                                        event_notification_hint_,
+                                        core::connection_error,
+                                        ch->get_target(), 0);
+                                }
+                                catch (...)
+                                {
+                                    // ignore errors from user callback
                                 }
                             }
-
-                            channel_dec_ref(i, ch);
                         }
+                        
+                        channel_dec_ref(i, ch);
                     }
                 }
             }
-
-            lst = first_listener_;
-            while (res == core::ok && lst != NULL)
-            {
-                if (selector_.is_listener_ready(*lst))
-                {
-                    lst->inc_ref();
-
-                    res = lst->do_some_work();
-
-                    lst->dec_ref();
-                }
-
-                lst = lst->next;
-            }
-
-            // scan the list of listeners and remove those that are
-            // no longer referenced by any thread
-
-            prune_listeners();
-
-            // unref the channels from the shadow array
-            for (std::size_t i = 0; i != shadow_channels_num_; ++i)
-            {
-                channel * ch = shadow_channels_[i];
-                if (ch != NULL)
-                {
-                    channel_dec_ref(i, ch);
-                }
-            }
-
-            mtx_.unlock();
         }
-        else
+        
+        listener * lst = first_listener_;
+        while ((res == core::ok) && (lst != NULL))
         {
-            mtx_.unlock();
+            if (selector_.is_listener_ready(*lst))
+            {
+                lst->inc_ref();
+                
+                res = lst->do_some_work();
+                
+                lst->dec_ref();
+            }
+            
+            lst = lst->next;
         }
+        
+        // scan the list of listeners and remove those that are
+        // no longer referenced by any thread
+        
+        prune_listeners();
+        
+        // unref the channels from the shadow array
+        for (std::size_t i = 0; i != shadow_channels_num_; ++i)
+        {
+            channel * ch = shadow_channels_[i];
+            if (ch != NULL)
+            {
+                channel_dec_ref(i, ch);
+            }
+        }
+
+        mtx_.unlock();
 
         selector_mtx_.unlock();
     }

@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -27,6 +27,10 @@ namespace // unnamed
 const char tcp_prefix[] = "tcp://";
 const char udp_prefix[] = "udp://";
 const char unix_prefix[] = "unix://";
+
+#ifdef YAMI4_WITH_OPEN_SSL
+const char tcps_prefix[] = "tcps://";
+#endif // YAMI4_WITH_OPEN_SSL
 } // unnamed namespace
 
 void listener::init(allocator & alloc,
@@ -42,6 +46,7 @@ void listener::init(allocator & alloc,
     ref_count_ = 1;
     tcp_port_ = -1;
     fd_ = empty_io_descriptor;
+    selector_index_ = -1;
     group_ = &group;
     frame_buffer_ = NULL;
     mtx_ = &mtx;
@@ -66,6 +71,9 @@ core::result listener::prepare(const char * target)
     const std::size_t tcp_prefix_size = sizeof(tcp_prefix) - 1;
     const std::size_t udp_prefix_size = sizeof(udp_prefix) - 1;
     const std::size_t unix_prefix_size = sizeof(unix_prefix) - 1;
+#ifdef YAMI4_WITH_OPEN_SSL
+    const std::size_t tcps_prefix_size = sizeof(tcps_prefix) - 1;
+#endif // YAMI4_WITH_OPEN_SSL
 
     if (std::strncmp(target, tcp_prefix, tcp_prefix_size) == 0)
     {
@@ -79,6 +87,12 @@ core::result listener::prepare(const char * target)
     {
         res = prepare_unix(target + unix_prefix_size);
     }
+#ifdef YAMI4_WITH_OPEN_SSL
+    else if (std::strncmp(target, tcps_prefix, tcps_prefix_size) == 0)
+    {
+        res = prepare_tcps(target + tcps_prefix_size);
+    }
+#endif // YAMI4_WITH_OPEN_SSL
     else
     {
         // unknown protocol

@@ -1,4 +1,4 @@
---  Copyright Maciej Sobczak 2008-2014.
+--  Copyright Maciej Sobczak 2008-2015.
 --  This file is part of YAMI4.
 --
 --  YAMI4 is free software: you can redistribute it and/or modify
@@ -228,6 +228,18 @@ package YAMI.Agents is
    procedure Close_Connection (The_Agent : in out Agent;
                                Target : in String;
                                Priority : in Natural := 0);
+
+   --
+   --  Immediately closes the given channel.
+   --
+   --  Closes the channel identified by the given descriptor.
+   --
+   --  The channel is closed immediately and those messages that are
+   --  waiting in its outgoing queue are abandoned. Integrity of the
+   --  message that was already partly transmitted is not guaranteed.
+   --
+   procedure Hard_Close_Connection (The_Agent : in out Agent;
+                                    Target : in String);
 
    --
    --  Registers the monitor for connection-related events.

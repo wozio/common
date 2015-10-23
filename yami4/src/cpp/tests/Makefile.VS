@@ -1,8 +1,10 @@
-LIB_YAMI = ..\..\..\lib\yamicore.lib ..\..\..\lib\yamicpp.lib
-INCLUDE_YAMI = ..\..\..\include
+!INCLUDE ..\..\Makefile.VS.common
+
+YAMI_LIBS = ..\..\..\lib\yamicore.lib ..\..\..\lib\yamicpp.lib
+YAMI_INCLUDE = ..\..\..\include
 
 CPP = cl.exe
-CPP_OPTIONS = /nologo /EHsc /MD /O2 /D _CRT_SECURE_NO_WARNINGS /I $(INCLUDE_YAMI)
+CPP_OPTIONS = /nologo /EHsc /MD /O2 /D _CRT_SECURE_NO_WARNINGS /I $(YAMI_INCLUDE)
 
 TESTS = \
 	parameters-test.exe \
@@ -17,7 +19,7 @@ run :
 notifications-test.exe : notifications-test.cpp
 
 .cpp.exe:
-	$(CPP) $(CPP_OPTIONS) $< /link $(LIB_YAMI) Ws2_32.lib
+	$(CPP) $(CPP_OPTIONS) $< /link $(YAMI_LIBS) $(OPEN_SSL_LIBS) Ws2_32.lib
 	
 clean :
 	del /Q $(TESTS) *.obj

@@ -1,4 +1,4 @@
-// Copyright Paweł Kierski 2010, 2014.
+// Copyright Paweł Kierski 2010, 2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -15,9 +15,13 @@
 // along with YAMI4.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Security;
+using System.Net.Sockets;
 using System.Collections.Generic;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 namespace Inspirel.YAMI.details
 {
@@ -26,12 +30,222 @@ namespace Inspirel.YAMI.details
         private const int WSAETIMEDOUT = 10060;
         private const int WSAEWOULDBLOCK = 10035;
 
+        internal class Buffer
+        {
+            private byte[] area;
+            private int used;
+            private int ip;
+            private int ig;
+            private bool eof;
+
+            internal Buffer(int size)
+            {
+                area = new byte[size];
+                used = 0;
+                ip = 0;
+                ig = 0;
+                eof = false;
+            }
+
+            private bool waitForPlace(int needSize)
+            {
+                while (area != null && (used + needSize >= area.Length))
+                {
+                    try
+                    {
+                        Monitor.Wait(this);
+                    }
+                    catch (System.Exception)
+                    {
+                        // ignore
+                    }
+                }
+
+                return area != null;
+            }
+
+            private void doPut(byte[] buf, int from, int to)
+            {
+                for (int i = from; i != to; ++i)
+                {
+                    area[ip] = buf[i];
+                    ++ip;
+                    ++used;
+                    if (ip == area.Length)
+                    {
+                        ip = 0;
+                    }
+                }
+            }
+
+            // returns true if the buffer was empty and new data was put into it
+            // and null if no data was inserted (due to close)
+            internal bool? Put(byte[] buf)
+            {
+                lock (this)
+                {
+                    if (buf == null) {
+                        eof = true;
+                        
+                        return null;
+                    }
+                    
+                    bool wasEmpty = used == 0;
+                    
+                    bool hasPlace = waitForPlace(buf.Length);
+                    
+                    if (hasPlace) {
+                        doPut(buf, 0, buf.Length);
+                        
+                        Monitor.Pulse(this);
+                        
+                        return wasEmpty;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+
+            internal int PutMany(IList<ArraySegment<byte>> buffers)
+            {
+                lock (this)
+                {
+                    bool wasEmpty = used == 0;
+
+                    int totalSize = 0;
+                    foreach (ArraySegment<byte> buf in buffers)
+                    {
+                        totalSize += buf.Count;
+                    }
+
+                    bool hasPlace = waitForPlace(totalSize);
+
+                    if (hasPlace)
+                    {
+                        foreach (ArraySegment<byte> buf in buffers)
+                        {
+                            doPut(buf.Array, buf.Offset, buf.Offset + buf.Count);
+                        }
+
+                        Monitor.Pulse(this);
+
+                        return totalSize;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+            }
+
+            internal void Close()
+            {
+                lock (this)
+                {
+                    area = null;
+                    used = 0;
+                
+                    Monitor.Pulse(this);
+                }
+            }
+
+            internal bool HasDataOrEOF()
+            {
+                lock (this)
+                {
+                    return area == null || eof || used != 0;
+                }
+            }
+
+            private bool waitForData()
+            {
+                while (area != null && eof == false && used == 0)
+                {
+                    try
+                    {
+                        Monitor.Wait(this);
+                    }
+                    catch (System.Exception)
+                    {
+                        // ignore
+                    }
+                }
+
+                return area != null && eof == false;
+            }
+
+            private int doGet(byte[] buf, int from, int to)
+            {
+                bool hasData = waitForData();
+
+                if (hasData)
+                {
+                    int toRead = Math.Min(to - from, used);
+
+                    for (int i = from; i != from + toRead; ++i)
+                    {
+                        buf[i] = area[ig];
+                        ++ig;
+                        --used;
+                        if (ig == area.Length)
+                        {
+                            ig = 0;
+                        }
+                    }
+
+                    Monitor.Pulse(this);
+
+                    return toRead;
+                }
+
+                return -1;
+            }
+
+            // returns available block or waits for minimum size of data (4)
+            // or returns null if buffer was closed
+            internal byte[] Get() {
+                lock (this)
+                {
+                    int sizeOfSingleBlock =
+                        Math.Max(Math.Min(used, area.Length - ig), 4);
+
+                    byte[] buf = new byte[sizeOfSingleBlock];
+                    int readn = doGet(buf, 0, sizeOfSingleBlock);
+                
+                    if (readn == sizeOfSingleBlock) {
+                        return buf;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+
+            internal int Receive(byte[] buf, int offset, int toRead)
+            {
+                lock (this)
+                {
+                    int sizeOfBlock =
+                        Math.Min(Math.Min(used, area.Length - ig), toRead);
+
+                    int readn = doGet(buf, offset, offset + sizeOfBlock);
+
+                    return readn;
+                }
+            }
+        }
+
         internal const string tcpPrefix = "tcp://";
+        internal const string tcpsPrefix = "tcps://";
         internal const string udpPrefix = "udp://";
 
         internal static bool protocolIsTcp(string target)
         {
             return target.StartsWith(tcpPrefix);
+        }
+
+        internal static bool protocolIsTcps(string target)
+        {
+            return target.StartsWith(tcpsPrefix);
         }
 
         internal static bool protocolIsUdp(string target)
@@ -68,6 +282,13 @@ namespace Inspirel.YAMI.details
         // assume target was already recognized as TCP
 
             return parseIp(target.Substring(tcpPrefix.Length));
+        }
+
+        internal static IpComponents parseTcps(string target)
+        {
+            // assume target was already recognized as TCPs
+
+            return parseIp(target.Substring(tcpsPrefix.Length));
         }
 
         internal static IpComponents parseUdp(string target)
@@ -139,18 +360,156 @@ namespace Inspirel.YAMI.details
 
         internal class TransportChannel
         {
-        // non-null for TCP channels
+            // non-null for TCP channels
             internal readonly Socket connectedChannel;
 
-        // nnon-null for UDP channels
+            // non-null for UDP channels
             internal readonly Socket datagramChannel;
             internal readonly IPEndPoint targetAddress;
+
+            // non-null for blocking SSL sockets
+            internal readonly SslStream ssl;
+            internal readonly Buffer readingQueue;
+            internal readonly Thread socketReader;
+            internal readonly Buffer writingQueue;
+            internal readonly Thread socketWriter;
+            internal readonly IOWorker ioWorker;
+            internal readonly int frameSize;
+
+            internal class SocketReader
+            {
+                private TransportChannel outer;
+
+                internal SocketReader(TransportChannel outer)
+                {
+                    this.outer = outer;
+                }
+
+                public void run()
+                {
+                    while (true)
+                    {
+                        byte[] bytes = null;
+                        int readn;
+                        try
+                        {
+                            int toRead = 1024;
+                            byte[] buf = new byte[1024];
+                            
+                            readn = outer.ssl.Read(buf, 0, toRead);
+
+                            if (readn > 0)
+                            {
+                                bytes = new byte[readn];
+                                System.Buffer.BlockCopy(buf, 0, bytes, 0, readn);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            outer.readingQueue.Close();
+                            outer.writingQueue.Close();
+
+                            return;
+                        }
+
+                        if (bytes == null)
+                        {
+                            // EOF
+
+                            outer.readingQueue.Put(null);
+
+                            return;
+                        }
+
+                        bool? stored = outer.readingQueue.Put(bytes);
+                        if (stored.HasValue == false)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            if (stored.Value)
+                            {
+                                outer.ioWorker.wakeup();
+                            }
+                        }
+                    }
+                }
+            }
+
+            internal class SocketWriter
+            {
+                private TransportChannel outer;
+
+                internal SocketWriter(TransportChannel outer)
+                {
+                    this.outer = outer;
+                }
+
+                public void run()
+                {
+                    while (true)
+                    {
+                        byte[] bytes = outer.writingQueue.Get();
+                        if (bytes == null)
+                        {
+                            outer.ssl.Close();
+
+                            return;
+                        }
+
+                        try
+                        {
+                            outer.ssl.Write(bytes, 0, bytes.Length);
+                        }
+                        catch (Exception)
+                        {
+                            outer.writingQueue.Close();
+
+                            return;
+                        }
+                    }
+                }
+            }
 
             internal TransportChannel(Socket connectedChannel)
             {
                 this.connectedChannel = connectedChannel;
                 this.datagramChannel = null;
                 this.targetAddress = null;
+
+                this.ssl = null;
+                this.readingQueue = null;
+                this.socketReader = null;
+                this.writingQueue = null;
+                this.socketWriter = null;
+                this.ioWorker = null;
+                frameSize = 0;
+            }
+
+            internal TransportChannel(SslStream ssl, int bufferSize, IOWorker worker)
+            {
+                this.connectedChannel = null;
+                this.datagramChannel = null;
+                this.targetAddress = null;
+
+                this.ssl = ssl;
+
+                this.readingQueue = new Buffer(bufferSize * 2);
+                this.writingQueue = new Buffer(bufferSize * 2);
+                this.frameSize = bufferSize;
+
+                this.ioWorker = worker;
+
+                this.socketReader = new Thread(new SocketReader(this).run);
+                this.socketReader.Name = "YAMI4 SSL Reader";
+                this.socketReader.IsBackground = true;
+                this.socketReader.Start();
+
+                this.socketWriter = new Thread(new SocketWriter(this).run);
+                this.socketWriter.Name = "YAMI4 SSL Writer";
+                this.socketWriter.IsBackground = true;
+                this.socketWriter.Start();
             }
 
             internal TransportChannel(Socket datagramChannel, 
@@ -159,20 +518,37 @@ namespace Inspirel.YAMI.details
                 this.connectedChannel = null;
                 this.datagramChannel = datagramChannel;
                 this.targetAddress = targetAddress;
+
+                this.ssl = null;
+                this.readingQueue = null;
+                this.socketReader = null;
+                this.writingQueue = null;
+                this.socketWriter = null;
+                this.ioWorker = null;
+                frameSize = 0;
             }
 
-            internal virtual Socket register(Selector selector, 
-                Selector.Direction operations)
+            internal virtual Socket register(Selector selector,
+                Selector.Direction operations, bool useBlockingOnly)
             {
+                if (useBlockingOnly)
+                {
+                    return null;
+                }
+                
                 if (connectedChannel != null)
                 {
                     selector.Add(connectedChannel, operations);
                     return connectedChannel;
                 }
-                else
+                else if (datagramChannel != null)
                 {
                     selector.Add(datagramChannel, operations);
                     return datagramChannel;
+                }
+                else
+                {
+                    return null;
                 }
             }
 
@@ -182,9 +558,25 @@ namespace Inspirel.YAMI.details
                 {
                     connectedChannel.Close();
                 }
-                else
+                else if (datagramChannel != null)
                 {
                     datagramChannel.Close();
+                }
+                else
+                {
+                    ssl.Close();
+                    readingQueue.Close();
+                    writingQueue.Close();
+
+                    try
+                    {
+                        socketReader.Join();
+                        socketWriter.Join();
+                    }
+                    catch (System.Exception)
+                    {
+                        // ignore
+                    }
                 }
             }
         }
@@ -233,6 +625,58 @@ namespace Inspirel.YAMI.details
             return new TransportChannel(connection);
         }
 
+        internal static TransportChannel connectTcps(string target,
+            Options options, IOWorker ioWorker)
+        {
+            IpComponents tcpComponents = parseTcps(target);
+
+            TcpClient tcpClient = new System.Net.Sockets.TcpClient();
+
+            Int32 timeout;
+            if (options.tcpConnectTimeout > 0)
+            {
+                timeout = options.tcpConnectTimeout;
+            }
+            else
+            {
+                timeout = Timeout.Infinite;
+            }
+
+            IAsyncResult result = tcpClient.BeginConnect(tcpComponents.hostName, tcpComponents.port, null, null);
+            bool connectionAttempted = result.AsyncWaitHandle.WaitOne(timeout);
+
+            if (!connectionAttempted || !tcpClient.Connected)
+            {
+                throw new YAMIIOException("Cannot create SSL connection");
+            }
+
+            SslStream ssl = new SslStream(tcpClient.GetStream(), false,
+                new RemoteCertificateValidationCallback(
+                    (object sender, X509Certificate cert, X509Chain chain, System.Net.Security.SslPolicyErrors errors) =>
+                {
+                    return true;
+                })
+            );
+
+            try
+            {
+                ssl.AuthenticateAsClient(tcpComponents.hostName, new X509CertificateCollection(),
+                    System.Security.Authentication.SslProtocols.Default, false);
+            }
+            catch (AuthenticationException)
+            {
+                throw new YAMIIOException("SSL authentication error");
+            }
+
+            tcpClient.NoDelay = options.tcpNoDelay;
+            tcpClient.Client.SetSocketOption(
+                SocketOptionLevel.Socket, 
+                SocketOptionName.KeepAlive, 
+                options.tcpKeepAlive ? 1 : 0);
+
+            return new TransportChannel(ssl, options.tcpFrameSize, ioWorker);
+        }
+
         internal static TransportChannel createUdp(
             string target, Options options)
         {
@@ -264,7 +708,7 @@ namespace Inspirel.YAMI.details
         internal static int getPreferredFrameSize(
             Options options, string target)
         {
-            if (protocolIsTcp(target))
+            if (protocolIsTcp(target) || protocolIsTcps(target))
             {
                 return options.tcpFrameSize;
             }

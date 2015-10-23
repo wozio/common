@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -43,6 +43,7 @@ public class Channel {
 
     public Channel(String target, Options options,
             IncomingMessageDispatchCallback incomingMessageDispatchCallback,
+            IOWorker ioWorker,
             LogCallback logCallback, LogCallback.LogLevel logLevel)
             throws IOException {
 
@@ -52,7 +53,7 @@ public class Channel {
         this.logCallback = logCallback;
         this.logLevel = logLevel;
 
-        connect(incomingMessageDispatchCallback);
+        connect(incomingMessageDispatchCallback, ioWorker);
 
         if (logCallback != null) {
             logCallback.log(LogCallback.LogLevel.LOW,
@@ -164,8 +165,15 @@ public class Channel {
         channelReader.injectFullFrame(frameBuffer);
     }
     
-    SelectionKey registerForSelection(Selector selector,
-            boolean allowInput, boolean allowOutput) {
+    static class SelectionKeys {
+        SelectionKey key;
+        boolean blockingChannelReadyForReading;
+        boolean blockingChannelReadyForWriting;
+    }
+    
+    SelectionKeys registerForSelection(Selector selector,
+            boolean allowInput, boolean allowOutput,
+            boolean useBlockingOnly) {
 
         int operations = 0;
         if (allowInput) {
@@ -183,13 +191,21 @@ public class Channel {
         SelectionKey key = null;
         if (operations != 0) {
             try {
-                key = connection.register(selector, operations);
+                key = connection.register(selector, operations, useBlockingOnly);
             } catch (ClosedChannelException ex) {
                 // ignore, will never happen
             }
         }
         
-        return key;
+        SelectionKeys keys = new SelectionKeys();
+        keys.key = key;
+        keys.blockingChannelReadyForReading =
+            ((operations & SelectionKey.OP_READ) != 0) &&
+            connection.readingQueue != null &&
+            connection.readingQueue.hasDataOrEOF();
+        keys.blockingChannelReadyForWriting = (operations & SelectionKey.OP_WRITE) != 0;
+        
+        return keys;
     }
     
     boolean doSomeWork(boolean allowInput, boolean allowOutput)
@@ -212,13 +228,23 @@ public class Channel {
     }
     
     private void connect(
-            IncomingMessageDispatchCallback incomingMessageDispatchCallback)
+            IncomingMessageDispatchCallback incomingMessageDispatchCallback,
+            IOWorker ioWorker)
             throws IOException {
         
         if (NetworkUtils.protocolIsTcp(target)) {
             
             connection = NetworkUtils.connectTcp(target, options);
 
+        } else if (NetworkUtils.protocolIsTcps(target)) {
+            
+            connection = NetworkUtils.connectTcps(target, options, ioWorker);
+            
+            // additionally, instruct I/O Worker that blocking sockets
+            // are the only ones that should be acted upon
+            
+            ioWorker.useBlockingChannelsOnly();
+            
         } else if (NetworkUtils.protocolIsUdp(target)) {
 
             connection = NetworkUtils.createUdp(target, options);
@@ -230,7 +256,7 @@ public class Channel {
         } else {
             throw new BadProtocolException(target);
         }
-
+        
         createReaderWriter(incomingMessageDispatchCallback);
     }
     

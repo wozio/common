@@ -1,4 +1,4 @@
---  Copyright Maciej Sobczak 2008-2014.
+--  Copyright Maciej Sobczak 2008-2015.
 --  This file is part of YAMI4.
 --
 --  YAMI4 is free software: you can redistribute it and/or modify
@@ -559,6 +559,41 @@ package body YAMI.Core.Agents is
                        Size_T (Priority), Result);
       Check_Result (Result);
    end Close;
+
+   procedure Hard_Close (The_Agent : in out Agent;
+                         Descriptor : in Channel_Descriptor) is
+
+      procedure Agent_Hard_Close_CD (C_Agent : in out Agent_Value;
+                                     C_Index : in Size_T;
+                                     C_Seq_Num : in Size_T;
+                                     Result : out Int);
+      pragma Import (C, Agent_Hard_Close_CD, "agent_hard_close_cd");
+
+      Result : Int;
+
+   begin
+      Agent_Hard_Close_CD (The_Agent.Value,
+                           Descriptor.Index, Descriptor.Sequence_Number,
+                           Result);
+      Check_Result (Result);
+   end Hard_Close;
+
+   procedure Hard_Close (The_Agent : in out Agent;
+                         Target : in String) is
+
+      procedure Agent_Hard_Close_Str (C_Agent : in out Agent_Value;
+                                      C_Target : in Char_Array;
+                                      Result : out Int);
+      pragma Import (C, Agent_Hard_Close_Str, "agent_hard_close_str");
+
+      Result : Int;
+
+   begin
+      Agent_Hard_Close_Str (The_Agent.Value,
+                            Interfaces.C.To_C (Target),
+                            Result);
+      Check_Result (Result);
+   end Hard_Close;
 
    procedure Post
      (The_Agent : in out Agent;

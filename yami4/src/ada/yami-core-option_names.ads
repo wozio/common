@@ -1,4 +1,4 @@
---  Copyright Maciej Sobczak 2008-2014.
+--  Copyright Maciej Sobczak 2008-2015.
 --  This file is part of YAMI4.
 --
 --  YAMI4 is free software: you can redistribute it and/or modify
@@ -32,5 +32,7 @@ package YAMI.Core.Option_Names is
    Unix_Frame_Size : constant String :=     "unix_frame_size";
    File_Nonblocking : constant String :=    "file_nonblocking";
    File_Frame_Size : constant String :=     "file_frame_size";
-
+   SSL_Certificate_File : constant String := "ssl_certificate_file";
+   SSL_Private_Key_File : constant String := "ssl_private_key_file";
+   
 end YAMI.Core.Option_Names;

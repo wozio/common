@@ -1,9 +1,0 @@
-with "../../../ada/yami.gpr";
-
-project Tests is
-   for Main use ("set", "get", "delete", "saturate");
-
-   package Compiler is
-      for Default_Switches ("Ada") use ("-O2", "-gnat05");
-   end Compiler;
-end Tests;

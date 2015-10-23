@@ -1,5 +1,9 @@
 with "std_cpp.gpr";
 with "Ws2_32.gpr";
+
+-- Uncomment it for OpenSSl support:
+--with "open_ssl.gpr";
+
 with "yami_core.gpr";
 
 project YAMI is

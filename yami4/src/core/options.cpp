@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
 #include "options.h"
 #include "option_names.h"
 #include "parameters.h"
+
+#include <cstring>
 
 using namespace yami;
 using namespace details;
@@ -63,6 +65,26 @@ void override_if_defined(const core::parameters * params, const char * name,
     }
 }
 
+#ifdef YAMI4_WITH_OPEN_SSL
+void override_if_defined(const core::parameters * params, const char * name,
+    char value[], std::size_t max_value_len)
+{
+    core::parameter_type type;
+    core::result res = params->get_type(name, type);
+    if (res == core::ok && type == core::string)
+    {
+        const char * v;
+        std::size_t len;
+        res = params->get_string(name, v, len);
+        if (res == core::ok && len < max_value_len)
+        {
+            std::strncpy(value, v, len);
+            value[len] = '\0';
+        }
+    }
+}
+#endif // YAMI4_WITH_OPEN_SSL
+
 } // unnamed namespace
 
 void options::init(const core::parameters * params)
@@ -108,6 +130,12 @@ void options::init(const core::parameters * params)
     // frame size for file transfer is 4kB
     file_frame_size = 4096;
 
+#ifdef YAMI4_WITH_OPEN_SSL
+    // SSL certificate and private key file are not set up
+    ssl_certificate_file[0] = '\0';
+    ssl_private_key_file[0] = '\0';
+#endif // YAMI4_WITH_OPEN_SSL
+
     // extract user-provided options and override default settings
 
     override (params);
@@ -152,5 +180,15 @@ void options::override(const core::parameters * params)
 
         override_if_defined(params,
             core::option_names::file_frame_size, file_frame_size);
+
+#ifdef YAMI4_WITH_OPEN_SSL
+        override_if_defined(params,
+            core::option_names::ssl_certificate_file,
+            ssl_certificate_file, max_file_path_len);
+
+        override_if_defined(params,
+            core::option_names::ssl_private_key_file,
+            ssl_private_key_file, max_file_path_len);
+#endif // YAMI4_WITH_OPEN_SSL
     }
 }

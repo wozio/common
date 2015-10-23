@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -1198,6 +1198,11 @@ void agent_impl::close_connection(
     translate_result_to_exception(agent_.close(target.c_str(), priority));
 }
 
+void agent_impl::hard_close_connection(const std::string & target)
+{
+    translate_result_to_exception(agent_.hard_close(target.c_str()));
+}
+
 void agent_impl::register_object(
     const std::string & object_name,
     std::auto_ptr<incoming_message_dispatcher_base> object)
@@ -1310,6 +1315,8 @@ void agent_impl::do_message_dispatching(std::size_t dispatcher_index)
 
             // find appropriate dispatcher object and call it
 
+            // note: copy of source_name is intended to ensure valid value
+            // even if the user code "moves" incoming message object elsewhere
             const std::string source_name = im.get_source();
             const std::string & object_name = im.get_object_name();
             const long long message_id = im_info->message_id;

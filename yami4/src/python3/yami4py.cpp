@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -616,6 +616,21 @@ extern "C" void yami4_agent_close_connection(void * pa,
     try
     {
         a->close_connection(target, priority);
+    }
+    catch (const std::exception & e)
+    {
+        // ignore
+    }
+}
+
+extern "C" void yami4_agent_hard_close_connection(void * pa,
+    const char * target)
+{
+    agent_wrapper * wrapper = static_cast<agent_wrapper *>(pa);
+    yami::agent * a = wrapper->a_;
+    try
+    {
+        a->hard_close_connection(target);
     }
     catch (const std::exception & e)
     {
@@ -1492,5 +1507,5 @@ static struct PyModuleDef yami4pymodule = {
 
 extern "C" PyMODINIT_FUNC PyInit_yami4py(void)
 {
-    PyModule_Create(&yami4pymodule);
+    return PyModule_Create(&yami4pymodule);
 }

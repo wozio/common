@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ public class ChannelTest {
     @Test
     public void testForBadProtocol() {
         try {
-            new Channel("abc", new Options(null), null,
+            new Channel("abc", new Options(null), null, null,
                     null, LogCallback.LogLevel.LOW);
             fail("should never reach this point");
         } catch (com.inspirel.yami.BadProtocolException ex) {
@@ -52,7 +52,7 @@ public class ChannelTest {
     public void testForNodeInsertion() {
         Channel ch = null;
         try {
-            ch = new Channel("null", new Options(null), null,
+            ch = new Channel("null", new Options(null), null, null,
                     null, LogCallback.LogLevel.LOW);
         } catch (IOException ex) {
             fail("should never reach this point");
@@ -159,7 +159,7 @@ public class ChannelTest {
     public void testForImmediateClose() {
         Channel ch = null;
         try {
-            ch = new Channel("null", new Options(null), null,
+            ch = new Channel("null", new Options(null), null, null,
                     null, LogCallback.LogLevel.LOW);
         } catch (IOException ex) {
             fail("should never reach this point");
@@ -175,7 +175,7 @@ public class ChannelTest {
     @Test
     public void testForInvalidConnection() {
         try {
-            new Channel("tcp://invalid", new Options(null), null,
+            new Channel("tcp://invalid", new Options(null), null, null,
                     null, LogCallback.LogLevel.LOW);
             fail("should never reach this point");
         } catch (IOException ex) {
@@ -187,7 +187,7 @@ public class ChannelTest {
 
         try {
             new Channel("tcp://invalidhostname:12345",
-                    new Options(null), null,
+                    new Options(null), null, null,
                     null, LogCallback.LogLevel.LOW);
             fail("should never reach this point");
         } catch (IOException ex) {
@@ -208,7 +208,7 @@ public class ChannelTest {
             String target = "tcp://127.0.0.1:" + server.getLocalPort();
                     
             try {
-                Channel ch = new Channel(target, new Options(null), null,
+                Channel ch = new Channel(target, new Options(null), null, null,
                     null, LogCallback.LogLevel.LOW);
             
                 Socket accepted = server.accept();
@@ -234,7 +234,7 @@ public class ChannelTest {
             String target = "tcp://127.0.0.1:" + server.getLocalPort();
                     
             try {
-                Channel ch = new Channel(target, new Options(null), null,
+                Channel ch = new Channel(target, new Options(null), null, null,
                     null, LogCallback.LogLevel.LOW);
             
                 Socket accepted = server.accept();

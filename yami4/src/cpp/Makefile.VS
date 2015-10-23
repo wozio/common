@@ -1,17 +1,16 @@
+!INCLUDE ..\Makefile.VS.common
+
 OUTDIR = ..\..\lib
 PUBLIC_HEADERS_DIR = ..\..\include\yami4-cpp
 
-LIB_YAMI = $(OUTDIR)\yamicpp.lib
+YAMI_LIB = $(OUTDIR)\yamicpp.lib
 
 CPP = cl.exe
-#CPP_OPTIONS = /nologo /EHsc /MT /O2 /D _CRT_SECURE_NO_WARNINGS \
-#	/I ..\..\include /I windows /I ..\core\windows /c
-  
-CPP_OPTIONS = /nologo /EHsc /MTd /D _DEBUG \
-	/I ..\..\include /I windows /I ..\core\windows /c
+CPP_OPTIONS = /c /nologo /EHsc /MD /O2 /D _CRT_SECURE_NO_WARNINGS \
+	/I ..\..\include /I windows /I ..\core\windows $(OPEN_SSL_OPTIONS)
 
 ARCHIVE = lib.exe
-ARCHIVE_FLAGS = /nologo /out:$(LIB_YAMI)
+ARCHIVE_FLAGS = /nologo /out:$(YAMI_LIB)
 
 ARCHIVE_OBJS = \
 	activity_statistics_monitor.obj \
@@ -38,14 +37,14 @@ ARCHIVE_OBJS = \
 	windows\semaphore.obj \
 	windows\start_thread.obj
 
-all : platform_objects $(LIB_YAMI)
+all : platform_objects $(YAMI_LIB)
 
 platform_objects :
 	cd windows
 	nmake /F Makefile.VS
 	cd ..
 
-$(LIB_YAMI) : $(ARCHIVE_OBJS)
+$(YAMI_LIB) : $(ARCHIVE_OBJS)
 	$(ARCHIVE) $(ARCHIVE_FLAGS) $(ARCHIVE_OBJS)
 	copy activity_statistics_monitor.h $(PUBLIC_HEADERS_DIR)
 	copy agent.h $(PUBLIC_HEADERS_DIR)
@@ -85,4 +84,4 @@ clean :
 	nmake /F Makefile.VS clean
 	cd ..
 	del /Q *.obj
-	del /Q $(LIB_YAMI)
+	del /Q $(YAMI_LIB)

@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -28,19 +28,24 @@ namespace core
 namespace option_names
 {
 
-DLL const char tcp_listen_backlog[] =  "tcp_listen_backlog";
-DLL const char tcp_reuseaddr[] =       "tcp_reuseaddr";
-DLL const char tcp_nonblocking[] =     "tcp_nonblocking";
-DLL const char tcp_connect_timeout[] = "tcp_connect_timeout";
-DLL const char tcp_nodelay[] =         "tcp_nodelay";
-DLL const char tcp_keepalive[] =       "tcp_keepalive";
-DLL const char tcp_frame_size[] =      "tcp_frame_size";
-DLL const char udp_frame_size[] =      "udp_frame_size";
-DLL const char unix_listen_backlog[] = "unix_listen_backlog";
-DLL const char unix_nonblocking[] =    "unix_nonblocking";
-DLL const char unix_frame_size[] =     "unix_frame_size";
-DLL const char file_nonblocking[] =    "file_nonblocking";
-DLL const char file_frame_size[] =     "file_frame_size";
+DLL const char tcp_listen_backlog[] =   "tcp_listen_backlog";
+DLL const char tcp_reuseaddr[] =        "tcp_reuseaddr";
+DLL const char tcp_nonblocking[] =      "tcp_nonblocking";
+DLL const char tcp_connect_timeout[] =  "tcp_connect_timeout";
+DLL const char tcp_nodelay[] =          "tcp_nodelay";
+DLL const char tcp_keepalive[] =        "tcp_keepalive";
+DLL const char tcp_frame_size[] =       "tcp_frame_size";
+DLL const char udp_frame_size[] =       "udp_frame_size";
+DLL const char unix_listen_backlog[] =  "unix_listen_backlog";
+DLL const char unix_nonblocking[] =     "unix_nonblocking";
+DLL const char unix_frame_size[] =      "unix_frame_size";
+DLL const char file_nonblocking[] =     "file_nonblocking";
+DLL const char file_frame_size[] =      "file_frame_size";
+
+#ifdef YAMI4_WITH_OPEN_SSL
+DLL const char ssl_certificate_file[] = "ssl_certificate_file";
+DLL const char ssl_private_key_file[] = "ssl_private_key_file";
+#endif // YAMI4_WITH_OPEN_SSL
 
 } // namespace option_names
 

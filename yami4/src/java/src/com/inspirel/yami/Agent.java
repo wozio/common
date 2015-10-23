@@ -1,4 +1,4 @@
-// Copyright Maciej Sobczak 2008-2014.
+// Copyright Maciej Sobczak 2008-2015.
 // This file is part of YAMI4.
 //
 // YAMI4 is free software: you can redistribute it and/or modify
@@ -857,12 +857,42 @@ public final class Agent {
     public void closeConnection(String target, int priority) {
         if (isTargetFailover(target)) {
             // close all targets from the failover group
-            doCloseConnections(splitFailoverTargets(target), priority);
+            doCloseConnections(splitFailoverTargets(target), false, priority);
         } else {
             // this is a single target
             List<String> targets = new ArrayList<String>();
             targets.add(target);
-            doCloseConnections(targets, priority);
+            doCloseConnections(targets, false, priority);
+        }
+    }
+   
+    /**
+     * Immediately closes the given connection.
+     * 
+     * <p>
+     * The channel is closed immediately and those messages that are
+     * waiting in its outgoing queue are abandoned. Integrity of the
+     * message that was already partly transmitted is not guaranteed.
+     * </p>
+     * <p>
+     * If the failover group is given then all targets from the group
+     * are closed.
+     * </p>
+     * <p>
+     * Closing the channel that does not exist is a no-op.
+     * </p>
+     * 
+     * @param target the name of connection to close
+     */
+    public void hardCloseConnection(String target) {
+        if (isTargetFailover(target)) {
+            // close all targets from the failover group
+            doCloseConnections(splitFailoverTargets(target), true, 0);
+        } else {
+            // this is a single target
+            List<String> targets = new ArrayList<String>();
+            targets.add(target);
+            doCloseConnections(targets, true, 0);
         }
     }
    
@@ -1183,7 +1213,6 @@ public final class Agent {
         int transportId = doSendReplyOrReject(
                 target, header, emptyParameters, priority);
 
-
         if (logCallback != null) {
             if (logLevel == LogCallback.LogLevel.MEDIUM ||
                     logLevel == LogCallback.LogLevel.HIGH) {
@@ -1286,6 +1315,7 @@ public final class Agent {
                 try {
                     ch = new Channel(target, options,
                             incomingMessageDispatchCallback,
+                            ioWorker,
                             logCallback, logLevel);
                     
                     reportChannelEvent(target,
@@ -1334,29 +1364,38 @@ public final class Agent {
         return ch;
     }
     
-    private void doCloseConnections(List<String> targets, int priority) {
+    private void doCloseConnections(List<String> targets, boolean hard, int priority) {
         synchronized (channels) {
             for (String t : targets) {
                 Channel ch = channels.get(t);
                 if (ch != null) {
-                    boolean closeMeImmediately = ch.postClose(priority);
-                    if (closeMeImmediately) {
-                        ch.close();
-                        channels.remove(t);
-                        reportClosedChannel(t);
-                        
-                        ioWorker.prepareForChanges();
-                    }
+                	if (hard) {
+                		doClose(ch, t);
+                	} else {
+                		boolean closeMeImmediately = ch.postClose(priority);
+                		if (closeMeImmediately) {
+                			doClose(ch, t);
+                		}
                 
-                    // if the channel is not closed immediately,
-                    // it will be kept alive until all messages before
-                    // the close reuest are transmitted
-                    // after that the close event is discovered by the worker
-                    // and the channel closing and removal is performed
-                    // by the worker thread
+                		// if the channel is not closed immediately,
+	                    // it will be kept alive until all messages before
+	                    // the close reuest are transmitted
+	                    // after that the close event is discovered by the worker
+	                    // and the channel closing and removal is performed
+	                    // by the worker thread
+                	}
                 }
             }
         }
+    }
+    
+    // synchronized by caller
+    private void doClose(Channel ch, String target) {
+    	ch.close();
+        channels.remove(target);
+        reportClosedChannel(target);
+        
+        ioWorker.prepareForChanges();
     }
 
     private boolean isTargetFailover(String target) {
