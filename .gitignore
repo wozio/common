@@ -11,3 +11,4 @@ bin
 /common/*.user
 /common/Release
 *.so
+*.pyc
