@@ -1,9 +1,13 @@
 #include "logger.h"
 #include "discovery.h"
 #include "yamicontainer.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <string>
 #include <iostream>
 #include <list>
 #include <fstream>
+
+using namespace boost::posix_time;
 
 namespace home_system
 {
@@ -53,15 +57,11 @@ void log(level l, std::stringstream& stream)
       f << "[ERROR] ";
       break;
   }
-  time_t rawtime;
-  struct tm * timeinfo;
-  char buffer [80];
-  time (&rawtime);
-  timeinfo = localtime (&rawtime);
-  strftime(buffer, 80, "%F %T", timeinfo);
   
-  f << buffer << ": " << stream.str() << std::endl;
-  std::cout << buffer << ": " << stream.str() << std::endl;
+  std::string t = to_iso_extended_string(microsec_clock::local_time());
+  
+  f << t << ": " << stream.str() << std::endl;
+  std::cout << t << ": " << stream.str() << std::endl;
   stream.str("");
   f.flush();
 }
