@@ -12,3 +12,9 @@ bin
 /common/Release
 *.so
 *.pyc
+/wshandling/build/
+/wshandling/nbproject/private
+/wshandling/*.user
+/wshandling/Release
+/wshandling/Debug
+
