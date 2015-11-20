@@ -18,7 +18,6 @@ data_t create_data()
 handler::handler(ws_t ws)
 : ws_(ws)
 {
-  ws_->setBlocking(false);
   LOG("Handler created");
 }
 
@@ -59,10 +58,18 @@ void handler::send(data_t data, size_t data_size)
   ws_->sendFrame((*data).data(), data_size);
 }
 
+void handler::init()
+{
+  ws_->setBlocking(false);
+  HANDLERS.add(shared_from_this());
+  LOG("Handler initiated");
+}
+
 void handler::shutdown()
 {
+  HANDLERS.remove(shared_from_this());
   ws_->shutdown();
-  LOG(this->name() << " Handler shut down");
+  LOG("Handler shut down");
 }
 
 }

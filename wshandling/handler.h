@@ -29,9 +29,9 @@ public:
   virtual void on_read(data_t data, size_t data_size) = 0;
   static void on_send(handler_t handler, data_t data, size_t data_size);
   
-  virtual void shutdown() = 0;
-  virtual std::string name() = 0;
-  
+  virtual void init();
+  virtual void shutdown();
+
 private:
   ws_t ws_;
 };
