@@ -3,6 +3,7 @@
 #include "handler.h"
 #include "ios_wrapper.h"
 #include <memory>
+#include <mutex>
 
 namespace home_system
 {
@@ -30,6 +31,7 @@ private:
   handlers();
   
   ios_wrapper ios_;
+  std::mutex mut_;
   
   void select();
   void read(handler_t handler);

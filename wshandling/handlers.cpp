@@ -26,12 +26,24 @@ handlers::~handlers()
 
 void handlers::add(handler_t handler)
 {
+  lock_guard<mutex> l(mut_);
+  
   ws_to_handler_map_[handler->ws()] = handler;
   list_.push_back(handler->ws());
+  
+  if (list_.size() == 0)
+  {
+    ios_.io_service().post([this] ()
+    {
+      this->select();
+    });
+  }
 }
 
 void handlers::remove(handler_t handler)
 {
+  lock_guard<mutex> l(mut_);
+  
   for (Socket::SocketList::iterator i = list_.begin(); i != list_.end(); ++i)
   {
     if (*i == handler->ws())
@@ -45,37 +57,38 @@ void handlers::remove(handler_t handler)
 
 void handlers::select()
 {
-  //LOG("select");
-  Socket::SocketList readList(list_);
-  Socket::SocketList writeList;
-  Socket::SocketList exceptList;
-  
-  int n = Socket::select(readList, writeList, exceptList, Timespan(0, 1000));
-  
-  //LOG("select: " << n);
-  
-  if (n > 0)
+  if (list_.size() > 0)
   {
-    for (auto socket : readList)
+    Socket::SocketList readList(list_);
+    Socket::SocketList writeList;
+    Socket::SocketList exceptList;
+
+    int n = Socket::select(readList, writeList, exceptList, Timespan(0, 1000));
+
+    if (n > 0)
     {
-      auto handler = ws_to_handler_map_[socket];
-      // start reading from assiociated websocket
-      ios_.io_service().post([this, handler] ()
-        {
-          this->read(handler);
-        }
-      );
+      for (auto socket : readList)
+      {
+        auto handler = ws_to_handler_map_[socket];
+        // start reading from assiociated websocket
+        ios_.io_service().post([this, handler] ()
+          {
+            this->read(handler);
+          }
+        );
+      }
     }
   }
-  else
+  
+  lock_guard<mutex> l(mut_);
+  
+  if (list_.size() > 0)
   {
-    this_thread::sleep_for(milliseconds(1));
+    ios_.io_service().post([this] ()
+    {
+      this->select();
+    });
   }
-  ios_.io_service().post([this] ()
-  {
-    this->select();
-  });
-  //LOG("after select");
 }
 
 void handlers::read(handler_t handler)
