@@ -29,9 +29,17 @@ public:
   virtual void on_read(data_t data, size_t data_size) = 0;
   static void on_send(handler_t handler, data_t data, size_t data_size);
   
+  void init();
   virtual void shutdown();
 
 private:
+  enum class state
+  {
+    created,
+    initialized,
+    shutdown
+  } state_;
+  
   ws_t ws_;
 };
 

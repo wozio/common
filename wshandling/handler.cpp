@@ -16,11 +16,22 @@ data_t create_data()
 }
 
 handler::handler(ws_t ws)
-: ws_(ws)
+: state_(state::created),
+  ws_(ws)
 {
-  ws_->setBlocking(false);
-  HANDLERS.add(shared_from_this());
-  LOG("Handler created");
+  LOG("Handler creating");
+}
+
+void handler::init()
+{
+  if (state_ == state::created)
+  {
+    LOG("Handler initializing");
+    //ws_->setBlocking(false);
+    HANDLERS.add(shared_from_this());
+    LOG("Handler initialized");
+    state_ = state::initialized;
+  }
 }
 
 handler::~handler()
@@ -35,36 +46,56 @@ Poco::Net::WebSocket handler::ws()
 
 size_t handler::read(data_t data)
 {
-  int flags;
-  size_t n = ws_->receiveFrame((*data).data(), (*data).size(), flags);
-  
-  if ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_CLOSE)
+  if (state_ == state::initialized)
   {
-    throw runtime_error("WebSocket close request received");
+    int flags;
+    size_t n = ws_->receiveFrame((*data).data(), (*data).size(), flags);
+
+    if ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_CLOSE)
+    {
+      throw runtime_error("WebSocket close request received");
+    }
+    else if ((flags & WebSocket::FRAME_OP_BITMASK) != WebSocket::FRAME_OP_TEXT)
+    {
+      throw runtime_error("Only text frames are supported on WebSocket");
+    }
+    return n;
   }
-  else if ((flags & WebSocket::FRAME_OP_BITMASK) != WebSocket::FRAME_OP_TEXT)
+  else
   {
-    throw runtime_error("Only text frames are supported on WebSocket");
+    throw runtime_error("read on not initialized handler");
   }
-  return n;
 }
 
 void handler::on_send(handler_t handler, data_t data, size_t data_size)
 {
-  // posts send request to hadlers WebSocket hadling thread
-  HANDLERS.post_send(handler, data, data_size);
+  if (handler->state_ == state::initialized)
+  {
+    // posts send request to handlers WebSocket handling thread
+    HANDLERS.post_send(handler, data, data_size);
+  }
 }
 
 void handler::send(data_t data, size_t data_size)
 {
-  ws_->sendFrame((*data).data(), data_size);
+  if (state_ == state::initialized)
+  {
+    ws_->sendFrame((*data).data(), data_size);
+  }
 }
 
 void handler::shutdown()
 {
-  HANDLERS.remove(shared_from_this());
-  ws_->shutdown();
-  LOG("Handler shut down");
+  try
+  {
+    state_ = state::shutdown;
+    LOG("Handler shutdown");
+    ws_->shutdown();
+  }
+  catch (const exception& e)
+  {
+    LOGERROR(e.what());
+  }
 }
 
 }

@@ -13,10 +13,6 @@ namespace home_system
 
 handlers::handlers()
 {
-  ios_.io_service().post([this] ()
-  {
-    this->select();
-  });
 }
 
 handlers::~handlers()
@@ -28,10 +24,12 @@ void handlers::add(handler_t handler)
 {
   lock_guard<mutex> l(mut_);
   
+  LOG("Handler add");
+  
   ws_to_handler_map_[handler->ws()] = handler;
   list_.push_back(handler->ws());
   
-  if (list_.size() == 0)
+  if (list_.size() == 1)
   {
     ios_.io_service().post([this] ()
     {
@@ -43,6 +41,10 @@ void handlers::add(handler_t handler)
 void handlers::remove(handler_t handler)
 {
   lock_guard<mutex> l(mut_);
+  
+  LOG("Handler remove");
+  
+  handler->shutdown();
   
   for (Socket::SocketList::iterator i = list_.begin(); i != list_.end(); ++i)
   {
@@ -63,7 +65,7 @@ void handlers::select()
     Socket::SocketList writeList;
     Socket::SocketList exceptList;
 
-    int n = Socket::select(readList, writeList, exceptList, Timespan(0, 1000));
+    int n = Socket::select(readList, writeList, exceptList, Timespan(0, 100000));
 
     if (n > 0)
     {
@@ -102,10 +104,10 @@ void handlers::read(handler_t handler)
       handler->on_read(data, n);
     }
   }
-  catch (...)
+  catch (const exception& e)
   {
-    // anything thrown from handler's read leads to deleting handler
-    handler->shutdown();
+    LOG("Exception on read '" << e.what() << "', removing handler");
+    remove(handler);
   }
 }
 
@@ -124,10 +126,10 @@ void handlers::send(handler_t handler, data_t data, int data_size)
   {
     handler->send(data, data_size);
   }
-  catch (...)
+  catch (const exception& e)
   {
-    // anything thrown from handler's send leads to deleting handler
-    handler->shutdown();
+    LOG("Exception on send '" << e.what() << "', removing handler");
+    remove(handler);
   }
 }
 
