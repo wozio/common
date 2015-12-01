@@ -15,8 +15,15 @@ public:
   timer(const timer&) = delete;
   timer& operator=(const timer&) = delete;
   
+  /**
+   * Set timer to timeout after duration calling handler callback
+   * @param duration timer duration from now in milliseconds
+   * @param handler callback to call on timeout, will not be called when timer is cancelled
+   */
   void set_from_now(unsigned int duration, std::function<void()> handler);
+  
   bool is_set();
+  
   void cancel();
   
 private:
