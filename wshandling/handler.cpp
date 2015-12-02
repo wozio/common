@@ -50,14 +50,27 @@ size_t handler::read(data_t data)
   {
     int flags;
     size_t n = ws_->receiveFrame((*data).data(), (*data).size(), flags);
-
-    if ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_CLOSE)
+    
+    flags = flags & WebSocket::FRAME_OP_BITMASK;
+    
+    LOG("Received " << n << " bytes with flags " << flags);
+    
+    switch (flags)
     {
-      throw runtime_error("WebSocket close request received");
-    }
-    else if ((flags & WebSocket::FRAME_OP_BITMASK) != WebSocket::FRAME_OP_TEXT)
-    {
-      throw runtime_error("Only text frames are supported on WebSocket");
+      case WebSocket::FRAME_OP_TEXT:
+        // frames which are to be processed
+        break;
+      case WebSocket::FRAME_OP_CONT:
+      case WebSocket::FRAME_OP_PONG:
+      case WebSocket::FRAME_OP_BINARY:
+        // ignore
+        n = 0;
+        break;
+      case WebSocket::FRAME_OP_PING:
+        ws_->sendFrame(nullptr, 0, WebSocket::FRAME_OP_PONG);
+        break;
+      case WebSocket::FRAME_OP_CLOSE:
+        throw runtime_error("WebSocket close request received");
     }
     return n;
   }
