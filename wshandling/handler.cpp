@@ -12,7 +12,7 @@ namespace home_system
 
 data_t create_data()
 {
-  return data_t(new std::array<char, 1024>());
+  return data_t(new std::array<char, MAX_DATA_SIZE>());
 }
 
 handler::handler(ws_t ws)
@@ -50,7 +50,7 @@ size_t handler::read(data_t data)
   if (state_ == state::initialized)
   {
     int flags;
-    size_t n = ws_->receiveFrame((*data).data(), (*data).size(), flags);
+    size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
     
     if (n == 0)
     {

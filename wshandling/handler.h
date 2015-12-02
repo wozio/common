@@ -6,9 +6,15 @@
 
 namespace home_system
 {
+  
+#define DATA_SIZE 1024
+#define MAX_DATA_SIZE 1025
 
 typedef std::shared_ptr<Poco::Net::WebSocket> ws_t;
-typedef std::shared_ptr<std::array<char, 1024>> data_t;
+// it is bigger by one to ensure that we always have place to put '\0' character
+// at the end
+typedef std::shared_ptr<std::array<char, MAX_DATA_SIZE>> data_t;
+
 data_t create_data();
 
 class handler;
