@@ -36,6 +36,7 @@ void handler::init()
 
 handler::~handler()
 {
+  shutdown();
   LOG("Handler destroyed");
 }
 
@@ -51,9 +52,10 @@ size_t handler::read(data_t data)
     int flags;
     size_t n = ws_->receiveFrame((*data).data(), (*data).size(), flags);
     
-    flags = flags & WebSocket::FRAME_OP_BITMASK;
-    
-    LOG("Received " << n << " bytes with flags " << flags);
+    if (n == 0)
+    {
+      throw runtime_error("Peer shut down or closed connection");
+    }
     
     switch (flags)
     {
@@ -99,15 +101,18 @@ void handler::send(data_t data, size_t data_size)
 
 void handler::shutdown()
 {
-  try
+  if (state_ == state::initialized)
   {
-    state_ = state::shutdown;
-    LOG("Handler shutdown");
-    ws_->shutdown();
-  }
-  catch (const exception& e)
-  {
-    LOGERROR(e.what());
+    try
+    {
+      state_ = state::shutdown;
+      LOG("Handler shutdown");
+      ws_->shutdown();
+    }
+    catch (const exception& e)
+    {
+      LOGERROR(e.what());
+    }
   }
 }
 
