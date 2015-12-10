@@ -1,10 +1,10 @@
 COMPILER = c++
 
 # These options are used for development
-#OPTIONS = -Wall -Wextra -W -Wshadow -pedantic -Wno-long-long -g
+OPTIONS = -Wall -Wextra -W -Wshadow -pedantic -Wno-long-long -g
 
 # These options are intended for final use
-OPTIONS = -O2 $(USER_COMPILER_OPTIONS)
+#OPTIONS = -O2 $(USER_COMPILER_OPTIONS)
 
 PLATFORM = posix
 INCLUDE_PLATFORM = -I$(PLATFORM) -I../core/$(PLATFORM)
