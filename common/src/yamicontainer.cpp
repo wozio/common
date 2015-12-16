@@ -43,10 +43,17 @@ void yami_container::operator()(int ec, const char* desc)
   LOG("YAMI IO error: " << ec << " " << desc);
 }
 
+yami::parameters agent_params()
+{
+  yami::parameters params;
+  params.set_integer("tcp_connect_timeout", 150);
+  return params;
+}
+
 yami_container::yami_container(log_callback_t log_callback)
 : ec_(log_callback),
   log_callback_(log_callback),
-  agent_(ec_)
+  agent_(ec_, agent_params())
 {
   agent_.register_io_error_logger(*this);
   
