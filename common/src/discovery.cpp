@@ -20,12 +20,8 @@ namespace home_system
   discovery::discovery(log_callback_t log_callback)
   : log_callback_(log_callback),
     idle_dt_(ios_.io_service()),
-#ifdef _DEBUG
-  listen_endpoint_(ip::udp::v4(), 10001),
-#else
-  listen_endpoint_(ip::udp::v4(), 10000),
-#endif
-  listen_socket_(ios_.io_service(), listen_endpoint_.protocol())
+    listen_endpoint_(ip::udp::v4(), 10001),
+    listen_socket_(ios_.io_service(), listen_endpoint_.protocol())
 {
   listen_socket_.set_option(ip::tcp::socket::reuse_address(true));
   listen_socket_.bind(listen_endpoint_);
