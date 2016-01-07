@@ -2,6 +2,7 @@
 
 #include "logger.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #ifdef __linux__
 #include <signal.h>
 #include <sys/stat.h>
@@ -14,6 +15,19 @@ using namespace std;
 
 namespace home_system
 {
+
+boost::property_tree::ptree app::config_;
+
+boost::property_tree::ptree& app::config()
+{
+  return config_;
+}
+
+app::app(const std::string& conf_file, bool daemonize, cmd_handler_type cmd_handler)
+: app(daemonize, cmd_handler)
+{
+  boost::property_tree::read_json(conf_file, config_);
+}
 
 app::app(bool daemonize, cmd_handler_type cmd_handler)
 : daemonize_(daemonize),
