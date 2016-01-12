@@ -79,6 +79,7 @@ void service::operator()(yami::incoming_message & im)
   catch (const std::exception& e)
   {
     LOGWARN(name_ << ": EXCEPTION: " << e.what());
+    im.reject(e.what());
   }
 }
 

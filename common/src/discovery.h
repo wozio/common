@@ -92,13 +92,8 @@ class service_not_found
 : public std::exception
 {
 public:
-  service_not_found(const service_not_found& o)
-  : name_(o.name_)
-  {
-  }
-
   service_not_found(const std::string& name)
-  : name_(name)
+  : name_("service_not_found: " + name)
   {
   }
 
