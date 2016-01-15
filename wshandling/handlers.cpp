@@ -17,7 +17,12 @@ handlers::handlers()
 
 handlers::~handlers()
 {
+  ios_.stop_ios();
+
+  LOG("Handlers destroing");
   
+  list_.clear();
+  ws_to_handler_map_.clear();
 }
 
 void handlers::add(handler_t handler)

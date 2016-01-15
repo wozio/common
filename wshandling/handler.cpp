@@ -52,12 +52,14 @@ size_t handler::read(data_t data)
     int flags;
     size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
     
+    //LOG("Received " << n << " bytes with " << flags << " flags");
+
     if (n == 0)
     {
       throw runtime_error("Peer shut down or closed connection");
     }
     
-    switch (flags)
+    switch (flags & WebSocket::FRAME_OP_BITMASK)
     {
       case WebSocket::FRAME_OP_TEXT:
         // frames which are to be processed
