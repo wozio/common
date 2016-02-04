@@ -1,41 +1,19 @@
 #ifndef LOGGER_H
 #define	LOGGER_H
 
-#include <sstream>
-#include <mutex>
+#include <boost/log/trivial.hpp>
 
 namespace home_system
 {
-namespace logger
-{
 
-enum class level {
-  debug,
-  info,
-  warning,
-  error
-};
-
-extern std::stringstream _log_stream;
-extern std::string _log_file_path;
-
-void log(level l, std::stringstream& stream);
-
-extern std::mutex _mutex;
+void init_log(const char* file, bool console_log);
 
 }
-}
 
-#define LOGIMPL(l, msg) {\
-  std::lock_guard<std::mutex> lock(home_system::logger::_mutex);\
-  home_system::logger::_log_stream << __FILE__ << ": " << __LINE__ << ": " << msg;\
-  log(l, home_system::logger::_log_stream);\
-}
-
-#define LOGDEBUG(msg) LOGIMPL(home_system::logger::level::debug,   msg)
-#define LOGINFO(msg)  LOGIMPL(home_system::logger::level::info,    msg)
-#define LOGWARN(msg)  LOGIMPL(home_system::logger::level::warning, msg)
-#define LOGERROR(msg) LOGIMPL(home_system::logger::level::error,   msg)
+#define LOGDEBUG(msg) BOOST_LOG_TRIVIAL(debug) << msg
+#define LOGINFO(msg)  BOOST_LOG_TRIVIAL(info) << msg
+#define LOGWARN(msg)  BOOST_LOG_TRIVIAL(warning) << msg
+#define LOGERROR(msg) BOOST_LOG_TRIVIAL(error) << msg
 #define LOG(msg) LOGDEBUG(msg)
 
 #endif	/* LOGGER_H */

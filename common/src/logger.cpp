@@ -1,69 +1,50 @@
 #include "logger.h"
-#include "discovery.h"
-#include "yamicontainer.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <string>
-#include <iostream>
-#include <list>
-#include <fstream>
 
-using namespace boost::posix_time;
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/filesystem.hpp>
+
+namespace logging = boost::log;
+namespace src = boost::log::sources;
+namespace expr = boost::log::expressions;
+namespace keywords = boost::log::keywords;
+namespace attrs = boost::log::attributes;
 
 namespace home_system
 {
-namespace logger
+
+void init_log(const char* file, bool console_log)
 {
-
-std::string _log_file_path("logger.log");
-std::stringstream _log_stream;
-std::mutex _mutex;
-
-struct log_entry
-{
-  level level_;
-  std::string msg_;
-};
-
-std::list<log_entry> _log;
-
-
-// TODO: when more stuff to be done on constructor use this struct instead of
-// bare ofstream
-struct log_file
-{
-  std::ofstream f_;
-  log_file()
+  if (!console_log)
   {
-    f_.open(_log_file_path, std::ios_base::out | std::ios_base::app);
-  }
-};
+    boost::log::add_common_attributes();
 
-void log(level l, std::stringstream& stream)
-{
-  static std::ofstream f(_log_file_path, std::ios_base::out | std::ios_base::app);
-  _log.push_back({l, stream.str() });
-  switch (l)
-  {
-    case level::debug:
-      f << "[DEBUG] ";
-      break;
-    case level::info:
-      f << "[INFO]  ";
-      break;
-    case level::warning:
-      f << "[WARN]  ";
-      break;
-    case level::error:
-      f << "[ERROR] ";
-      break;
+    std::string path("/var/log/home-system/");
+    boost::filesystem::create_directories(path);
+    path += file;
+    path += "_%N.log";
+    boost::log::add_file_log(
+        keywords::file_name = path,
+        keywords::rotation_size = 2 * 1024 * 1024,
+        keywords::auto_flush = true,
+        keywords::format =
+        (
+          expr::stream
+            << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S.%f") << " "
+            << expr::attr<attrs::current_thread_id::value_type>("ThreadID") << " "
+            << logging::trivial::severity << ": "
+            << expr::smessage
+        )
+    );
   }
-  
-  std::string t = to_iso_extended_string(microsec_clock::local_time());
-  
-  f << t << ": " << stream.str() << std::endl;
-  std::cout << t << ": " << stream.str() << std::endl;
-  stream.str("");
-  f.flush();
+}
+
 }
 
 /*void configure(const char* file_name, const std::string& log_level, bool console_log)
@@ -97,6 +78,3 @@ void log(level l, std::stringstream& stream)
   l.setChannel(fc);
   l.setLevel(log_level);
 }*/
-
-}  
-}

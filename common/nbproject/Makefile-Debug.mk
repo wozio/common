@@ -50,7 +50,7 @@ CFLAGS=
 
 # CC Compiler Flags
 CCFLAGS=
-CXXFLAGS=
+CXXFLAGS=-DBOOST_LOG_DYN_LINK
 
 # Fortran Compiler Flags
 FFLAGS=
