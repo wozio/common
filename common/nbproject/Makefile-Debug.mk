@@ -21,8 +21,8 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-Linux-x86
-CND_DLIB_EXT=so
+CND_PLATFORM=None-Windows
+CND_DLIB_EXT=dll
 CND_CONF=Debug
 CND_DISTDIR=dist
 CND_BUILDDIR=build
@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/discovery.o \
 	${OBJECTDIR}/src/ios_wrapper.o \
 	${OBJECTDIR}/src/logger.o \
+	${OBJECTDIR}/src/logger_init.o \
 	${OBJECTDIR}/src/mcs.o \
 	${OBJECTDIR}/src/service.o \
 	${OBJECTDIR}/src/timer.o \
@@ -50,7 +51,7 @@ CFLAGS=
 
 # CC Compiler Flags
 CCFLAGS=
-CXXFLAGS=-DBOOST_LOG_DYN_LINK
+CXXFLAGS=
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -74,42 +75,47 @@ LDLIBSOPTIONS=
 ${OBJECTDIR}/src/app.o: src/app.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -D_DEBUG -I../yami4/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/app.o src/app.cpp
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/app.o src/app.cpp
 
 ${OBJECTDIR}/src/discovery.o: src/discovery.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -D_DEBUG -I../yami4/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/discovery.o src/discovery.cpp
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/discovery.o src/discovery.cpp
 
 ${OBJECTDIR}/src/ios_wrapper.o: src/ios_wrapper.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -D_DEBUG -I../yami4/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ios_wrapper.o src/ios_wrapper.cpp
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ios_wrapper.o src/ios_wrapper.cpp
 
 ${OBJECTDIR}/src/logger.o: src/logger.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -D_DEBUG -I../yami4/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/logger.o src/logger.cpp
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/logger.o src/logger.cpp
+
+${OBJECTDIR}/src/logger_init.o: src/logger_init.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/logger_init.o src/logger_init.cpp
 
 ${OBJECTDIR}/src/mcs.o: src/mcs.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -D_DEBUG -I../yami4/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/mcs.o src/mcs.cpp
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/mcs.o src/mcs.cpp
 
 ${OBJECTDIR}/src/service.o: src/service.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -D_DEBUG -I../yami4/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/service.o src/service.cpp
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/service.o src/service.cpp
 
 ${OBJECTDIR}/src/timer.o: src/timer.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -D_DEBUG -I../yami4/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/timer.o src/timer.cpp
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/timer.o src/timer.cpp
 
 ${OBJECTDIR}/src/yamicontainer.o: src/yamicontainer.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -D_DEBUG -I../yami4/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/yamicontainer.o src/yamicontainer.cpp
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/yamicontainer.o src/yamicontainer.cpp
 
 # Subprojects
 .build-subprojects:

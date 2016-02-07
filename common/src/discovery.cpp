@@ -3,12 +3,11 @@
 #include "yamicontainer.h"
 #include "ios_wrapper.h"
 #include "service.h"
+#include "logger.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <sstream>
 #include <string>
-
-#define LOG(x) if (log_callback_ != nullptr) {std::stringstream s; s << x; log_callback_(s.str());}
 
 using namespace std;
 //using namespace boost;
@@ -17,9 +16,8 @@ using namespace boost::asio;
 namespace home_system
 {
 
-  discovery::discovery(log_callback_t log_callback)
-  : log_callback_(log_callback),
-    idle_dt_(ios_.io_service()),
+  discovery::discovery()
+  : idle_dt_(ios_.io_service()),
     listen_endpoint_(ip::udp::v4(), 10001),
     listen_socket_(ios_.io_service(), listen_endpoint_.protocol())
 {
@@ -41,7 +39,6 @@ discovery::~discovery()
 {
   {
     lock_guard<mutex> lock(idle_mutex);
-    log_callback_ = nullptr;
     subscriptions_.clear();
   }
 
@@ -63,7 +60,7 @@ std::string discovery::get(const std::string& name)
   //str << "search\n" << name << "\n";
   //multicast_send(str.str());
 
-  LOG("Service " << name << " not found");
+  LOG(TRACE) << "Service " << name << " not found";
     
   throw service_not_found(name);
 }
@@ -260,7 +257,7 @@ void discovery::check_service(const std::string& name, const std::string& ye)
 
 void discovery::store_service(const std::string& name, const std::string& ye)
 {
-  LOG("storing service: " << name << " (" << ye << ")");
+  LOG(TRACE) << "storing service: " << name << " (" << ye << ")";
 
   known_services_[name] = ye;
   for (auto i = on_service_subscriptions.begin();
@@ -279,7 +276,7 @@ void discovery::store_service(const std::string& name, const std::string& ye)
 
 void discovery::erase_service(const std::string& name)
 {
-  LOG("erasing service: " << name);
+  LOG(TRACE) << "erasing service: " << name;
   known_services_.erase(name);
   notify_received_.erase(name);
   
@@ -297,4 +294,3 @@ void discovery::erase_service(const std::string& name)
 }
 
 }
-

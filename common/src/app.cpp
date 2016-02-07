@@ -41,7 +41,7 @@ app::app(bool daemonize, cmd_handler_type cmd_handler)
     pid_t pid = fork();
     if (pid < 0)
     {
-      LOGERROR("Cannot fork");
+      LOG(ERROR) << "Cannot fork";
       exit(EXIT_FAILURE);
     }
     else if (pid > 0)
@@ -54,7 +54,7 @@ app::app(bool daemonize, cmd_handler_type cmd_handler)
     pid_t sid = setsid();
     if (sid < 0)
     {
-      LOGERROR("Cannot setsid");
+      LOG(ERROR) << "Cannot setsid";
       exit(EXIT_FAILURE);
     }
     
@@ -62,6 +62,7 @@ app::app(bool daemonize, cmd_handler_type cmd_handler)
     fclose(stdout);
     fclose(stderr);
   }
+  
 #endif
 }
 

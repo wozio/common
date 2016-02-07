@@ -39,7 +39,7 @@ void service::init()
   
   set_notify_timeout();
   
-  LOG("Started service with name: " << name_ << " and YAMI endpoint: " << ye());
+  LOG(DEBUG) << "Started service with name: " << name_ << " and YAMI endpoint: " << ye();
   
   send_hello();
 }
@@ -65,20 +65,20 @@ std::string service::ye() const
 
 void service::on_msg(yami::incoming_message & im)
 {
-  LOGWARN(name_ << ": unknown message: " << im.get_message_name());
+  LOG(WARNING) << name_ << ": unknown message: " << im.get_message_name();
   im.reject("unknown message");
 }
 
 void service::operator()(yami::incoming_message & im)
 {
-//  LOG("message " << im.get_message_name() << " from " << im.get_source());
+  LOG(TRACE) << "message " << im.get_message_name() << " from " << im.get_source();
   try
   {
     on_msg(im);
   }
   catch (const std::exception& e)
   {
-    LOGWARN(name_ << ": EXCEPTION: " << e.what());
+    LOG(WARNING) << name_ << ": EXCEPTION: " << e.what();
     im.reject(e.what());
   }
 }
