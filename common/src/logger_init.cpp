@@ -20,6 +20,7 @@ void init_log(const char* file, bool console_log)
   defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, console_log ? "true" : "false");
   defaultConf.setGlobally(el::ConfigurationType::Format, "[%datetime] [%levshort] [%thread] [%loc] %msg");
   el::Loggers::reconfigureLogger("default", defaultConf);
+  el::Loggers::addFlag(el::LoggingFlag::StrictLogFileSizeCheck);
 }
 
 }

@@ -4,7 +4,7 @@
 #define ELPP_THREAD_SAFE
 #define ELPP_STACKTRACE_ON_CRASH
 
-#include "easyloggingpp.h"
+#include "easylogging++.h"
 
 #endif	/* LOGGER_H */
 
