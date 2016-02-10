@@ -19,17 +19,17 @@ handler::handler(ws_t ws)
 : state_(state::created),
   ws_(ws)
 {
-  LOG("Handler creating");
+  LOG(DEBUG) << "Handler creating";
 }
 
 void handler::init()
 {
   if (state_ == state::created)
   {
-    LOG("Handler initializing");
+    LOG(DEBUG) << "Handler initializing";
     //ws_->setBlocking(false);
     HANDLERS.add(shared_from_this());
-    LOG("Handler initialized");
+    LOG(DEBUG) << "Handler initialized";
     state_ = state::initialized;
   }
 }
@@ -37,7 +37,7 @@ void handler::init()
 handler::~handler()
 {
   shutdown();
-  LOG("Handler destroyed");
+  LOG(DEBUG) << "Handler destroyed";
 }
 
 Poco::Net::WebSocket handler::ws()
@@ -108,12 +108,12 @@ void handler::shutdown()
     try
     {
       state_ = state::shutdown;
-      LOG("Handler shutdown");
+      LOG(DEBUG) << "Handler shutdown";
       ws_->shutdown();
     }
     catch (const exception& e)
     {
-      LOGERROR(e.what());
+      LOG(ERROR) << e.what();
     }
   }
 }

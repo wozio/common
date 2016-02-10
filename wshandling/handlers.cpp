@@ -19,7 +19,7 @@ handlers::~handlers()
 {
   ios_.stop_ios();
 
-  LOG("Handlers destroing");
+  LOG(DEBUG) << "Handlers destroing";
   
   list_.clear();
   ws_to_handler_map_.clear();
@@ -29,7 +29,7 @@ void handlers::add(handler_t handler)
 {
   lock_guard<mutex> l(mut_);
   
-  LOG("Handler add");
+  LOG(DEBUG) << "Handler add";
   
   ws_to_handler_map_[handler->ws()] = handler;
   list_.push_back(handler->ws());
@@ -47,7 +47,7 @@ void handlers::remove(handler_t handler)
 {
   lock_guard<mutex> l(mut_);
   
-  LOG("Handler remove");
+  LOG(DEBUG) << "Handler remove";
   
   handler->shutdown();
   
@@ -108,7 +108,7 @@ void handlers::read(handler_t handler)
   }
   catch (const exception& e)
   {
-    LOG("Exception on read '" << e.what() << "', removing handler");
+    LOG(DEBUG) << "Exception on read '" << e.what() << "', removing handler";
     remove(handler);
   }
 }
@@ -130,7 +130,7 @@ void handlers::send(handler_t handler, data_t data, int data_size)
   }
   catch (const exception& e)
   {
-    LOG("Exception on send '" << e.what() << "', removing handler");
+    LOG(DEBUG) << "Exception on send '" << e.what() << "', removing handler";
     remove(handler);
   }
 }
