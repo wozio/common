@@ -1,6 +1,6 @@
 CPP = cl.exe
 INCLUDES = /I . /I ..\..\..\include
-CPP_OPTIONS = /c /nologo /EHsc /MD /O2 /D _CRT_SECURE_NO_WARNINGS $(OPEN_SSL_OPTIONS)
+CPP_OPTIONS = /c /nologo /EHsc /MTd /D _CRT_SECURE_NO_WARNINGS $(OPEN_SSL_OPTIONS)
 
 ARCHIVE_OBJS = \
 	delay.obj \

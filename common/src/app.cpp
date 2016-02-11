@@ -23,7 +23,7 @@ boost::property_tree::ptree& app::config()
   return config_;
 }
 
-app::app(const std::string& conf_file, bool daemonize, cmd_handler_type cmd_handler)
+app::app(const char* conf_file, bool daemonize, cmd_handler_type cmd_handler)
 : app(daemonize, cmd_handler)
 {
   boost::property_tree::read_json(conf_file, config_);

@@ -3,6 +3,7 @@
 
 #include <Poco/Net/WebSocket.h>
 #include <memory>
+#include <array>
 
 namespace home_system
 {
