@@ -49,39 +49,44 @@ size_t handler::read(data_t data)
 {
   if (state_ == state::initialized)
   {
-    int flags;
-    size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
-    
-    //LOG("Received " << n << " bytes with " << flags << " flags");
-
-    if (n == 0)
-    {
-      throw runtime_error("Peer shut down or closed connection");
-    }
-    
-    switch (flags & WebSocket::FRAME_OP_BITMASK)
-    {
-      case WebSocket::FRAME_OP_TEXT:
-        // frames which are to be processed
-        break;
-      case WebSocket::FRAME_OP_CONT:
-      case WebSocket::FRAME_OP_PONG:
-      case WebSocket::FRAME_OP_BINARY:
-        // ignore
-        n = 0;
-        break;
-      case WebSocket::FRAME_OP_PING:
-        ws_->sendFrame(nullptr, 0, WebSocket::FRAME_OP_PONG);
-        break;
-      case WebSocket::FRAME_OP_CLOSE:
-        throw runtime_error("WebSocket close request received");
-    }
-    return n;
+    return read_internal(data);
   }
   else
   {
     throw runtime_error("read on not initialized handler");
   }
+}
+
+size_t handler::read_internal(data_t data)
+{
+  int flags;
+  size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
+
+  //LOG("Received " << n << " bytes with " << flags << " flags");
+
+  if (n == 0)
+  {
+    throw runtime_error("Peer shut down or closed connection");
+  }
+
+  switch (flags & WebSocket::FRAME_OP_BITMASK)
+  {
+    case WebSocket::FRAME_OP_TEXT:
+      // frames which are to be processed
+      break;
+    case WebSocket::FRAME_OP_CONT:
+    case WebSocket::FRAME_OP_PONG:
+    case WebSocket::FRAME_OP_BINARY:
+      // ignore
+      n = 0;
+      break;
+    case WebSocket::FRAME_OP_PING:
+      ws_->sendFrame(nullptr, 0, WebSocket::FRAME_OP_PONG);
+      break;
+    case WebSocket::FRAME_OP_CLOSE:
+      throw runtime_error("WebSocket close request received");
+  }
+  return n;
 }
 
 void handler::on_send(handler_t handler, data_t data, size_t data_size)
@@ -97,8 +102,18 @@ void handler::send(data_t data, size_t data_size)
 {
   if (state_ == state::initialized)
   {
-    ws_->sendFrame((*data).data(), data_size);
+    send_internal(data, data_size);
   }
+}
+
+void handler::send_internal(data_t data, size_t data_size)
+{
+  send_internal((*data).data(), data_size);
+}
+
+void handler::send_internal(const void* data, size_t data_size)
+{
+  ws_->sendFrame(data, data_size);
 }
 
 void handler::shutdown()
