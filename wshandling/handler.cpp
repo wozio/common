@@ -19,11 +19,13 @@ handler::handler(ws_t ws)
 : state_(state::created),
   ws_(ws)
 {
+  lock_guard<mutex> lock(state_mutex_);
   LOG(DEBUG) << "Handler creating";
 }
 
 void handler::init()
 {
+  lock_guard<mutex> lock(state_mutex_);
   if (state_ == state::created)
   {
     LOG(DEBUG) << "Handler initializing";
@@ -47,6 +49,7 @@ Poco::Net::WebSocket handler::ws()
 
 size_t handler::read(data_t data)
 {
+  lock_guard<mutex> lock(state_mutex_);
   if (state_ == state::initialized)
   {
     return read_internal(data);
@@ -91,15 +94,13 @@ size_t handler::read_internal(data_t data)
 
 void handler::on_send(handler_t handler, data_t data, size_t data_size)
 {
-  if (handler->state_ == state::initialized)
-  {
-    // posts send request to handlers WebSocket handling thread
-    HANDLERS.post_send(handler, data, data_size);
-  }
+  // posts send request to handlers WebSocket handling thread
+  HANDLERS.post_send(handler, data, data_size);
 }
 
 void handler::send(data_t data, size_t data_size)
 {
+  lock_guard<mutex> lock(state_mutex_);
   if (state_ == state::initialized)
   {
     send_internal(data, data_size);
@@ -118,6 +119,7 @@ void handler::send_internal(const void* data, size_t data_size)
 
 void handler::shutdown()
 {
+  lock_guard<mutex> lock(state_mutex_);
   if (state_ == state::initialized)
   {
     try
