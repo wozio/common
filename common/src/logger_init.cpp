@@ -8,19 +8,18 @@ namespace home_system
 
 void init_log(const char* file, bool console_log)
 {
-#ifdef __linux__
+  std::string to_file("false");
   std::string path("/var/log/home-system/");
-  std::string to_file("true");
+#ifdef __linux__
   try
   {
     boost::filesystem::create_directories(path);
+    to_file = "true";
   }
   catch (...)
   {
     to_file = "false";
   }
-#else
-  to_file = "false";
 #endif
   
   el::Configurations defaultConf;

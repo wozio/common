@@ -17,6 +17,7 @@ typedef std::shared_ptr<Poco::Net::WebSocket> ws_t;
 // it is bigger by one to ensure that we always have place to put '\0' character
 // at the end
 typedef std::shared_ptr<std::array<char, MAX_DATA_SIZE>> data_t;
+typedef std::shared_ptr<rapidjson::StringBuffer> buffer_t;
 
 data_t create_data();
 
@@ -59,7 +60,7 @@ public:
    * Call this method from this base class to send data.
    * @param buffer Data buffer to send
    */
-  virtual void send(rapidjson::StringBuffer&& buffer);
+  virtual void send(buffer_t buffer);
   
   /**
    * Handle incoming data.
@@ -84,7 +85,7 @@ public:
    * @param handler Handler which should send the data
    * @param buffer Buffer of data to send
    */
-  static void on_send(handler_t handler, rapidjson::StringBuffer&& buffer);
+  static void on_send(handler_t handler, buffer_t buffer);
   
   void init();
   virtual void shutdown();

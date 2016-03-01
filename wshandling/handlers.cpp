@@ -1,5 +1,6 @@
 #include "handlers.h"
 #include "logger.h"
+#include "rapidjson/stringbuffer.h"
 #include <utility>
 #include <chrono>
 
@@ -122,7 +123,7 @@ void handlers::post_send(handler_t handler, data_t data, size_t data_size)
   );
 }
 
-void handlers::post_send(handler_t handler, rapidjson::StringBuffer&& buffer)
+void handlers::post_send(handler_t handler, buffer_t buffer)
 {
   ios_.io_service().post([this, handler, buffer] ()
     {
@@ -144,7 +145,7 @@ void handlers::send(handler_t handler, data_t data, int data_size)
   }
 }
 
-void handlers::send(handler_t handler, rapidjson::StringBuffer&& buffer)
+void handlers::send(handler_t handler, buffer_t buffer)
 {
   try
   {
