@@ -98,12 +98,27 @@ void handler::on_send(handler_t handler, data_t data, size_t data_size)
   HANDLERS.post_send(handler, data, data_size);
 }
 
+void handler::on_send(handler_t handler, rapidjson::StringBuffer&& buffer)
+{
+  // posts send request to handlers WebSocket handling thread
+  HANDLERS.post_send(handler, std::move(buffer));
+}
+
 void handler::send(data_t data, size_t data_size)
 {
   lock_guard<mutex> lock(state_mutex_);
   if (state_ == state::initialized)
   {
     send_internal(data, data_size);
+  }
+}
+
+void handler::send(rapidjson::StringBuffer&& buffer)
+{
+  lock_guard<mutex> lock(state_mutex_);
+  if (state_ == state::initialized)
+  {
+    send_internal(buffer.GetString(), buffer.GetSize());
   }
 }
 

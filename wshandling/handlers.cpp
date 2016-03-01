@@ -122,11 +122,33 @@ void handlers::post_send(handler_t handler, data_t data, size_t data_size)
   );
 }
 
+void handlers::post_send(handler_t handler, rapidjson::StringBuffer&& buffer)
+{
+  ios_.io_service().post([this, handler, buffer] ()
+    {
+      this->send(handler, buffer);
+    }
+  );
+}
+
 void handlers::send(handler_t handler, data_t data, int data_size)
 {
   try
   {
     handler->send(data, data_size);
+  }
+  catch (const exception& e)
+  {
+    LOG(DEBUG) << "Exception on send '" << e.what() << "', removing handler";
+    remove(handler);
+  }
+}
+
+void handlers::send(handler_t handler, rapidjson::StringBuffer&& buffer)
+{
+  try
+  {
+    handler->send(buffer);
   }
   catch (const exception& e)
   {

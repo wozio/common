@@ -35,6 +35,7 @@
           <incDir>
             <pElem>../common/src</pElem>
             <pElem>../easyloggingpp/src</pElem>
+            <pElem>../../rapidjson/include</pElem>
           </incDir>
           <warningLevel>2</warningLevel>
         </ccTool>

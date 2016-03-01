@@ -1,6 +1,7 @@
 #ifndef HANDLER_H
 #define	HANDLER_H
 
+#include "rapidjson/stringbuffer.h"
 #include <Poco/Net/WebSocket.h>
 #include <memory>
 #include <array>
@@ -41,7 +42,7 @@ public:
   
   /**
    * Send provided data to underlying WebSocket.
-   * Derived classes may override this method to additionaly process data
+   * Derived classes may override this method to additionally process data
    * before sending.
    * Any exception thrown from this method will lead to removing this handler.
    * Call this method from this base class to send data.
@@ -49,6 +50,16 @@ public:
    * @param data_size Size of the data to send
    */
   virtual void send(data_t data, size_t data_size);
+  
+  /**
+   * Send provided data to underlying WebSocket.
+   * Derived classes may override this method to additionally process data
+   * before sending.
+   * Any exception thrown from this method will lead to removing this handler.
+   * Call this method from this base class to send data.
+   * @param buffer Data buffer to send
+   */
+  virtual void send(rapidjson::StringBuffer&& buffer);
   
   /**
    * Handle incoming data.
@@ -67,6 +78,13 @@ public:
    * @param data_size Data size
    */
   static void on_send(handler_t handler, data_t data, size_t data_size);
+  
+  /**
+   * Request sending of data.
+   * @param handler Handler which should send the data
+   * @param buffer Buffer of data to send
+   */
+  static void on_send(handler_t handler, rapidjson::StringBuffer&& buffer);
   
   void init();
   virtual void shutdown();

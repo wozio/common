@@ -26,6 +26,7 @@ public:
   void remove(handler_t handler);
   
   void post_send(handler_t handler, data_t data, size_t data_size);
+  void post_send(handler_t handler, rapidjson::StringBuffer&& buffer);
   
 private:
   handlers();
@@ -36,6 +37,7 @@ private:
   void select();
   void read(handler_t handler);
   void send(handler_t handler, data_t data, int data_size);
+  void send(handler_t handler, rapidjson::StringBuffer&& buffer);
   
   typedef std::map<Poco::Net::WebSocket, handler_t> ws_to_handler_map_t;
   Poco::Net::Socket::SocketList list_;
