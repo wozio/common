@@ -65,7 +65,7 @@ size_t handler::read_internal(data_t data)
   int flags;
   size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
 
-  //LOG("Received " << n << " bytes with " << flags << " flags");
+  //LOG(TRACE) << "Received " << n << " bytes with " << flags << " flags, message: " << string((*data).data(), n);
 
   if (n == 0)
   {
@@ -129,6 +129,7 @@ void handler::send_internal(data_t data, size_t data_size)
 
 void handler::send_internal(const void* data, size_t data_size)
 {
+  //LOG(TRACE) << "Sending " << data_size << " bytes, message: " << string((const char*)data, data_size);
   ws_->sendFrame(data, data_size);
 }
 
