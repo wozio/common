@@ -15,13 +15,13 @@ CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
 CND_PACKAGE_NAME_Debug=common.tar
 CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/common.tar
 # Release configuration
-CND_PLATFORM_Release=GNU-Linux
+CND_PLATFORM_Release=None-Windows
 CND_ARTIFACT_DIR_Release=../bin/Release
 CND_ARTIFACT_NAME_Release=libcommon.a
 CND_ARTIFACT_PATH_Release=../bin/Release/libcommon.a
-CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
+CND_PACKAGE_DIR_Release=dist/Release/None-Windows/package
 CND_PACKAGE_NAME_Release=common.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/common.tar
+CND_PACKAGE_PATH_Release=dist/Release/None-Windows/package/common.tar
 #
 # include compiler specific variables
 #
