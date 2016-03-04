@@ -42,6 +42,8 @@ void handlers::add(handler_t handler)
       this->select();
     });
   }
+  LOG(DEBUG) << "Size of ws_to_handler_map=" << ws_to_handler_map_.size();
+  LOG(DEBUG) << "Size of list=" << list_.size();
 }
 
 void handlers::remove(handler_t handler)
@@ -61,6 +63,9 @@ void handlers::remove(handler_t handler)
     }
   }
   ws_to_handler_map_.erase(handler->ws());
+
+  LOG(DEBUG) << "Size of ws_to_handler_map=" << ws_to_handler_map_.size();
+  LOG(DEBUG) << "Size of list=" << list_.size();
 }
 
 void handlers::select()

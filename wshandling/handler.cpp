@@ -38,7 +38,7 @@ void handler::init()
 
 handler::~handler()
 {
-  shutdown();
+  this->shutdown();
   LOG(DEBUG) << "Handler destroyed";
 }
 
