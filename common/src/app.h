@@ -14,7 +14,7 @@ typedef std::function<void (const std::vector<std::string>&)> cmd_handler_type;
 class app
 {
 public:
-  app(const std::string& conf_file, bool daemonize, cmd_handler_type cmd_handler = nullptr);
+  app(const char* conf_file, bool daemonize, cmd_handler_type cmd_handler = nullptr);
   app(bool daemonize, cmd_handler_type cmd_handler = nullptr);
   virtual ~app();
   

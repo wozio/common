@@ -1,5 +1,6 @@
 #include "handlers.h"
 #include "logger.h"
+#include "rapidjson/stringbuffer.h"
 #include <utility>
 #include <chrono>
 
@@ -19,7 +20,7 @@ handlers::~handlers()
 {
   ios_.stop_ios();
 
-  LOG("Handlers destroing");
+  LOG(DEBUG) << "Handlers destroing";
   
   list_.clear();
   ws_to_handler_map_.clear();
@@ -29,7 +30,7 @@ void handlers::add(handler_t handler)
 {
   lock_guard<mutex> l(mut_);
   
-  LOG("Handler add");
+  LOG(DEBUG) << "Handler add";
   
   ws_to_handler_map_[handler->ws()] = handler;
   list_.push_back(handler->ws());
@@ -41,13 +42,15 @@ void handlers::add(handler_t handler)
       this->select();
     });
   }
+  LOG(DEBUG) << "Size of ws_to_handler_map=" << ws_to_handler_map_.size();
+  LOG(DEBUG) << "Size of list=" << list_.size();
 }
 
 void handlers::remove(handler_t handler)
 {
   lock_guard<mutex> l(mut_);
   
-  LOG("Handler remove");
+  LOG(DEBUG) << "Handler remove";
   
   handler->shutdown();
   
@@ -60,6 +63,9 @@ void handlers::remove(handler_t handler)
     }
   }
   ws_to_handler_map_.erase(handler->ws());
+
+  LOG(DEBUG) << "Size of ws_to_handler_map=" << ws_to_handler_map_.size();
+  LOG(DEBUG) << "Size of list=" << list_.size();
 }
 
 void handlers::select()
@@ -108,7 +114,7 @@ void handlers::read(handler_t handler)
   }
   catch (const exception& e)
   {
-    LOG("Exception on read '" << e.what() << "', removing handler");
+    LOG(DEBUG) << "Exception on read '" << e.what() << "', removing handler";
     remove(handler);
   }
 }
@@ -122,6 +128,15 @@ void handlers::post_send(handler_t handler, data_t data, size_t data_size)
   );
 }
 
+void handlers::post_send(handler_t handler, buffer_t buffer)
+{
+  ios_.io_service().post([this, handler, buffer] ()
+    {
+      this->send(handler, buffer);
+    }
+  );
+}
+
 void handlers::send(handler_t handler, data_t data, int data_size)
 {
   try
@@ -130,7 +145,20 @@ void handlers::send(handler_t handler, data_t data, int data_size)
   }
   catch (const exception& e)
   {
-    LOG("Exception on send '" << e.what() << "', removing handler");
+    LOG(DEBUG) << "Exception on send '" << e.what() << "', removing handler";
+    remove(handler);
+  }
+}
+
+void handlers::send(handler_t handler, buffer_t buffer)
+{
+  try
+  {
+    handler->send(buffer);
+  }
+  catch (const exception& e)
+  {
+    LOG(DEBUG) << "Exception on send '" << e.what() << "', removing handler";
     remove(handler);
   }
 }

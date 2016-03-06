@@ -21,7 +21,7 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-Linux-x86
+CND_PLATFORM=GNU-Linux
 CND_DLIB_EXT=so
 CND_CONF=Debug
 CND_DISTDIR=dist
@@ -68,12 +68,12 @@ LDLIBSOPTIONS=
 ${OBJECTDIR}/handler.o: handler.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I../common/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/handler.o handler.cpp
+	$(COMPILE.cc) -g -Wall -I../common/src -I../easyloggingpp/src -I../../rapidjson/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/handler.o handler.cpp
 
 ${OBJECTDIR}/handlers.o: handlers.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I../common/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/handlers.o handlers.cpp
+	$(COMPILE.cc) -g -Wall -I../common/src -I../easyloggingpp/src -I../../rapidjson/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/handlers.o handlers.cpp
 
 # Subprojects
 .build-subprojects:

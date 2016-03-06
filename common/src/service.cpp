@@ -39,13 +39,14 @@ void service::init()
   
   set_notify_timeout();
   
-  LOG(DEBUG) << "Started service with name: " << name_ << " and YAMI endpoint: " << ye();
+  LOG(DEBUG) << "Initialized service with name: " << name_ << " and YAMI endpoint: " << ye();
   
   send_hello();
 }
 
 void service::deinit()
 {
+  LOG(DEBUG) << "Deinitialized service with name: " << name_;
   AGENT.unregister_object(name_);
   
   notify_dt_.cancel();
