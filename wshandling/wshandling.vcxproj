@@ -25,6 +25,7 @@
   <ItemGroup>
     <ClInclude Include="handler.h" />
     <ClInclude Include="handlers.h" />
+    <ClInclude Include="handler_t.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7B947294-4BC7-41A8-9791-1E8421EC50A8}</ProjectGuid>

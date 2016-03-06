@@ -1,6 +1,7 @@
 #ifndef HANDLER_H
 #define	HANDLER_H
 
+#include "handler_t.h"
 #include "rapidjson/stringbuffer.h"
 #include <Poco/Net/WebSocket.h>
 #include <memory>
@@ -20,9 +21,6 @@ typedef std::shared_ptr<std::array<char, MAX_DATA_SIZE>> data_t;
 typedef std::shared_ptr<rapidjson::StringBuffer> buffer_t;
 
 data_t create_data();
-
-class handler;
-typedef std::shared_ptr<handler> handler_t;
 
 class handler
 : public std::enable_shared_from_this<handler>
