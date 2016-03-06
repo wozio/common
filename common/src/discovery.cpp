@@ -29,7 +29,7 @@ namespace home_system
   listen_socket_.async_receive(buffer(data_),
     [&] (const boost::system::error_code& error, size_t bytes_recvd) { handle_receive(error, bytes_recvd); });
 
-  idle_dt_.expires_from_now(boost::posix_time::seconds(10));
+  idle_dt_.expires_from_now(boost::posix_time::seconds(30));
   idle_dt_.async_wait([this] (const boost::system::error_code& error) { on_idle_timeout(error); });
   
   multicast_send("search");
@@ -126,12 +126,12 @@ void discovery::on_idle_timeout(const boost::system::error_code& error)
 {
   if (!error)
   {
-    idle_dt_.expires_at(idle_dt_.expires_at() + boost::posix_time::seconds(10));
+    idle_dt_.expires_at(idle_dt_.expires_at() + boost::posix_time::seconds(30));
     idle_dt_.async_wait([&] (const boost::system::error_code& error) { on_idle_timeout(error); });
 
     vector<string> to_remove;
 
-    // checking if our known services sent notify within idle period (10s)
+    // checking if our known services sent notify within idle period
     for (map<string, bool>::iterator i = notify_received_.begin();
       i != notify_received_.end();
       ++i)
@@ -145,7 +145,7 @@ void discovery::on_idle_timeout(const boost::system::error_code& error)
     for (size_t i = 0; i < to_remove.size(); ++i)
     {
       lock_guard<mutex> lock(idle_mutex);
-      //erase_service(to_remove[i]);
+      erase_service(to_remove[i]);
     }
   }
 }
