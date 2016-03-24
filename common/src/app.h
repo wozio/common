@@ -2,20 +2,15 @@
 #define	APP_H
 
 #include <boost/property_tree/ptree.hpp>
-#include <functional>
-#include <vector>
-#include <string>
 
 namespace home_system
 {
 
-typedef std::function<void (const std::vector<std::string>&)> cmd_handler_type;
-
 class app
 {
 public:
-  app(const char* conf_file, bool daemonize, cmd_handler_type cmd_handler = nullptr);
-  app(bool daemonize, cmd_handler_type cmd_handler = nullptr);
+  app(const char* conf_file, bool daemonize);
+  app(bool daemonize);
   virtual ~app();
   
   int run();
@@ -25,7 +20,6 @@ public:
 private:
   static boost::property_tree::ptree config_;
   bool daemonize_;
-  cmd_handler_type cmd_handler_;
 };
 
 }

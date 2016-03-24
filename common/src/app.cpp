@@ -1,7 +1,6 @@
 #include "app.h"
 
 #include "logger.h"
-#include <boost/algorithm/string.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #ifdef __linux__
 #include <signal.h>
@@ -23,15 +22,14 @@ boost::property_tree::ptree& app::config()
   return config_;
 }
 
-app::app(const char* conf_file, bool daemonize, cmd_handler_type cmd_handler)
-: app(daemonize, cmd_handler)
+app::app(const char* conf_file, bool daemonize)
+: app(daemonize)
 {
   boost::property_tree::read_json(conf_file, config_);
 }
 
-app::app(bool daemonize, cmd_handler_type cmd_handler)
-: daemonize_(daemonize),
-  cmd_handler_(cmd_handler)
+app::app(bool daemonize)
+: daemonize_(daemonize)
 {
 #ifdef __linux__
   if (daemonize_)
@@ -91,21 +89,9 @@ int app::run()
     std::string input_line;
     while (std::getline(std::cin, input_line))
     {
-      vector<string> fields;
-      boost::split(fields, input_line, boost::is_any_of(" "));
-      if (fields.size() >= 1)
+      if (input_line == "q" || input_line == "quit")
       {
-        if (fields[0] == "q" || fields[0] == "quit")
-        {
-          break;
-        }
-        else
-        {
-          if (cmd_handler_)
-          {
-            cmd_handler_(fields);
-          }
-        }
+        break;
       }
     }
   }
