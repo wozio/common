@@ -72,19 +72,28 @@ void handlers::select()
 {
   if (list_.size() > 0)
   {
-    Socket::SocketList readList(list_);
-    Socket::SocketList writeList;
-    Socket::SocketList exceptList;
+    Socket::SocketList read_list(list_);
+    Socket::SocketList write_list;
+    Socket::SocketList except_list(list_);
 
-    Socket::select(readList, writeList, exceptList, Timespan(0, 100000));
+    Socket::select(read_list, write_list, except_list, Timespan(0, 100000));
     
-    for (auto socket : readList)
+    for (auto socket : read_list)
     {
       auto handler = ws_to_handler_map_[socket];
-      // start reading from assiociated websocket
+      // start reading from associated websocket
       ios_.io_service().post([this, handler] ()
         {
           this->read(handler);
+        }
+      );
+    }
+    for (auto socket : except_list)
+    {
+      auto handler = ws_to_handler_map_[socket];
+      ios_.io_service().post([this, handler] ()
+        {
+          this->remove(handler);
         }
       );
     }
