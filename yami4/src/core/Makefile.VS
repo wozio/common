@@ -6,7 +6,7 @@ PUBLIC_HEADERS_DIR = ..\..\include\yami4-core
 YAMI_LIB = $(OUTDIR)\yamicore.lib
 
 CPP = cl.exe
-CPP_OPTIONS = /c /nologo /EHsc /MTd /D _CRT_SECURE_NO_WARNINGS /I windows $(OPEN_SSL_OPTIONS)
+CPP_OPTIONS = /c /nologo /EHsc /MDd /D _CRT_SECURE_NO_WARNINGS /I windows $(OPEN_SSL_OPTIONS)
 
 ARCHIVE = lib.exe
 ARCHIVE_FLAGS = /nologo /out:$(YAMI_LIB)
