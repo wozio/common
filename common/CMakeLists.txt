@@ -17,6 +17,6 @@ SET(SOURCES src/app.cpp
 include_directories(../yami4/include/
                     ../easyloggingpp/src/)
 					
-add_definitions(-D_ITERATOR_DEBUG_LEVEL=2 -DPOCO_STATIC)
+add_definitions(-D_ITERATOR_DEBUG_LEVEL=2 -DPOCO_STATIC -DELPP_DISABLE_LOGS)
 
 ADD_LIBRARY(common STATIC ${SOURCES})
