@@ -1,6 +1,7 @@
 #ifndef HANDLER_H
 #define	HANDLER_H
 
+#include "timer.h"
 #include "handler_t.h"
 #include "rapidjson/stringbuffer.h"
 #include <Poco/Net/WebSocket.h>
@@ -26,7 +27,7 @@ class handler
 : public std::enable_shared_from_this<handler>
 {
 public:
-  handler(ws_t ws);
+  handler(ws_t ws, bool use_idle_ping);
   handler(const handler& orig) = delete;
   virtual ~handler();
   
@@ -105,6 +106,10 @@ private:
   std::mutex state_mutex_;
   
   ws_t ws_;
+  bool use_idle_ping_;
+  
+  timer timer_;
+  void set_up_timer();
 };
 
 }
