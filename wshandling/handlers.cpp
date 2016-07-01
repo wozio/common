@@ -91,6 +91,7 @@ void handlers::select()
     for (auto socket : except_list)
     {
       auto handler = ws_to_handler_map_[socket];
+      // start reading from assiociated websocket
       ios_.io_service().post([this, handler] ()
         {
           this->remove(handler);
