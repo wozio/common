@@ -21,7 +21,7 @@ handler::handler(ws_t ws, bool use_idle_ping)
   use_idle_ping_(use_idle_ping)
 {
   lock_guard<mutex> lock(state_mutex_);
-  LOG(DEBUG) << "Handler creating";
+  LOGH(DEBUG) << "Handler creating";
 }
 
 void handler::set_up_timer()
@@ -32,7 +32,7 @@ void handler::set_up_timer()
     timer_.set_from_now(15000, [this] ()
     {
       // just to keep WebSocket busy
-      LOG(DEBUG) << "Idle for more than 15 seconds, sending ping message";
+      LOGH(DEBUG) << "Idle for more than 15 seconds, sending ping message";
       buffer_t buffer(new rapidjson::StringBuffer);
       
       buffer->Put('p');
@@ -52,10 +52,10 @@ void handler::init()
   lock_guard<mutex> lock(state_mutex_);
   if (state_ == state::created)
   {
-    LOG(DEBUG) << "Handler initializing";
+    LOGH(DEBUG) << "Handler initializing";
     ws_->setBlocking(false);
     HANDLERS.add(shared_from_this());
-    LOG(DEBUG) << "Handler initialized";
+    LOGH(DEBUG) << "Handler initialized";
     state_ = state::initialized;
     set_up_timer();
   }
@@ -64,7 +64,7 @@ void handler::init()
 handler::~handler()
 {
   this->shutdown();
-  LOG(DEBUG) << "Handler destroyed";
+  LOGH(DEBUG) << "Handler destroyed";
 }
 
 Poco::Net::WebSocket handler::ws()
@@ -90,7 +90,7 @@ size_t handler::read_internal(data_t data)
   int flags;
   size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
 
-  //LOG(TRACE) << "Received " << n << " bytes with " << flags << " flags, message: " << string((*data).data(), n);
+  //LOGH(TRACE) << "Received " << n << " bytes with " << flags << " flags, message: " << string((*data).data(), n);
 
   if (n == 0)
   {
@@ -164,7 +164,7 @@ void handler::send_internal(data_t data, size_t data_size)
 void handler::send_internal(const void* data, size_t data_size)
 {
   set_up_timer();
-  //LOG(TRACE) << "Sending " << data_size << " bytes, message: " << string((const char*)data, data_size);
+  //LOGH(TRACE) << "Sending " << data_size << " bytes, message: " << string((const char*)data, data_size);
   ws_->sendFrame(data, data_size);
 }
 
@@ -177,12 +177,12 @@ void handler::shutdown()
     try
     {
       state_ = state::shutdown;
-      LOG(DEBUG) << "Handler shutdown";
+      LOGH(DEBUG) << "Handler shutdown";
       ws_->shutdown();
     }
     catch (const exception& e)
     {
-      LOG(ERROR) << e.what();
+      LOGH(ERROR) << e.what();
     }
   }
 }

@@ -9,6 +9,8 @@
 #include <array>
 #include <mutex>
 
+#define LOGH(level) LOG(level) << "(" << this << ") "
+
 namespace home_system
 {
   
