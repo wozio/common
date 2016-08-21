@@ -72,7 +72,7 @@ void service::on_msg(yami::incoming_message & im)
 
 void service::operator()(yami::incoming_message & im)
 {
-  LOG(TRACE) << "message " << im.get_message_name() << " from " << im.get_source();
+  //LOG(TRACE) << "message " << im.get_message_name() << " from " << im.get_source();
   try
   {
     on_msg(im);

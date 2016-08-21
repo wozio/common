@@ -73,10 +73,20 @@ void handlers::select()
   if (list_.size() > 0)
   {
     Socket::SocketList read_list(list_);
-    Socket::SocketList write_list;
     Socket::SocketList except_list(list_);
+    Socket::SocketList write_list;
+    
+    for (auto s : ws_to_handler_map_)
+    {
+      if (s.second->something_to_send())
+      {
+        write_list.push_back(s.first);
+      }
+    }
 
     Socket::select(read_list, write_list, except_list, Timespan(0, 100000));
+    
+    //LOG(TRACE) << read_list.size() << " " << write_list.size() << " " << except_list.size();
     
     for (auto socket : read_list)
     {
@@ -85,6 +95,16 @@ void handlers::select()
       ios_.io_service().post([this, handler] ()
         {
           this->read(handler);
+        }
+      );
+    }
+    for (auto socket : write_list)
+    {
+      auto handler = ws_to_handler_map_[socket];
+      // start reading from associated websocket
+      ios_.io_service().post([this, handler] ()
+        {
+          this->send(handler);
         }
       );
     }
@@ -129,42 +149,16 @@ void handlers::read(handler_t handler)
   }
 }
 
-void handlers::post_send(handler_t handler, data_t data, size_t data_size)
-{
-  ios_.io_service().post([this, handler, data, data_size] ()
-    {
-      this->send(handler, data, data_size);
-    }
-  );
-}
-
-void handlers::post_send(handler_t handler, buffer_t buffer)
-{
-  ios_.io_service().post([this, handler, buffer] ()
-    {
-      this->send(handler, buffer);
-    }
-  );
-}
-
-void handlers::send(handler_t handler, data_t data, int data_size)
+void handlers::send(handler_t handler)
 {
   try
   {
-    handler->send(data, data_size);
+    handler->send();
   }
-  catch (const exception& e)
+  catch (const Poco::Exception& e)
   {
-    LOG(DEBUG) << "Exception on send '" << e.what() << "', removing handler";
+    LOG(DEBUG) << "Exception on send '" << e.displayText() << "', removing handler";
     remove(handler);
-  }
-}
-
-void handlers::send(handler_t handler, buffer_t buffer)
-{
-  try
-  {
-    handler->send(buffer);
   }
   catch (const exception& e)
   {

@@ -43,25 +43,13 @@ public:
   size_t read(data_t data);
   
   /**
-   * Send provided data to underlying WebSocket.
+   * Send previously provided in on_send data to underlying WebSocket.
    * Derived classes may override this method to additionally process data
    * before sending.
    * Any exception thrown from this method will lead to removing this handler.
-   * Call this method from this base class to send data.
-   * @param data Data buffer to send
-   * @param data_size Size of the data to send
+   * Call this method to actually send data.
    */
-  virtual void send(data_t data, size_t data_size);
-  
-  /**
-   * Send provided data to underlying WebSocket.
-   * Derived classes may override this method to additionally process data
-   * before sending.
-   * Any exception thrown from this method will lead to removing this handler.
-   * Call this method from this base class to send data.
-   * @param buffer Data buffer to send
-   */
-  virtual void send(buffer_t buffer);
+  virtual void send();
   
   /**
    * Handle incoming data.
@@ -75,21 +63,20 @@ public:
   
   /**
    * Request sending of data.
-   * @param handler Handler which should send the data
    * @param data Data to send
    * @param data_size Data size
    */
-  static void on_send(handler_t handler, data_t data, size_t data_size);
+  void on_send(data_t data, size_t data_size);
   
   /**
    * Request sending of data.
-   * @param handler Handler which should send the data
    * @param buffer Buffer of data to send
    */
-  static void on_send(handler_t handler, buffer_t buffer);
+  void on_send(buffer_t buffer);
   
   void init();
   virtual void shutdown();
+  bool something_to_send();
   
 protected:
   size_t read_internal(data_t data);
@@ -112,6 +99,48 @@ private:
   
   timer timer_;
   void set_up_timer();
+  
+  class queue_item
+  {
+  public:
+    queue_item(buffer_t buffer)
+    : buffer_(buffer),
+      data_size_(0)
+    {
+    }
+    queue_item(data_t data, size_t data_size)
+    : data_(data),
+      data_size_(data_size)
+    {
+    }
+    int send(ws_t ws)
+    {
+      if (data_size_ > 0)
+      {
+        return ws->sendFrame(data_->data(), data_size_, Poco::Net::WebSocket::FRAME_BINARY);
+      }
+      else
+      {
+        return ws->sendFrame(buffer_->GetString(), buffer_->GetSize(), Poco::Net::WebSocket::FRAME_BINARY);
+      }
+    }
+    size_t size()
+    {
+      if (data_size_ > 0)
+      {
+        return data_size_;
+      }
+      else
+      {
+        return buffer_->GetSize();
+      }
+    }
+  private:
+    buffer_t buffer_;
+    data_t data_;
+    size_t data_size_;
+  };
+  std::list<queue_item> queue_;
 };
 
 }

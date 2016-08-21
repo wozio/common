@@ -41,8 +41,8 @@ void handler::set_up_timer()
       buffer->Put('g');
       buffer->Put(0);
 
-      // sending to cloud server
-      on_send(shared_from_this(), buffer);
+      // sending to peer
+      on_send(buffer);
     });
   }
 }
@@ -87,10 +87,11 @@ size_t handler::read(data_t data)
 
 size_t handler::read_internal(data_t data)
 {
+  LOGH(TRACE) << "Reading data";
   int flags;
   size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
 
-  //LOGH(TRACE) << "Received " << n << " bytes with " << flags << " flags, message: " << string((*data).data(), n);
+  //LOGH(TRACE) << "Received " <<n << " bytes with " << flags << " flags, message: " << string((*data).data(), n);
 
   if (n == 0)
   {
@@ -102,6 +103,7 @@ size_t handler::read_internal(data_t data)
   switch (flags & WebSocket::FRAME_OP_BITMASK)
   {
     case WebSocket::FRAME_OP_TEXT:
+    case WebSocket::FRAME_OP_BINARY:
       // frames which are to be processed
       // checking for ping which is used only to keep WebSocket connection busy
       if (n == 5)
@@ -116,7 +118,6 @@ size_t handler::read_internal(data_t data)
     case WebSocket::FRAME_OP_CONT:
     case WebSocket::FRAME_OP_PONG:
     case WebSocket::FRAME_OP_PING:
-    case WebSocket::FRAME_OP_BINARY:
       // ignore
       n = 0;
       break;
@@ -126,46 +127,44 @@ size_t handler::read_internal(data_t data)
   return n;
 }
 
-void handler::on_send(handler_t handler, data_t data, size_t data_size)
+void handler::on_send(data_t data, size_t data_size)
 {
-  // posts send request to handlers WebSocket handling thread
-  HANDLERS.post_send(handler, data, data_size);
+  queue_item item(data, data_size);
+  queue_.push_back(item);
 }
 
-void handler::on_send(handler_t handler, buffer_t buffer)
+void handler::on_send(buffer_t buffer)
 {
-  // posts send request to handlers WebSocket handling thread
-  HANDLERS.post_send(handler, buffer);
+  queue_item item(buffer);
+  queue_.push_back(item);
 }
 
-void handler::send(data_t data, size_t data_size)
+bool handler::something_to_send()
+{
+  return queue_.size() > 0;
+}
+
+void handler::send()
 {
   lock_guard<mutex> lock(state_mutex_);
   if (state_ == state::initialized)
   {
-    send_internal(data, data_size);
+    if (queue_.size() > 0)
+    {
+      set_up_timer();
+      queue_item item = queue_.front();
+      //LOGH(TRACE) << "Sending " << item.size() << " bytes, queue size: " << queue_.size();
+      try
+      {
+        item.send(ws_);
+        queue_.pop_front();
+      }
+      catch (const Poco::Exception& e)
+      {
+        LOGH(TRACE) << e.displayText();
+      }
+    }
   }
-}
-
-void handler::send(buffer_t buffer)
-{
-  lock_guard<mutex> lock(state_mutex_);
-  if (state_ == state::initialized)
-  {
-    send_internal(buffer->GetString(), buffer->GetSize());
-  }
-}
-
-void handler::send_internal(data_t data, size_t data_size)
-{
-  send_internal((*data).data(), data_size);
-}
-
-void handler::send_internal(const void* data, size_t data_size)
-{
-  set_up_timer();
-  //LOGH(TRACE) << "Sending " << data_size << " bytes, message: " << string((const char*)data, data_size);
-  ws_->sendFrame(data, data_size);
 }
 
 void handler::shutdown()
