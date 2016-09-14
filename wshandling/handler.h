@@ -4,7 +4,6 @@
 #include "timer.h"
 #include "handler_t.h"
 #include "rapidjson/stringbuffer.h"
-#include <Poco/Net/WebSocket.h>
 #include <memory>
 #include <array>
 #include <mutex>
@@ -17,7 +16,7 @@ namespace home_system
 #define DATA_SIZE 1024
 #define MAX_DATA_SIZE 1025
 
-typedef std::shared_ptr<Poco::Net::WebSocket> ws_t;
+
 // it is bigger by one to ensure that we always have place to put '\0' character
 // at the end
 typedef std::shared_ptr<std::array<char, MAX_DATA_SIZE>> data_t;
@@ -103,42 +102,20 @@ private:
   class queue_item
   {
   public:
-    queue_item(buffer_t buffer)
-    : buffer_(buffer),
-      data_size_(0)
+    enum type_t
     {
-    }
-    queue_item(data_t data, size_t data_size)
-    : data_(data),
-      data_size_(data_size)
-    {
-    }
-    int send(ws_t ws)
-    {
-      if (data_size_ > 0)
-      {
-        return ws->sendFrame(data_->data(), data_size_, Poco::Net::WebSocket::FRAME_BINARY);
-      }
-      else
-      {
-        return ws->sendFrame(buffer_->GetString(), buffer_->GetSize(), Poco::Net::WebSocket::FRAME_BINARY);
-      }
-    }
-    size_t size()
-    {
-      if (data_size_ > 0)
-      {
-        return data_size_;
-      }
-      else
-      {
-        return buffer_->GetSize();
-      }
-    }
+      BINARY,
+      TEXT
+    };
+    queue_item(buffer_t buffer, type_t type = TEXT);
+    queue_item(data_t data, size_t data_size, type_t type = TEXT);
+    int send(ws_t ws);
+    size_t size();
   private:
     buffer_t buffer_;
     data_t data_;
     size_t data_size_;
+    Poco::Net::WebSocket::SendFlags send_flags_;
   };
   std::list<queue_item> queue_;
 };

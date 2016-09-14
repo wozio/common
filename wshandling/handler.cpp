@@ -186,4 +186,41 @@ void handler::shutdown()
   }
 }
 
+handler::queue_item::queue_item(buffer_t buffer, type_t type)
+  : buffer_(buffer),
+  data_size_(0)
+{
+  type == TEXT ? send_flags_ = Poco::Net::WebSocket::FRAME_TEXT : send_flags_ = Poco::Net::WebSocket::FRAME_BINARY;
+}
+
+handler::queue_item::queue_item(data_t data, size_t data_size, type_t type)
+  : data_(data),
+  data_size_(data_size)
+{
+  type == TEXT ? send_flags_ = Poco::Net::WebSocket::FRAME_TEXT : send_flags_ = Poco::Net::WebSocket::FRAME_BINARY;
+}
+
+int handler::queue_item::send(ws_t ws)
+{
+  if (data_size_ > 0)
+  {
+    return ws->sendFrame(data_->data(), data_size_, send_flags_);
+  }
+  else
+  {
+    return ws->sendFrame(buffer_->GetString(), buffer_->GetSize(), send_flags_);
+  }
+}
+size_t handler::queue_item::size()
+{
+  if (data_size_ > 0)
+  {
+    return data_size_;
+  }
+  else
+  {
+    return buffer_->GetSize();
+  }
+}
+
 }
