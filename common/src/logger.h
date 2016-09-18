@@ -1,6 +1,7 @@
 #ifndef LOGGER_H
 #define	LOGGER_H
 
+#ifndef DISABLE_LOGS
 #define ELPP_THREAD_SAFE
 #ifdef __GNUC__
 #define ELPP_STACKTRACE_ON_CRASH
@@ -9,6 +10,7 @@
 #define ELPP_WINSOCK2
 
 #include "easylogging++.h"
+#endif
 
 #endif	/* LOGGER_H */
 

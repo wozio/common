@@ -14,9 +14,8 @@ SET(SOURCES src/app.cpp
 			src/timer.cpp
 			src/yamicontainer.cpp)
 			
-include_directories(../yami4/include/
-                    ../easyloggingpp/src/)
+include_directories(../yami4/include/)
 					
-add_definitions(-D_ITERATOR_DEBUG_LEVEL=2 -DPOCO_STATIC -DELPP_DISABLE_LOGS)
+add_definitions(-D_ITERATOR_DEBUG_LEVEL=2 -DPOCO_STATIC -DDISABLE_LOGS)
 
 ADD_LIBRARY(common STATIC ${SOURCES})

@@ -8,6 +8,7 @@ namespace home_system
 
 void init_log(const char* file, bool console_log)
 {
+#ifndef DISABLE_LOGS
   std::string to_file("false");
   std::string path("/var/log/home-system/");
 #ifdef __linux__
@@ -32,6 +33,7 @@ void init_log(const char* file, bool console_log)
   defaultConf.setGlobally(el::ConfigurationType::Format, "[%datetime] [%levshort] [%thread] [%fbase:%line] %msg");
   el::Loggers::reconfigureLogger("default", defaultConf);
   el::Loggers::addFlag(el::LoggingFlag::StrictLogFileSizeCheck);
+#endif
 }
 
 }

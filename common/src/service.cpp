@@ -1,3 +1,4 @@
+#undef _WINSOCKAPI_
 #include "service.h"
 #include "mcs.h"
 #include "discovery.h"
@@ -39,14 +40,18 @@ void service::init()
   
   set_notify_timeout();
   
+#ifndef DISABLE_LOGS
   LOG(DEBUG) << "Initialized service with name: " << name_ << " and YAMI endpoint: " << ye();
+#endif
   
   send_hello();
 }
 
 void service::deinit()
 {
+#ifndef DISABLE_LOGS
   LOG(DEBUG) << "Deinitialized service with name: " << name_;
+#endif
   AGENT.unregister_object(name_);
   
   notify_dt_.cancel();
@@ -66,20 +71,26 @@ std::string service::ye() const
 
 void service::on_msg(yami::incoming_message & im)
 {
+#ifndef DISABLE_LOGS
   LOG(WARNING) << name_ << ": unknown message: " << im.get_message_name();
+#endif
   im.reject("unknown message");
 }
 
 void service::operator()(yami::incoming_message & im)
 {
+#ifndef DISABLE_LOGS
   //LOG(TRACE) << "message " << im.get_message_name() << " from " << im.get_source();
+#endif
   try
   {
     on_msg(im);
   }
   catch (const std::exception& e)
   {
+#ifndef DISABLE_LOGS
     LOG(WARNING) << name_ << ": EXCEPTION: " << e.what();
+#endif
     im.reject(e.what());
   }
 }
