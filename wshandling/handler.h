@@ -12,17 +12,16 @@
 
 namespace home_system
 {
-  
-#define DATA_SIZE 1024
-#define MAX_DATA_SIZE 1025
-
 
 // it is bigger by one to ensure that we always have place to put '\0' character
 // at the end
-typedef std::shared_ptr<std::array<char, MAX_DATA_SIZE>> data_t;
-typedef std::shared_ptr<rapidjson::StringBuffer> buffer_t;
+#define DATA_SIZE 18800
+#define MAX_DATA_SIZE DATA_SIZE + 1
 
+typedef std::shared_ptr<std::array<char, MAX_DATA_SIZE>> data_t;
 data_t create_data();
+
+typedef std::shared_ptr<rapidjson::StringBuffer> buffer_t;
 
 class handler
 : public std::enable_shared_from_this<handler>
@@ -33,13 +32,23 @@ public:
   virtual ~handler();
   
   Poco::Net::WebSocket ws();
+
+  /**
+  * Data type
+  */
+  enum type_t
+  {
+    BINARY,
+    TEXT
+  };
   
   /**
    * Read data from underlying WebSocket into supplied data buffer.
    * @param data Data buffer
+   * @param type Data type
    * @return Number of read bytes
    */
-  size_t read(data_t data);
+  size_t read(data_t data, type_t& type);
   
   /**
    * Send previously provided in on_send data to underlying WebSocket.
@@ -49,7 +58,7 @@ public:
    * Call this method to actually send data.
    */
   virtual void send();
-  
+
   /**
    * Handle incoming data.
    * Called when data has been successfully read from WebSocket.
@@ -58,27 +67,27 @@ public:
    * @param data Data buffer
    * @param data_size Data size
    */
-  virtual void on_read(data_t data, size_t data_size) = 0;
+  virtual void on_read(data_t data, size_t data_size, type_t data_type = TEXT) = 0;
   
   /**
    * Request sending of data.
    * @param data Data to send
    * @param data_size Data size
    */
-  void on_send(data_t data, size_t data_size);
+  void on_send(data_t data, size_t data_size, type_t data_type = TEXT);
   
   /**
    * Request sending of data.
    * @param buffer Buffer of data to send
    */
-  void on_send(buffer_t buffer);
+  void on_send(buffer_t buffer, type_t data_type = TEXT);
   
   void init();
   virtual void shutdown();
   bool something_to_send();
   
 protected:
-  size_t read_internal(data_t data);
+  size_t read_internal(data_t data, type_t& type);
   void send_internal(data_t data, size_t data_size);
   void send_internal(const void* data, size_t data_size);
 
@@ -102,13 +111,9 @@ private:
   class queue_item
   {
   public:
-    enum type_t
-    {
-      BINARY,
-      TEXT
-    };
-    queue_item(buffer_t buffer, type_t type = TEXT);
-    queue_item(data_t data, size_t data_size, type_t type = TEXT);
+    
+    queue_item(buffer_t buffer, type_t data_type);
+    queue_item(data_t data, size_t data_size, type_t data_type);
     int send(ws_t ws);
     size_t size();
   private:

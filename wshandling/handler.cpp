@@ -32,7 +32,7 @@ void handler::set_up_timer()
     timer_.set_from_now(15000, [this] ()
     {
       // just to keep WebSocket busy
-      LOGH(DEBUG) << "Idle for more than 15 seconds, sending ping message";
+      //LOGH(DEBUG) << "Idle for more than 15 seconds, sending ping message";
       buffer_t buffer(new rapidjson::StringBuffer);
       
       buffer->Put('p');
@@ -72,12 +72,31 @@ Poco::Net::WebSocket handler::ws()
   return *ws_;
 }
 
-size_t handler::read(data_t data)
+void handler::shutdown()
 {
   lock_guard<mutex> lock(state_mutex_);
   if (state_ == state::initialized)
   {
-    return read_internal(data);
+    timer_.cancel();
+    try
+    {
+      state_ = state::shutdown;
+      LOGH(DEBUG) << "Handler shutdown";
+      ws_->shutdown();
+    }
+    catch (const exception& e)
+    {
+      LOGH(ERROR) << e.what();
+    }
+  }
+}
+
+size_t handler::read(data_t data, type_t& data_type)
+{
+  lock_guard<mutex> lock(state_mutex_);
+  if (state_ == state::initialized)
+  {
+    return read_internal(data, data_type);
   }
   else
   {
@@ -85,7 +104,7 @@ size_t handler::read(data_t data)
   }
 }
 
-size_t handler::read_internal(data_t data)
+size_t handler::read_internal(data_t data, type_t& data_type)
 {
   LOGH(TRACE) << "Reading data";
   int flags;
@@ -124,18 +143,26 @@ size_t handler::read_internal(data_t data)
     case WebSocket::FRAME_OP_CLOSE:
       throw runtime_error("WebSocket close request received");
   }
+  if ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_BINARY)
+  {
+    data_type = BINARY;
+  }
+  else
+  {
+    data_type = TEXT;
+  }
   return n;
 }
 
-void handler::on_send(data_t data, size_t data_size)
+void handler::on_send(data_t data, size_t data_size, type_t data_type)
 {
-  queue_item item(data, data_size);
+  queue_item item(data, data_size, data_type);
   queue_.push_back(item);
 }
 
-void handler::on_send(buffer_t buffer)
+void handler::on_send(buffer_t buffer, type_t data_type)
 {
-  queue_item item(buffer);
+  queue_item item(buffer, data_type);
   queue_.push_back(item);
 }
 
@@ -167,37 +194,18 @@ void handler::send()
   }
 }
 
-void handler::shutdown()
-{
-  lock_guard<mutex> lock(state_mutex_);
-  if (state_ == state::initialized)
-  {
-    timer_.cancel();
-    try
-    {
-      state_ = state::shutdown;
-      LOGH(DEBUG) << "Handler shutdown";
-      ws_->shutdown();
-    }
-    catch (const exception& e)
-    {
-      LOGH(ERROR) << e.what();
-    }
-  }
-}
-
-handler::queue_item::queue_item(buffer_t buffer, type_t type)
+handler::queue_item::queue_item(buffer_t buffer, type_t data_type)
   : buffer_(buffer),
   data_size_(0)
 {
-  type == TEXT ? send_flags_ = Poco::Net::WebSocket::FRAME_TEXT : send_flags_ = Poco::Net::WebSocket::FRAME_BINARY;
+  data_type == TEXT ? send_flags_ = Poco::Net::WebSocket::FRAME_TEXT : send_flags_ = Poco::Net::WebSocket::FRAME_BINARY;
 }
 
-handler::queue_item::queue_item(data_t data, size_t data_size, type_t type)
+handler::queue_item::queue_item(data_t data, size_t data_size, type_t data_type)
   : data_(data),
   data_size_(data_size)
 {
-  type == TEXT ? send_flags_ = Poco::Net::WebSocket::FRAME_TEXT : send_flags_ = Poco::Net::WebSocket::FRAME_BINARY;
+  data_type == TEXT ? send_flags_ = Poco::Net::WebSocket::FRAME_TEXT : send_flags_ = Poco::Net::WebSocket::FRAME_BINARY;
 }
 
 int handler::queue_item::send(ws_t ws)

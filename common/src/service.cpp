@@ -103,6 +103,10 @@ void service::send_hello()
   str << "hello\n"
     << name_ << "\n"
     << ye();
+  if (extra_discovery_data_.size() > 0)
+  {
+    str << "\n" << extra_discovery_data_;
+  }
   multicast_send(str.str());
 }
 
@@ -112,6 +116,10 @@ void service::send_notify()
   str << "notify\n"
     << name_ << "\n"
     << ye();
+  if (extra_discovery_data_.size() > 0)
+  {
+    str << "\n" << extra_discovery_data_;
+  }
   multicast_send(str.str());
   
   set_notify_timeout();

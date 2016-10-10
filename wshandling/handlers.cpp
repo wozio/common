@@ -136,10 +136,11 @@ void handlers::read(handler_t handler)
   try
   {
     auto data = create_data();
-    int n = handler->read(data);
+    handler::type_t t;
+    int n = handler->read(data, t);
     if (n > 0)
     {
-      handler->on_read(data, n);
+      handler->on_read(data, n, t);
     }
   }
   catch (const exception& e)

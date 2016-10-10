@@ -34,6 +34,7 @@ public:
   std::string get(const std::string& name);
   void get_all(std::map<std::string, std::string>& services);
   std::map<std::string, std::string> get_all();
+  std::string get_extra_data(const std::string& name);
 
   void subscribe(service* s);
   void unsubscribe(service* s);
@@ -60,6 +61,10 @@ private:
   void check_service(const std::string& name, const std::string& ye);
   void store_service(const std::string& name, const std::string& ye);
   void erase_service(const std::string& name);
+
+  void save_extra_data(const std::string& name, const std::string& extra_data);
+  // extra data for known external services (key is name, value is extra data)
+  std::map<std::string, std::string> extra_data_;
 
   // multicast receive
   boost::asio::ip::udp::endpoint listen_endpoint_;
