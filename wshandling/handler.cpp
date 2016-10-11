@@ -28,22 +28,26 @@ void handler::set_up_timer()
 {
   if (use_idle_ping_)
   {
-    timer_.cancel();
-    timer_.set_from_now(15000, [this] ()
+    timer_.set_from_now(5000, [this] ()
     {
-      // just to keep WebSocket busy
-      //LOGH(DEBUG) << "Idle for more than 15 seconds, sending ping message";
-      buffer_t buffer(new rapidjson::StringBuffer);
-      
-      buffer->Put('p');
-      buffer->Put('i');
-      buffer->Put('n');
-      buffer->Put('g');
-      buffer->Put(0);
+      if (!active_)
+      {
+        // just to keep WebSocket busy
+        LOGH(DEBUG) << "Idle for too long, sending ping message";
+        buffer_t buffer(new rapidjson::StringBuffer);
 
-      // sending to peer
-      on_send(buffer);
+        buffer->Put('p');
+        buffer->Put('i');
+        buffer->Put('n');
+        buffer->Put('g');
+        buffer->Put(0);
+
+        // sending to peer
+        on_send(buffer);
+      }
+      set_up_timer();
     });
+    active_ = false;
   }
 }
 
@@ -106,7 +110,7 @@ size_t handler::read(data_t data, type_t& data_type)
 
 size_t handler::read_internal(data_t data, type_t& data_type)
 {
-  LOGH(TRACE) << "Reading data";
+  //LOGH(TRACE) << "Reading data";
   int flags;
   size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
 
@@ -117,7 +121,7 @@ size_t handler::read_internal(data_t data, type_t& data_type)
     throw runtime_error("Peer shut down or closed connection");
   }
   
-  set_up_timer();
+  active_ = true;
 
   switch (flags & WebSocket::FRAME_OP_BITMASK)
   {
@@ -156,18 +160,21 @@ size_t handler::read_internal(data_t data, type_t& data_type)
 
 void handler::on_send(data_t data, size_t data_size, type_t data_type)
 {
+  lock_guard<mutex> lock(state_mutex_);
   queue_item item(data, data_size, data_type);
   queue_.push_back(item);
 }
 
 void handler::on_send(buffer_t buffer, type_t data_type)
 {
+  lock_guard<mutex> lock(state_mutex_);
   queue_item item(buffer, data_type);
   queue_.push_back(item);
 }
 
 bool handler::something_to_send()
 {
+  lock_guard<mutex> lock(state_mutex_);
   return queue_.size() > 0;
 }
 
@@ -178,7 +185,7 @@ void handler::send()
   {
     if (queue_.size() > 0)
     {
-      set_up_timer();
+      active_ = true;
       queue_item item = queue_.front();
       //LOGH(TRACE) << "Sending " << item.size() << " bytes, queue size: " << queue_.size();
       try

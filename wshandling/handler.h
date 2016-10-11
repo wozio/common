@@ -104,6 +104,7 @@ private:
   
   ws_t ws_;
   bool use_idle_ping_;
+  bool active_;
   
   timer timer_;
   void set_up_timer();
