@@ -65,14 +65,6 @@ std::string discovery::get(const std::string& name)
   throw service_not_found(name);
 }
 
-std::string discovery::get_extra_data(const std::string& name)
-{
-  auto i = extra_data_.find(name);
-  if (i != extra_data_.end())
-    return i->second;
-  throw service_not_found(name);
-}
-
 void discovery::get_all(std::map<std::string,std::string>& services)
 {
   //LOG("Get all");
@@ -200,10 +192,6 @@ void discovery::handle_hello(const vector<string>& fields)
   {
     lock_guard<mutex> lock(idle_mutex);
     check_service(fields[1], fields[2]);
-    if (fields.size() >= 4)
-    {
-      save_extra_data(fields[1], fields[3]);
-    }
     send_notify();
   }
 }
@@ -214,10 +202,6 @@ void discovery::handle_notify(const vector<string>& fields)
   {
     lock_guard<mutex> lock(idle_mutex);
     check_service(fields[1], fields[2]);
-    if (fields.size() >= 4)
-    {
-      save_extra_data(fields[1], fields[3]);
-    }
   }
 }
 
@@ -247,14 +231,6 @@ void discovery::send_notify()
     str << "notify\n"
       << i->first << "\n"
       << i->second;
-    auto edi = extra_data_.find(i->first);
-    if (edi != extra_data_.end())
-    {
-      if (edi->second.size() > 0)
-      {
-        str << "\n" << edi->second;
-      }
-    }
     multicast_send(str.str());
   }
 }
@@ -303,7 +279,6 @@ void discovery::erase_service(const std::string& name)
   LOG(TRACE) << "erasing service: " << name;
   known_services_.erase(name);
   notify_received_.erase(name);
-  extra_data_.erase(name);
   
   for (auto i = on_service_subscriptions.begin();
     i != on_service_subscriptions.end();
@@ -315,14 +290,6 @@ void discovery::erase_service(const std::string& name)
   for (size_t i = 0; i < subscriptions_.size(); ++i)
   {
     subscriptions_[i](name, false);
-  }
-}
-
-void discovery::save_extra_data(const std::string& name, const std::string& extra_data)
-{
-  if (known_services_.find(name) != known_services_.end())
-  {
-    extra_data_[name] = extra_data;
   }
 }
 
