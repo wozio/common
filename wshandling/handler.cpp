@@ -95,6 +95,11 @@ void handler::shutdown()
   }
 }
 
+void handler::on_read(data_t data, size_t data_size, type_t data_type)
+{
+  // ignore data
+}
+
 size_t handler::read(data_t data, type_t& data_type)
 {
   lock_guard<mutex> lock(state_mutex_);
