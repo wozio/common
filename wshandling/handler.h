@@ -67,7 +67,7 @@ public:
    * @param data Data buffer
    * @param data_size Data size
    */
-  virtual void on_read(data_t data, size_t data_size, type_t data_type = TEXT) = 0;
+  virtual void on_read(data_t data, size_t data_size, type_t data_type = TEXT);
   
   /**
    * Request sending of data.
