@@ -88,8 +88,6 @@ public:
   
 protected:
   size_t read_internal(data_t data, type_t& type);
-  void send_internal(data_t data, size_t data_size);
-  void send_internal(const void* data, size_t data_size);
 
 private:
   
