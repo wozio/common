@@ -2,7 +2,7 @@
 
 namespace home_system
 {
-  server_binary_session::server_binary_session(std::string& target_endpoint)
+  server_binary_session::server_binary_session(const std::string& target_endpoint)
   : target_endpoint_(target_endpoint)
   {
     agent_.reset(new yami::agent());
