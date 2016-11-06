@@ -1,6 +1,6 @@
 #pragma once
 
-#include <yami4-cpp\yami.h>
+#include <yami4-cpp/yami.h>
 
 namespace home_system
 {

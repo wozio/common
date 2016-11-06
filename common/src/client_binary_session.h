@@ -1,6 +1,6 @@
 #pragma once
-#include <boost\signals2.hpp>
-#include <yami4-cpp\yami.h>
+#include <boost/signals2.hpp>
+#include <yami4-cpp/yami.h>
 
 namespace home_system
 {
