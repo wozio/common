@@ -36,11 +36,13 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/src/app.o \
+	${OBJECTDIR}/src/client_binary_session.o \
 	${OBJECTDIR}/src/discovery.o \
 	${OBJECTDIR}/src/ios_wrapper.o \
 	${OBJECTDIR}/src/logger.o \
 	${OBJECTDIR}/src/logger_init.o \
 	${OBJECTDIR}/src/mcs.o \
+	${OBJECTDIR}/src/server_binary_session.o \
 	${OBJECTDIR}/src/service.o \
 	${OBJECTDIR}/src/timer.o \
 	${OBJECTDIR}/src/yamicontainer.o
@@ -72,47 +74,57 @@ LDLIBSOPTIONS=
 	${AR} -rv ../bin/${CND_CONF}/libcommon.a ${OBJECTFILES} 
 	$(RANLIB) ../bin/${CND_CONF}/libcommon.a
 
-${OBJECTDIR}/src/app.o: src/app.cpp 
+${OBJECTDIR}/src/app.o: src/app.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/app.o src/app.cpp
 
-${OBJECTDIR}/src/discovery.o: src/discovery.cpp 
+${OBJECTDIR}/src/client_binary_session.o: src/client_binary_session.cpp
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/client_binary_session.o src/client_binary_session.cpp
+
+${OBJECTDIR}/src/discovery.o: src/discovery.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/discovery.o src/discovery.cpp
 
-${OBJECTDIR}/src/ios_wrapper.o: src/ios_wrapper.cpp 
+${OBJECTDIR}/src/ios_wrapper.o: src/ios_wrapper.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ios_wrapper.o src/ios_wrapper.cpp
 
-${OBJECTDIR}/src/logger.o: src/logger.cpp 
+${OBJECTDIR}/src/logger.o: src/logger.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/logger.o src/logger.cpp
 
-${OBJECTDIR}/src/logger_init.o: src/logger_init.cpp 
+${OBJECTDIR}/src/logger_init.o: src/logger_init.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/logger_init.o src/logger_init.cpp
 
-${OBJECTDIR}/src/mcs.o: src/mcs.cpp 
+${OBJECTDIR}/src/mcs.o: src/mcs.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/mcs.o src/mcs.cpp
 
-${OBJECTDIR}/src/service.o: src/service.cpp 
+${OBJECTDIR}/src/server_binary_session.o: src/server_binary_session.cpp
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/server_binary_session.o src/server_binary_session.cpp
+
+${OBJECTDIR}/src/service.o: src/service.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/service.o src/service.cpp
 
-${OBJECTDIR}/src/timer.o: src/timer.cpp 
+${OBJECTDIR}/src/timer.o: src/timer.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/timer.o src/timer.cpp
 
-${OBJECTDIR}/src/yamicontainer.o: src/yamicontainer.cpp 
+${OBJECTDIR}/src/yamicontainer.o: src/yamicontainer.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Wall -I../yami4/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/yamicontainer.o src/yamicontainer.cpp
@@ -123,7 +135,6 @@ ${OBJECTDIR}/src/yamicontainer.o: src/yamicontainer.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ../bin/${CND_CONF}/libcommon.a
 
 # Subprojects
 .clean-subprojects:
