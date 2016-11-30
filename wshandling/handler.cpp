@@ -115,50 +115,57 @@ size_t handler::read(data_t data, type_t& data_type)
 
 size_t handler::read_internal(data_t data, type_t& data_type)
 {
-  //LOGH(TRACE) << "Reading data";
-  int flags;
-  size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
-
-  //LOGH(TRACE) << "Received " <<n << " bytes with " << flags << " flags, message: " << string((*data).data(), n);
-
-  if (n == 0)
+  size_t n = 0;
+  try
   {
-    throw runtime_error("Peer shut down or closed connection");
-  }
+    //LOGH(TRACE) << "Reading data";
+    int flags;
+    n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
+
+    //LOGH(TRACE) << "Received " <<n << " bytes with " << flags << " flags, message: " << string((*data).data(), n);
+
+    if (n == 0)
+    {
+      throw runtime_error("Peer shut down or closed connection");
+    }
   
-  active_ = true;
+    active_ = true;
 
-  switch (flags & WebSocket::FRAME_OP_BITMASK)
-  {
-    case WebSocket::FRAME_OP_TEXT:
-    case WebSocket::FRAME_OP_BINARY:
-      // frames which are to be processed
-      // checking for ping which is used only to keep WebSocket connection busy
-      if (n == 5)
-      {
-        (*data)[4] = '\0';
-        if (strcmp((*data).data(), "ping") == 0)
+    switch (flags & WebSocket::FRAME_OP_BITMASK)
+    {
+      case WebSocket::FRAME_OP_TEXT:
+      case WebSocket::FRAME_OP_BINARY:
+        // frames which are to be processed
+        // checking for ping which is used only to keep WebSocket connection busy
+        if (n == 5)
         {
-          n = 0;
+          (*data)[4] = '\0';
+          if (strcmp((*data).data(), "ping") == 0)
+          {
+            n = 0;
+          }
         }
+        break;
+      case WebSocket::FRAME_OP_CONT:
+      case WebSocket::FRAME_OP_PONG:
+      case WebSocket::FRAME_OP_PING:
+        // ignore
+        n = 0;
+        break;
+      case WebSocket::FRAME_OP_CLOSE:
+        throw runtime_error("WebSocket close request received");
       }
-      break;
-    case WebSocket::FRAME_OP_CONT:
-    case WebSocket::FRAME_OP_PONG:
-    case WebSocket::FRAME_OP_PING:
-      // ignore
-      n = 0;
-      break;
-    case WebSocket::FRAME_OP_CLOSE:
-      throw runtime_error("WebSocket close request received");
+    if ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_BINARY)
+    {
+      data_type = BINARY;
+    }
+    else
+    {
+      data_type = TEXT;
+    }
   }
-  if ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_BINARY)
+  catch (const Poco::TimeoutException&)
   {
-    data_type = BINARY;
-  }
-  else
-  {
-    data_type = TEXT;
   }
   return n;
 }
