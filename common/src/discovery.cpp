@@ -155,33 +155,40 @@ void discovery::handle_receive(const boost::system::error_code& error,
 {
   if (!error && bytes_recvd)
   {
-//    cout << "=========================================================" << endl;
-//    cout.write(data_, bytes_recvd);
-//    cout << endl;
-    
+    /*cout << "=========================================================" << endl;
+    cout.write(data_, bytes_recvd);
+    cout << endl;*/
+
     vector<string> fields;
     string data(&data_[0], bytes_recvd);
-    
+
     listen_socket_.async_receive(buffer(data_, msg_max_size),
-      [&] (const boost::system::error_code& error, size_t bytes_recvd) { handle_receive(error, bytes_recvd); });
+      [&](const boost::system::error_code& error, size_t bytes_recvd) { handle_receive(error, bytes_recvd); });
 
     boost::split(fields, data, boost::is_any_of("\n"));
 
-    if (fields[0] == "hello")
+    try
     {
-      handle_hello(fields);
+      if (fields[0] == "hello")
+      {
+        handle_hello(fields);
+      }
+      else if (fields[0] == "notify")
+      {
+        handle_notify(fields);
+      }
+      else if (fields[0] == "bye")
+      {
+        handle_bye(fields);
+      }
+      else if (fields[0] == "search")
+      {
+        handle_search(fields);
+      }
     }
-    else if (fields[0] == "notify")
+    catch (const std::exception& e)
     {
-      handle_notify(fields);
-    }
-    else if (fields[0] == "bye")
-    {
-      handle_bye(fields);
-    }
-    else if (fields[0] == "search")
-    {
-      handle_search(fields);
+      LOG(ERROR) << "EXCEPTION: " << e.what();
     }
   }
 }
