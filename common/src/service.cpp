@@ -113,7 +113,7 @@ void service::send_notify()
     << name_ << "\n"
     << ye();
   multicast_send(str.str());
-  
+
   set_notify_timeout();
 }
 

@@ -22,7 +22,6 @@ handler::handler(ws_t ws, bool use_idle_ping)
 {
   lock_guard<mutex> lock(state_mutex_);
   LOGH(DEBUG) << "Handler creating";
-  LOGH(DEBUG) << ws_->getReceiveBufferSize();
 }
 
 void handler::set_up_timer()
@@ -121,11 +120,6 @@ size_t handler::read_internal(data_t data, type_t& data_type)
   size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
 
   //LOGH(TRACE) << "Received " <<n << " bytes with " << flags << " flags";
-
-  if (n >= 2)
-  {
-	  LOGH(TRACE) << hex << (int)(*data)[0] << " " << (int)(*data)[1];
-  }
 
   if (n == 0)
   {
