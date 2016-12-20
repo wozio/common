@@ -4,6 +4,9 @@
 #include <yami4-cpp/yami.h>
 #include <memory>
 #include <functional>
+#include <string>
+#include <map>
+#include <mutex>
 
 namespace home_system
 {
@@ -16,29 +19,13 @@ class yami_container
 {
 public:
 
-  typedef std::function<void(const std::string&)> log_callback_t;
-  static yc_t create(log_callback_t log_callback = nullptr)
+  static yc_t create()
   {
-    return yc_t(new yami_container(log_callback));
+    return yc_t(new yami_container());
   }
 
-  yami_container(log_callback_t log_callback);
+  yami_container();
   ~yami_container();
-  
-  class event_callback_impl : public yami::event_callback
-  {
-  public:
-    event_callback_impl(log_callback_t log_callback);
-    ~event_callback_impl();
-
-  private:
-    void incoming_connection_open(const char * target);
-    void outgoing_connection_open(const char * target);
-    void connection_closed(const char * target);
-    void connection_error(const char * target);
-
-    log_callback_t log_callback_;
-  } ec_;
   
   yami::agent& agent()
   {
@@ -50,12 +37,18 @@ public:
     return endpoint_;
   }
 
-  void operator()(int ec, const char* desc);
+  void operator()(yami::incoming_message & im);
+
+  typedef std::function<void(yami::incoming_message& im)> handler_t;
+  void register_handler(const std::string& name, handler_t handler);
+  void unregister_handler(const std::string& name);
+
 
 private:
-  log_callback_t log_callback_;
   yami::agent agent_;
   std::string endpoint_;
+  std::mutex handlers_mutex_;
+  std::map<std::string, handler_t> handlers_;
 };
 
 }

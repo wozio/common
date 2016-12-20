@@ -36,7 +36,9 @@ service::~service()
 
 void service::init()
 {
-  AGENT.register_object(name_, *this);
+  YC.register_handler(name_, [this](yami::incoming_message& im) {
+    this->on_msg(im);
+  });
   
   set_notify_timeout();
   
@@ -52,7 +54,7 @@ void service::deinit()
 #ifndef DISABLE_LOGS
   LOG(DEBUG) << "Deinitialized service with name: " << name_;
 #endif
-  AGENT.unregister_object(name_);
+  YC.unregister_handler(name_);
   
   notify_dt_.cancel();
   
@@ -103,10 +105,6 @@ void service::send_hello()
   str << "hello\n"
     << name_ << "\n"
     << ye();
-  if (extra_discovery_data_.size() > 0)
-  {
-    str << "\n" << extra_discovery_data_;
-  }
   multicast_send(str.str());
 }
 
@@ -116,12 +114,8 @@ void service::send_notify()
   str << "notify\n"
     << name_ << "\n"
     << ye();
-  if (extra_discovery_data_.size() > 0)
-  {
-    str << "\n" << extra_discovery_data_;
-  }
   multicast_send(str.str());
-  
+
   set_notify_timeout();
 }
 

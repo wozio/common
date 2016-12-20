@@ -57,7 +57,7 @@ void handler::init()
   if (state_ == state::created)
   {
     LOGH(DEBUG) << "Handler initializing";
-    ws_->setBlocking(false);
+    //ws_->setBlocking(false);
     HANDLERS.add(shared_from_this());
     LOGH(DEBUG) << "Handler initialized";
     state_ = state::initialized;
@@ -116,10 +116,10 @@ size_t handler::read(data_t data, type_t& data_type)
 size_t handler::read_internal(data_t data, type_t& data_type)
 {
   //LOGH(TRACE) << "Reading data";
-  int flags;
+  int flags = 0;
   size_t n = ws_->receiveFrame((*data).data(), DATA_SIZE, flags);
 
-  //LOGH(TRACE) << "Received " <<n << " bytes with " << flags << " flags, message: " << string((*data).data(), n);
+  //LOGH(TRACE) << "Received " <<n << " bytes with " << flags << " flags";
 
   if (n == 0)
   {
@@ -143,7 +143,7 @@ size_t handler::read_internal(data_t data, type_t& data_type)
         }
       }
       break;
-    case WebSocket::FRAME_OP_CONT:
+    //case WebSocket::FRAME_OP_CONT:
     case WebSocket::FRAME_OP_PONG:
     case WebSocket::FRAME_OP_PING:
       // ignore
@@ -175,6 +175,7 @@ void handler::on_send(buffer_t buffer, type_t data_type)
   lock_guard<mutex> lock(state_mutex_);
   queue_item item(buffer, data_type);
   queue_.push_back(item);
+  //LOGH(TRACE) << "Queue size: " << queue_.size();
 }
 
 bool handler::something_to_send()
