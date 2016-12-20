@@ -36,7 +36,9 @@ service::~service()
 
 void service::init()
 {
-  AGENT.register_object(name_, *this);
+  YC.register_handler(name_, [this](yami::incoming_message& im) {
+    this->on_msg(im);
+  });
   
   set_notify_timeout();
   
@@ -52,7 +54,7 @@ void service::deinit()
 #ifndef DISABLE_LOGS
   LOG(DEBUG) << "Deinitialized service with name: " << name_;
 #endif
-  AGENT.unregister_object(name_);
+  YC.unregister_handler(name_);
   
   notify_dt_.cancel();
   
