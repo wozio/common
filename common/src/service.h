@@ -29,15 +29,9 @@ public:
 protected:
   service(const std::string& name, bool initialize = true);
   std::string name_;
-  std::string extra_discovery_data_;
 
   // yami message receive
   virtual void on_msg(yami::incoming_message & im);
-
-  // multicast send
-  void send_hello();
-  void send_notify();
-  void send_bye();
   
 private:
   ios_wrapper ios_;
@@ -46,6 +40,11 @@ private:
   
   void set_notify_timeout();
   void on_notify_timeout(const boost::system::error_code& error);
+  
+  // multicast send
+  void send_hello();
+  void send_notify();
+  void send_bye();
 };
 
 }

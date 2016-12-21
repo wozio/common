@@ -15,7 +15,7 @@ namespace home_system
 
 // it is bigger by one to ensure that we always have place to put '\0' character
 // at the end
-#define DATA_SIZE 18800
+#define DATA_SIZE 20480
 #define MAX_DATA_SIZE DATA_SIZE + 1
 
 typedef std::shared_ptr<std::array<char, MAX_DATA_SIZE>> data_t;

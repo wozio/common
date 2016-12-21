@@ -3,45 +3,8 @@
 #include <sstream>
 #include <iostream>
 
-#define LOG(x) if (log_callback_ != nullptr) {std::stringstream s; s << x; log_callback_(s.str());}
-
 namespace home_system
 {
-
-yami_container::event_callback_impl::event_callback_impl(log_callback_t log_callback)
-: log_callback_(log_callback)
-{
-}
-
-yami_container::event_callback_impl::~event_callback_impl()
-{
-  log_callback_ = nullptr;
-}
-
-void yami_container::event_callback_impl::incoming_connection_open(const char * target)
-{
-  LOG("incoming_connection_open: " << target);
-}
-
-void yami_container::event_callback_impl::outgoing_connection_open(const char * target)
-{
-  LOG("outgoing_connection_open: " << target);
-}
-
-void yami_container::event_callback_impl::connection_closed(const char * target)
-{
-  LOG("connection_closed: " << target);
-}
-
-void yami_container::event_callback_impl::connection_error(const char * target)
-{
-  LOG("connection_error: " << target);
-}
-
-void yami_container::operator()(int ec, const char* desc)
-{
-  LOG("YAMI IO error: " << ec << " " << desc);
-}
 
 yami::parameters agent_params()
 {
@@ -50,13 +13,9 @@ yami::parameters agent_params()
   return params;
 }
 
-yami_container::yami_container(log_callback_t log_callback)
-: ec_(log_callback),
-  log_callback_(log_callback),
-  agent_(ec_, agent_params())
+yami_container::yami_container()
+: agent_(agent_params())
 {
-  agent_.register_io_error_logger(*this);
-  
   Poco::Net::NetworkInterface::NetworkInterfaceList il = Poco::Net::NetworkInterface::list();
   std::string ip;
   for (size_t i = 0; i < il.size(); ++i)
@@ -69,11 +28,44 @@ yami_container::yami_container(log_callback_t log_callback)
   std::string ep("tcp://");
   ep.append(ip).append(":*");
   endpoint_ = agent_.add_listener(ep);
+
+  agent_.register_object("*", *this);
 }
 
 yami_container::~yami_container()
 {
-  log_callback_ = nullptr;
+  agent_.unregister_object("*");
+  std::lock_guard<std::mutex> guard(handlers_mutex_);
+  handlers_.clear();
+}
+
+void yami_container::register_handler(const std::string& name, std::function<void(yami::incoming_message& im)> handler)
+{
+  std::lock_guard<std::mutex> guard(handlers_mutex_);
+  handlers_[name] = handler;
+}
+
+void yami_container::unregister_handler(const std::string& name)
+{
+  std::lock_guard<std::mutex> guard(handlers_mutex_);
+  handlers_.erase(name);
+}
+
+void yami_container::operator()(yami::incoming_message & im)
+{
+  std::lock_guard<std::mutex> guard(handlers_mutex_);
+  auto hi = handlers_.find(im.get_object_name());
+  if (hi != handlers_.end())
+  {
+    try
+    {
+      hi->second(im);
+    }
+    catch (const std::exception& e)
+    {
+      //.....
+    }
+  }
 }
 
 }
