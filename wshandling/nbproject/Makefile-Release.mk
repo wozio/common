@@ -68,12 +68,12 @@ LDLIBSOPTIONS=
 ${OBJECTDIR}/handler.o: handler.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -Wall -s -I../common/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/handler.o handler.cpp
+	$(COMPILE.cc) -O2 -Wall -s -I../common/src -I../../rapidjson/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/handler.o handler.cpp
 
 ${OBJECTDIR}/handlers.o: handlers.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -Wall -s -I../common/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/handlers.o handlers.cpp
+	$(COMPILE.cc) -O2 -Wall -s -I../common/src -I../../rapidjson/include -I../easyloggingpp/src -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/handlers.o handlers.cpp
 
 # Subprojects
 .build-subprojects:
