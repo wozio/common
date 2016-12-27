@@ -31,7 +31,7 @@
     <ProjectGuid>{7B947294-4BC7-41A8-9791-1E8421EC50A8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>wshandling</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
