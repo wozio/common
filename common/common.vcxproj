@@ -119,6 +119,7 @@ nmake -f Makefile.VS</Command>
     <ClInclude Include="src\service.h" />
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\yamicontainer.h" />
+    <ClInclude Include="src\config.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app.cpp" />
@@ -130,6 +131,7 @@ nmake -f Makefile.VS</Command>
     <ClCompile Include="src\service.cpp" />
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\yamicontainer.cpp" />
+    <ClCompile Include="src\config.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
