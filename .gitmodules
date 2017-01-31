@@ -1,3 +1,6 @@
 [submodule "easyloggingpp"]
 	path = easyloggingpp
 	url = https://github.com/easylogging/easyloggingpp.git
+[submodule "rapidjson"]
+	path = rapidjson
+	url = https://github.com/miloyip/rapidjson.git
