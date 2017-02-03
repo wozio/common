@@ -1,7 +1,9 @@
 #include "config.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/filewritestream.h"
-#include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/error/en.h"
+#include "logger.h"
 #include <cstdio>
 
 using namespace rapidjson;
@@ -18,21 +20,17 @@ namespace home_system
             FileReadStream s(f, buf, sizeof(buf));
             doc_.ParseStream(s);
             fclose(f);
-            if (!doc_.IsObject())
+            if (doc_.HasParseError())
             {
-                prepare_empty_file();
+                LOG(ERROR) << "Error parsing configuration file: " << GetParseError_En(doc_.GetParseError()) <<
+                    " " << doc_.GetErrorOffset();
+                throw std::runtime_error("Error parsing configuration file");
             }
-        }
-        else
-        {
-            // file not exists
-            prepare_empty_file();
         }
     }
 
     config::~config()
     {
-        write();
     }
 
     rapidjson::Document& config::get()
@@ -45,14 +43,8 @@ namespace home_system
         FILE* f = fopen(file_.c_str(), "w");
         char buf[65536];
         FileWriteStream s(f, buf, sizeof(buf));
-        Writer<FileWriteStream> writer(s);
+        PrettyWriter<FileWriteStream> writer(s);
         doc_.Accept(writer);
         fclose(f);
-    }
-
-    void config::prepare_empty_file()
-    {
-        doc_.SetObject();
-        write();
     }
 }
